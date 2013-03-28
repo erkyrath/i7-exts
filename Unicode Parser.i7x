@@ -43,7 +43,7 @@ Include (-
 [ VM_ReadKeyboard  a_buffer a_table done ix;
     if (gg_commandstr ~= 0 && gg_command_reading ~= false) {
         done = glk_get_line_stream_uni(gg_commandstr, a_buffer+WORDSIZE,
-        	(INPUT_BUFFER_LEN-1)-1);
+            (INPUT_BUFFER_LEN-1)-1);
         if (done == 0) {
             glk_stream_close(gg_commandstr, 0);
             gg_commandstr = 0;
@@ -110,15 +110,15 @@ Include (-
         if (metaclass(a) == Object && a.#b == WORDSIZE
             && metaclass(a.b) == String)
             buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a.b);
-		else if (metaclass(a) == Routine)
-			buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a, b, c);
+        else if (metaclass(a) == Routine)
+            buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a, b, c);
         else
             buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a, b);
     }
     else if (metaclass(a) == Routine)
         buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a, b, c);
     else
-		buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a);
+        buf-->0 = Glulx_PrintAnyToArrayUni(buf+WORDSIZE, len, a);
     if (buf-->0 > len) buf-->0 = len;
     return buf-->0;
 ];
@@ -127,7 +127,7 @@ Constant LOWERCASE_BUF_SIZE = 2*DICT_WORD_SIZE;
 Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
 
 [ VM_Tokenise buf tab
-    cx numwords len bx ix wx wpos wlen val res dictlen ch bytesperword;
+    cx numwords len bx ix wx wpos wlen val res dictlen ch bytesperword uninormavail;
     len = buf-->0;
     buf = buf+WORDSIZE;
 
@@ -155,13 +155,13 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
 
     dictlen = #dictionary_table-->0;
     bytesperword = DICT_WORD_SIZE * DICT_CHAR_SIZE;
+    uninormavail = glk($0004, 16, 0);
 
     for (wx=0 : wx<numwords : wx++) {
         wlen = tab-->(wx*3+2);
         wpos = tab-->(wx*3+3);
 
         ! Copy the word into the gg_tokenbuf array, clipping to DICT_WORD_SIZE characters and lower case. We'll do this in two steps, because lowercasing might (theoretically) condense characters and allow more to fit into gg_tokenbuf.
-        ! ### normalize as well!
         if (wlen > LOWERCASE_BUF_SIZE) wlen = LOWERCASE_BUF_SIZE;
         cx = wpos - 1;
         for (ix=0 : ix<wlen : ix++) {
@@ -169,11 +169,15 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
             gg_lowercasebuf-->ix = ch;
         }
         wlen = glk($0120, gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen); ! buffer_to_lower_case_uni
+        if (uninormavail) {
+            ! Also normalize the Unicode -- combine accent marks with letters where possible.
+            wlen = glk($0124, gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen); ! buffer_canon_normalize_uni
+        }
         if (wlen > DICT_WORD_SIZE) wlen = DICT_WORD_SIZE;
         for (ix=0 : ix<wlen : ix++) {
             gg_tokenbuf-->ix = gg_lowercasebuf-->ix;
         }
-       	for (: ix<DICT_WORD_SIZE : ix++) gg_tokenbuf-->ix = 0;
+        for (: ix<DICT_WORD_SIZE : ix++) gg_tokenbuf-->ix = 0;
 
         val = #dictionary_table + WORDSIZE;
         @binarysearch gg_tokenbuf bytesperword val DICT_ENTRY_BYTES dictlen 4 1 res;
@@ -204,8 +208,8 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
 Include (-
 
 [ VM_InvalidDictionaryAddress addr;
-	if (addr < 0) rtrue;
-	rfalse;
+    if (addr < 0) rtrue;
+    rfalse;
 ];
 
 [ VM_DictionaryAddressToNumber w; return w; ];
@@ -254,5 +258,67 @@ Unicode Parser ends here.
 
 ---- DOCUMENTATION ----
 
-This modifies Inform's internal parse buffers to be Unicode arrays (arrays of 32-bit integers) rather than plain character arrays (arrays of 8-bit characters). It also updates the functions that manage these arrays.
+When you include this extension, I7 will appear to behave as it always does. However, the command line will be read using a Unicode-friendly input call, and the internal parsing dictionary will contain Unicode strings instead of byte strings. This means that, theoretically, you can define nouns and verbs using any Unicode character (not just basic Latin-1.)
 
+However, the I7 language does not currently permit this. So we have to indulge in some trickery to make these definitions possible.
+
+Section: Unicode synonyms for verbs
+
+To define a verb synonym with Unicode characters:
+
+	Include (-
+	Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' = 'get';
+	Verb '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get';
+	Verb '@{11D}et' = 'get';
+	-) after "Grammar" in "Output.i6t".
+
+The strings here are single-quoted strings of characters defined with the I6 '@{hexadecimal}' format. The first line is the Greek word "παίρνω". (I apologize for butchering Greek here -- all my translation is due to Google!) With this definition, the command "παίρνω lamp" will work. So will "Παίρνω Lamp"; as usual, commands are converted to lower case where possible.
+
+The second line is the same word, but without the accent mark. The dictionary considers accents significant while matching, so if you want to accept the verb "παιρνω" (or "Παιρνω") you need this line. (Again, I don't know if a Greek speaker would leave off the accent mark! Probably not.)
+
+The third line defines the verb "ĝet" in the same way. This is by way of demonstrating normalization. The Unicode standard permits two ways to define this string: "ĝet" and "ĝet". These probably look the same to you, but they're not. The former is three characters long, as you might expect; it starts with the Unicode character named LATIN SMALL LETTER G WITH CIRCUMFLEX. (Unicode loves these verbose names.) The second example is *four* characters long; the first character is LATIN SMALL LETTER G, and the second is COMBINING CIRCUMFLEX ACCENT. The "^" stacks on top of the "g" when the pair is displayed.
+
+The combined form is more common, but a player might type either form. Therefore, this extension *tries* to accept both, by "normalizing" the input words. However, the Glk normalization function is relatively new, and may not be available. The Mac Inform IDE 6G60 lacks this call, for example. So the four-character form will not be recognized by the verb definition shown above. To accept it, we'd need an additional line:
+
+	Verb 'g@{302}et' = 'get';
+
+You can also define an entire verb line (with prepositions and everything), using the I6 syntax:
+
+	Verb '@{11D}et' * 'i@{3B7}' noun -> Enter;
+
+(Accepts the command "ĝet iη boat".)
+
+However, it is currently not possible to refer to a custom action this way -- only to the predefined ones.
+
+
+Section: Unicode synonyms for nouns
+
+This is even uglier. To define a synonym for an object, we have to define a class for it and then include I6 code for the class:
+
+	A rock-name-object is a kind of thing.
+	Include (-
+	with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'
+	-) when defining a rock-name-object.
+	
+	The rock is a thing.
+	Include (- class (+ rock-name-object +) -) when defining the rock.
+
+The rock-name-object class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock
+
+
+Section: Details for the I6 hacker
+
+This extension modifies Inform's internal command buffers to be Unicode arrays (arrays of 32-bit integers) rather than plain character arrays (arrays of 8-bit characters). These are the "buffer", "buffer2", and "buffer3" arrays.
+
+We also update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(). We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
+
+Warning: Any extension that uses I6 code to manipulate the command buffer directly will break when used with this extension!
+
+
+Section: Caveats
+
+This extension is extremely untested! Things which probably don't work:
+
+- Replacing snippets in the player's command
+- Writing and reading command-history files
+- All the internal uses of CPrintOrRun() which I think I broke
