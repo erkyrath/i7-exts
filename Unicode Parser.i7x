@@ -280,11 +280,15 @@ The third line defines the verb "ĝet" in the same way. This is by way of demons
 
 The combined form is more common, but a player might type either form. Therefore, this extension *tries* to accept both, by "normalizing" the input words. However, the Glk normalization function is relatively new, and may not be available. The Mac Inform IDE 6G60 lacks this call, for example. So the four-character form will not be recognized by the verb definition shown above. To accept it, we'd need an additional line:
 
+	Include (-
 	Verb 'g@{302}et' = 'get';
+	-) after "Grammar" in "Output.i6t".
 
 You can also define an entire verb line (with prepositions and everything), using the I6 syntax:
 
+	Include (-
 	Verb '@{11D}et' * 'i@{3B7}' noun -> Enter;
+	-) after "Grammar" in "Output.i6t".
 
 (Accepts the command "ĝet iη boat".)
 
@@ -303,7 +307,7 @@ This is even uglier. To define a synonym for an object, we have to define a clas
 	The rock is a thing.
 	Include (- class (+ rock-name-object +) -) when defining the rock.
 
-The rock-name-object class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock
+The rock-name-object class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock. (I'm including the two variations on the final letter sigma.) We can now accept the command "παίρνω βράχος" (or "Παίρνω Βράχος").
 
 
 Section: Details for the I6 hacker
