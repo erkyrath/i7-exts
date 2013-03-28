@@ -123,6 +123,9 @@ Include (-
     return buf-->0;
 ];
 
+Constant LOWERCASE_BUF_SIZE = 2*DICT_WORD_SIZE;
+Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
+
 [ VM_Tokenise buf tab
     cx numwords len bx ix wx wpos wlen val res dictlen ch bytesperword;
     len = buf-->0;
@@ -157,20 +160,20 @@ Include (-
         wlen = tab-->(wx*3+2);
         wpos = tab-->(wx*3+3);
 
-        ! Copy the word into the gg_tokenbuf array, clipping to DICT_WORD_SIZE
-        ! characters and lower case. Remember that gg_tokenbuf is a word array!
-        if (wlen > DICT_WORD_SIZE) wlen = DICT_WORD_SIZE;
+        ! Copy the word into the gg_tokenbuf array, clipping to DICT_WORD_SIZE characters and lower case. We'll do this in two steps, because lowercasing might (theoretically) condense characters and allow more to fit into gg_tokenbuf.
+        ! ### normalize as well!
+        if (wlen > LOWERCASE_BUF_SIZE) wlen = LOWERCASE_BUF_SIZE;
         cx = wpos - 1;
         for (ix=0 : ix<wlen : ix++) {
-          ch = buf-->(cx+ix);
-          ! We only lowercase characters up through 256, which is what
-          ! glk_char_to_lower() can handle. We ought to be calling
-          ! glk_buffer_to_lower_case_uni() to lower-case everything,
-          ! but that's messier. #### use glk_buffer_to_lower_case_uni!
-          if (ch < 256) ch = glk_char_to_lower(ch);
-          gg_tokenbuf-->ix = ch;
+            ch = buf-->(cx+ix);
+            gg_lowercasebuf-->ix = ch;
         }
-        for (: ix<DICT_WORD_SIZE : ix++) gg_tokenbuf-->ix = 0;
+        wlen = glk($0120, gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen); ! buffer_to_lower_case_uni
+        if (wlen > DICT_WORD_SIZE) wlen = DICT_WORD_SIZE;
+        for (ix=0 : ix<wlen : ix++) {
+            gg_tokenbuf-->ix = gg_lowercasebuf-->ix;
+        }
+       	for (: ix<DICT_WORD_SIZE : ix++) gg_tokenbuf-->ix = 0;
 
         val = #dictionary_table + WORDSIZE;
         @binarysearch gg_tokenbuf bytesperword val DICT_ENTRY_BYTES dictlen 4 1 res;
