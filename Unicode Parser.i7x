@@ -175,7 +175,7 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
             ch = buf-->(cx+ix);
             gg_lowercasebuf-->ix = ch;
         }
-        wlen = glk($0120, gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen); ! buffer_to_lower_case_uni
+        wlen = glk_buffer_to_lower_case_uni(gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen);
         if (uninormavail) {
             ! Also normalize the Unicode -- combine accent marks with letters
             ! where possible.
@@ -238,6 +238,10 @@ Array gg_tokenbuf --> DICT_WORD_SIZE;
 
 Include (-
 
+! Like Glulx_PrintAnyToArray, but it writes to a word array. Returns
+! the number of characters printed. (If the text printed is longer than
+! the array, the extra characters are safely dropped rather than overflowing
+! the array; they are still counted in the returned count.)
 [ Glulx_PrintAnyToArrayUni _vararg_count arr arrlen str oldstr len;
     @copy sp arr;
     @copy sp arrlen;
@@ -261,6 +265,47 @@ Include (-
 ];
 
 -) after "Glulx-Only Printing Routines" in "Glulx.i6t".
+
+Include (-
+
+Constant SHORT_NAME_BUFFER_LEN = 250;
+Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
+
+[ CPrintOrRun obj prop  v length;
+    if ((obj ofclass String or Routine) || (prop == 0))
+        length = Glulx_PrintAnyToArrayUni(StorageForShortName, SHORT_NAME_BUFFER_LEN, obj);
+    else {
+    	if (obj.prop == NULL) rfalse;
+        if (metaclass(obj.prop) == Routine or String)
+            length = Glulx_PrintAnyToArrayUni(StorageForShortName, SHORT_NAME_BUFFER_LEN, obj.prop);
+        else return RunTimeError(2, obj, prop);
+	}
+	
+	! Perhaps the name contained more than 250 characters. If so, it was
+	! truncated (safely) to the array length.
+	if (length > SHORT_NAME_BUFFER_LEN) length = SHORT_NAME_BUFFER_LEN;
+	
+	! This is the best way to print text with the first character capitalized:
+	!length = glk_buffer_to_title_case_uni(StorageForShortName, SHORT_NAME_BUFFER_LEN, length, false);
+	!glk_put_buffer_uni(StorageForShortName, length);
+	
+	! However, that crashes on the Mac IDE, apparently due to a Zoom bug. So
+	! we do it the old-fashioned way.
+	if (length)
+		StorageForShortName-->0 = VM_LowerToUpperCase(StorageForShortName-->0);
+	glk_put_buffer_uni(StorageForShortName, length);
+
+    if (length) say__p = 1;
+
+    return;
+];
+
+[ Cap str nocaps;
+    if (nocaps) print (string) str;
+    else CPrintOrRun(str, 0);
+];
+
+-) instead of "Short Name Storage" in "Printing.i6t".
 
 Unicode Parser ends here.
 
