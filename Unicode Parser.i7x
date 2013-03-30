@@ -177,7 +177,8 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
         }
         wlen = glk($0120, gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen); ! buffer_to_lower_case_uni
         if (uninormavail) {
-            ! Also normalize the Unicode -- combine accent marks with letters where possible.
+            ! Also normalize the Unicode -- combine accent marks with letters
+            ! where possible.
             wlen = glk($0124, gg_lowercasebuf, LOWERCASE_BUF_SIZE, wlen); ! buffer_canon_normalize_uni
         }
         if (wlen > DICT_WORD_SIZE) wlen = DICT_WORD_SIZE;
@@ -303,7 +304,7 @@ However, it is currently not possible to refer to a custom action this way -- on
 
 Section: Unicode synonyms for nouns
 
-This is even uglier. To define a synonym for an object, we have to define a class for it and then include I6 code for the class:
+This is also ugly. To define a synonym for an object, we have to define an I6 class:
 
 	Include (- Class rock_name_class
 	with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
@@ -312,7 +313,7 @@ This is even uglier. To define a synonym for an object, we have to define a clas
 	The rock is a thing.
 	Include (- class rock_name_class -) when defining the rock.
 
-The rock_name_class I6 class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock. (I'm including the two variations on the final letter sigma.) We can now accept the command "παίρνω βράχος" (or "Παίρνω Βράχος").
+The rock_name_class class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock. (I'm including the two variations on the final letter sigma.) We can now accept the command "παίρνω βράχος" (or "Παίρνω Βράχος").
 
 
 Section: Details for the I6 hacker
