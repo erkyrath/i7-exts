@@ -1,4 +1,4 @@
-Version 1 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+Version 2 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
 
 [Tell the I6 compiler to generate a dictionary containing Unicode values rather than 8-bit characters. This requires I6 version 6.32 or later.]
 Use DICT_CHAR_SIZE of 4.
@@ -266,11 +266,11 @@ Section: Unicode synonyms for verbs
 
 To define a verb synonym with Unicode characters:
 
-	Include (-
-	Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' = 'get';
+	Include
+	(- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' = 'get';
 	Verb '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get';
-	Verb '@{11D}et' = 'get';
-	-) after "Grammar" in "Output.i6t".
+	Verb '@{11D}et' = 'get'; -)
+	after "Grammar" in "Output.i6t".
 
 The strings here are single-quoted strings of characters defined with the I6 '@{hexadecimal}' format. The first line is the Greek word "παίρνω". (I apologize for butchering Greek here -- all my translation is due to Google!) With this definition, the command "παίρνω lamp" will work. So will "Παίρνω Lamp"; as usual, commands are converted to lower case where possible.
 
@@ -280,15 +280,13 @@ The third line defines the verb "ĝet" in the same way. This is by way of demons
 
 The combined form is more common, but a player might type either form. Therefore, this extension *tries* to accept both, by "normalizing" the input words. However, the Glk normalization function is relatively new, and may not be available. The Mac Inform IDE 6G60 lacks this call, for example. So the four-character form will not be recognized by the verb definition shown above. To accept it, we'd need an additional line:
 
-	Include (-
-	Verb 'g@{302}et' = 'get';
-	-) after "Grammar" in "Output.i6t".
+	Include (- Verb 'g@{302}et' = 'get'; -)
+	after "Grammar" in "Output.i6t".
 
 You can also define an entire verb line (with prepositions and everything), using the I6 syntax:
 
-	Include (-
-	Verb '@{11D}et' * 'i@{3B7}' noun -> Enter;
-	-) after "Grammar" in "Output.i6t".
+	Include (- Verb '@{11D}et' * 'i@{3B7}' noun -> Enter; -)
+	after "Grammar" in "Output.i6t".
 
 (Accepts the command "ĝet iη boat".)
 
@@ -299,15 +297,14 @@ Section: Unicode synonyms for nouns
 
 This is even uglier. To define a synonym for an object, we have to define a class for it and then include I6 code for the class:
 
-	A rock-name-object is a kind of thing.
-	Include (-
-	with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'
-	-) when defining a rock-name-object.
+	Include (- Class rock_name_class
+	with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
+	before "Object Tree" in "Output.i6t".
 	
 	The rock is a thing.
-	Include (- class (+ rock-name-object +) -) when defining the rock.
+	Include (- class rock_name_class -) when defining the rock.
 
-The rock-name-object class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock. (I'm including the two variations on the final letter sigma.) We can now accept the command "παίρνω βράχος" (or "Παίρνω Βράχος").
+The rock_name_class I6 class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock. (I'm including the two variations on the final letter sigma.) We can now accept the command "παίρνω βράχος" (or "Παίρνω Βράχος").
 
 
 Section: Details for the I6 hacker
@@ -323,6 +320,29 @@ Section: Caveats
 
 This extension is extremely untested! Things which probably don't work:
 
+- Disambiguation
 - Replacing snippets in the player's command
 - Writing and reading command-history files
 - All the internal uses of CPrintOrRun() which I think I broke
+
+
+Example: ** Ungrammatical Greek - Defining verb and noun synonyms containing Unicode characters.
+
+"Ungrammatical Greek" by Andrew Plotkin.
+
+Include Unicode Parser by Andrew Plotkin.
+
+The Kitchen is a room. The description is "A sign reads: Test me with 'παίρνω βράχος'!"
+
+The lamp is in the Kitchen. The rock is in the Kitchen.
+
+Include (- Class rock_name_class
+with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
+before "Object Tree" in "Output.i6t".
+
+Include (- class rock_name_class -) when defining the rock.
+
+Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
+after "Grammar" in "Output.i6t".
+
+
