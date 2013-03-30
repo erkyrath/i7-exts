@@ -193,6 +193,8 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
     }
 ];
 
+! Insert a character into the (global) buffer array.
+! (See DM4 appendix A3.)
 [ LTI_Insert i ch  b y;
 
     ! In the original code, buffer was a funny array type. Now it isn't,
@@ -289,11 +291,12 @@ Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
 	if (length > SHORT_NAME_BUFFER_LEN) length = SHORT_NAME_BUFFER_LEN;
 	
 	! This is the best way to print text with the first character capitalized:
-	!length = glk_buffer_to_title_case_uni(StorageForShortName, SHORT_NAME_BUFFER_LEN, length, false);
-	!glk_put_buffer_uni(StorageForShortName, length);
+	!   length = glk_buffer_to_title_case_uni(StorageForShortName, SHORT_NAME_BUFFER_LEN, length, false);
+	!   glk_put_buffer_uni(StorageForShortName, length);
 	
-	! However, that crashes on the Mac IDE, apparently due to a Zoom bug. So
-	! we do it the old-fashioned way.
+	! However, that crashes on the Mac IDE (6G60), apparently due to a Zoom
+	! bug. So we do it the old-fashioned way. Hopefully a future version can
+	! be made Unicode-aware.
 	if (length)
 		StorageForShortName-->0 = VM_LowerToUpperCase(StorageForShortName-->0);
 	glk_put_buffer_uni(StorageForShortName, length);
