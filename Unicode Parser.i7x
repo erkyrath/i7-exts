@@ -271,6 +271,9 @@ Include (-
 Constant SHORT_NAME_BUFFER_LEN = 250;
 Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
 
+! Replacement for the CPrintOrRun routine, using modern printing commands.
+! This is a Glulx-only implementation, but then this whole extension is
+! Glulx-only.
 [ CPrintOrRun obj prop  v length;
     if ((obj ofclass String or Routine) || (prop == 0))
         length = Glulx_PrintAnyToArrayUni(StorageForShortName, SHORT_NAME_BUFFER_LEN, obj);
