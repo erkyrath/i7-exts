@@ -383,7 +383,14 @@ This extension is extremely untested! Things which probably don't work:
 - Disambiguation
 - Replacing snippets in the player's command
 - Writing and reading command-history files
-- All the internal uses of CPrintOrRun() which I think I broke
+
+Functions that need to be fixed:
+### Snippet...
+### Parser__parse
+### NounDomain
+### SetPlayersCommand
+### Keyboard, for "oops"
+### TestKeyboardPrimitive?
 
 
 Example: ** Ungrammatical Greek - Defining verb and noun synonyms containing Unicode characters.
