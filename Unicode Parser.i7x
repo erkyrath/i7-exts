@@ -22,7 +22,8 @@ Constant INPUT_BUFFER_LEN = 260;    ! No extra byte necessary
 Constant MAX_BUFFER_WORDS = 20;
 Constant PARSE_BUFFER_LEN = 61;
 
-! The buffer arrays have "table" structure, but we're going to be writing to entry zero a lot, so we just use word arrays.
+! The buffer arrays have "table" structure, but we're going to be writing to
+! entry zero a lot, so we just use word arrays.
 Array  buffer    --> INPUT_BUFFER_LEN+1;
 Array  buffer2   --> INPUT_BUFFER_LEN+1;
 Array  buffer3   --> INPUT_BUFFER_LEN+1;
@@ -105,6 +106,9 @@ Include (-
     for (i=0: i<INPUT_BUFFER_LEN: i++) bto-->i = bfrom-->i;
 ];
 
+! Prints an object (string, function, etc) to a buffer whose format is like
+! the input buffer: a word array whose zeroth entry is the length (in
+! characters). Do not use this with a byte array.
 [ VM_PrintToBuffer buf len a b c;
     if (b) {
         if (metaclass(a) == Object && a.#b == WORDSIZE
@@ -161,7 +165,10 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
         wlen = tab-->(wx*3+2);
         wpos = tab-->(wx*3+3);
 
-        ! Copy the word into the gg_tokenbuf array, clipping to DICT_WORD_SIZE characters and lower case. We'll do this in two steps, because lowercasing might (theoretically) condense characters and allow more to fit into gg_tokenbuf.
+        ! Copy the word into the gg_tokenbuf array, clipping to DICT_WORD_SIZE
+        ! characters and lower case. We'll do this in two steps, because
+        ! lowercasing might (theoretically) condense characters and allow more
+        ! to fit into gg_tokenbuf.
         if (wlen > LOWERCASE_BUF_SIZE) wlen = LOWERCASE_BUF_SIZE;
         cx = wpos - 1;
         for (ix=0 : ix<wlen : ix++) {
@@ -187,7 +194,8 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
 
 [ LTI_Insert i ch  b y;
 
-    ! In the original code, buffer was a funny array type. Now it isn't, but I am minimizing code changes, so we'll keep this alias.
+    ! In the original code, buffer was a funny array type. Now it isn't,
+    ! but I am minimizing code changes, so we'll keep this alias.
     b = buffer;
 
     ! Insert character ch into buffer at point i.
