@@ -130,6 +130,9 @@ Include (-
 Constant LOWERCASE_BUF_SIZE = 2*DICT_WORD_SIZE;
 Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
 
+! Tokenise the buffer, which is now a word array.
+! Entries written into the parse table are measured in characters,
+! not bytes.
 [ VM_Tokenise buf tab
     cx numwords len bx ix wx wpos wlen val res dictlen ch bytesperword uninormavail;
     len = buf-->0;
@@ -268,6 +271,37 @@ Include (-
 
 -) after "Glulx-Only Printing Routines" in "Glulx.i6t".
 
+
+[I am Replacing WordAddress, PrintSnippet, SpliceSnippet, rather than using a template replacement.]
+
+Include (-
+Replace WordAddress;
+Replace PrintSnippet;
+Replace SpliceSnippet;
+-) before "Parser.i6t".
+
+Include (-
+
+! WordAddress must account for the fact that buffer is a word array.
+[ WordAddress wordnum; return buffer + WORDSIZE * parse-->(wordnum*3); ];
+
+-) after "Words" in "Parser.i6t".
+
+Include (-
+
+[ PrintSnippet snip from to i w1 w2;
+    w1 = snip/100; w2 = w1 + (snip%100) - 1;
+    if ((w2<w1) || (w1<1) || (w2>WordCount())) {
+        if ((w1 == 1) && (w2 == 0)) rfalse;
+        return RunTimeProblem(RTP_SAYINVALIDSNIPPET, w1, w2);
+    }
+    from = WordAddress(w1); to = WordAddress(w2) + WORDSIZE * WordLength(w2);
+    for (i=from: i<to: i=i+4) print (char) i-->0;
+];
+
+-) after "Snippets" in "Parser.i6t".
+
+
 Include (-
 
 Constant SHORT_NAME_BUFFER_LEN = 250;
@@ -403,7 +437,7 @@ Functions that need to be fixed:
 ### Snippet...
 ### Parser__parse
 ### NounDomain
-### SetPlayersCommand
+# SetPlayersCommand
 ### Keyboard, for "oops"
 ### TestKeyboardPrimitive?
 
