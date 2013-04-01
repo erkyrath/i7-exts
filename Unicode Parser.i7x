@@ -280,26 +280,26 @@ Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
     if ((obj ofclass String or Routine) || (prop == 0))
         length = Glulx_PrintAnyToArrayUni(StorageForShortName, SHORT_NAME_BUFFER_LEN, obj);
     else {
-    	if (obj.prop == NULL) rfalse;
+        if (obj.prop == NULL) rfalse;
         if (metaclass(obj.prop) == Routine or String)
             length = Glulx_PrintAnyToArrayUni(StorageForShortName, SHORT_NAME_BUFFER_LEN, obj.prop);
         else return RunTimeError(2, obj, prop);
-	}
-	
-	! Perhaps the name contained more than 250 characters. If so, it was
-	! truncated (safely) to the array length.
-	if (length > SHORT_NAME_BUFFER_LEN) length = SHORT_NAME_BUFFER_LEN;
-	
-	! This is the best way to print text with the first character capitalized:
-	!   length = glk_buffer_to_title_case_uni(StorageForShortName, SHORT_NAME_BUFFER_LEN, length, false);
-	!   glk_put_buffer_uni(StorageForShortName, length);
-	
-	! However, that crashes on the Mac IDE (6G60), apparently due to a Zoom
-	! bug. So we do it the old-fashioned way. Hopefully a future version can
-	! be made Unicode-aware.
-	if (length)
-		StorageForShortName-->0 = VM_LowerToUpperCase(StorageForShortName-->0);
-	glk_put_buffer_uni(StorageForShortName, length);
+    }
+    
+    ! Perhaps the name contained more than 250 characters. If so, it was
+    ! truncated (safely) to the array length.
+    if (length > SHORT_NAME_BUFFER_LEN) length = SHORT_NAME_BUFFER_LEN;
+    
+    ! This is the best way to print text with the first character capitalized:
+    !   length = glk_buffer_to_title_case_uni(StorageForShortName, SHORT_NAME_BUFFER_LEN, length, false);
+    !   glk_put_buffer_uni(StorageForShortName, length);
+    
+    ! However, that crashes on the Mac IDE (6G60), apparently due to a Zoom
+    ! bug. So we do it the old-fashioned way. Hopefully a future version can
+    ! be made Unicode-aware.
+    if (length)
+        StorageForShortName-->0 = VM_LowerToUpperCase(StorageForShortName-->0);
+    glk_put_buffer_uni(StorageForShortName, length);
 
     if (length) say__p = 1;
 
@@ -312,6 +312,22 @@ Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
 ];
 
 -) instead of "Short Name Storage" in "Printing.i6t".
+
+Include (-
+[ SetPlayersCommand indt_from i len at;
+    len = IT_CharacterLength(indt_from);
+    if (len > 118) len = 118;
+    #ifdef TARGET_ZCODE;
+    buffer->1 = len; at = 2;
+    #ifnot;
+    buffer-->0 = len; at = 4;
+    #endif;
+    for (i=0:i<len:i++) buffer->(i+at) = CharToCase(BlkValueRead(indt_from, i), 0);
+    for (:at+i<120:i++) buffer->(at+i) = ' ';
+    VM_Tokenise(buffer, parse);
+    players_command = 100 + WordCount(); ! The snippet variable ``player's command''
+];
+-) instead of "Setting the Player's Command" in "Indexed Text.i6t".
 
 Unicode Parser ends here.
 
@@ -429,9 +445,14 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "###."
+The Kitchen is a room. The description is "### examine article;."
 
 The lamp is in the Kitchen. The rock is in the Kitchen.
+
+An article is in the Kitchen.
+
+Check examining the article:
+	instead say "[A noun] is a device to test capitalization. [The noun] is not otherwise interesting; it's just [a noun]."
 
 Include (- Class rock_name_class
 with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
