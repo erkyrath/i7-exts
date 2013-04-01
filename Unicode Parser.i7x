@@ -32,7 +32,9 @@ Array  parse2    --> PARSE_BUFFER_LEN;
 -) instead of "Variables and Arrays" in "Glulx.i6t".
 
 
-[I am Replacing VM_ReadKeyboard, rather than using a template replacement, because the "Keyboard Input" section has three functions and I only want to touch one of them.]
+[I am Replacing VM_ReadKeyboard, rather than using a template replacement, because the "Keyboard Input" section has three functions and I only want to touch one of them.
+
+Replacing functions in a one-file I6 program can be problematic, if the function is recursive or if it's invoked before the second definition occurs. The usage here is okay! But when something goes mysteriously wrong, come back here and look to make sure that's still true.]
 
 Include (-
 Replace VM_ReadKeyboard;
@@ -276,11 +278,11 @@ Include (-
 -) after "Glulx-Only Printing Routines" in "Glulx.i6t".
 
 
-[I am Replacing WordAddress rather than using a template replacement, because it's just one tiny function.]
+[I am Replacing WordAddress rather than using a template replacement, because it's just one tiny function. See caveat above.]
 
 Include (-
 Replace WordAddress;
--) before "Parser.i6t".
+-) before "Words" in "Parser.i6t".
 
 Include (-
 
