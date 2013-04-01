@@ -488,7 +488,9 @@ Warning: Any extension that uses I6 code to manipulate the command buffer direct
 
 Section: Caveats
 
-This extension is extremely untested! Things which probably don't work:
+This extension is intended for Inform 7 build 6G60. It has not been tested with any earlier (or later) version.
+
+This extension is not fully tested! Things which probably don't work:
 
 - Disambiguation
 - Writing and reading command-history files
