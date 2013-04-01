@@ -535,9 +535,9 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve."
+The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve; x qrock; x qlamp; say qrock foo to steve."
 
-The lamp is in the Kitchen. The rock is in the Kitchen.
+The brass lamp is in the Kitchen. The rock is in the Kitchen.
 
 An article is in the Kitchen.
 
@@ -555,13 +555,24 @@ Include (- class rock_name_class -) when defining the rock.
 Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
 after "Grammar" in "Output.i6t".
 
+To decide what snippet is snippet at word (N - number) length (L - number):
+	(- (({N})*100 + ({L})) -).
+
 After reading a command: 
 	let T be indexed text; 
 	let T be the player's command;
 	if T matches the regular expression "^xyz":
 		replace word number 1 in T with "examine";
 		say "(Changing command to '[T]'.)";
-		change the text of the player's command to T.
+		change the text of the player's command to T;
+	if word number 2 in T is "qlamp":
+		let snip be snippet at word 2 length 1;
+		replace snip with  "lamp";
+		say "(Changing command to '[the player's command]'.)";
+	if word number 2 in T is "qrock":
+		let snip be snippet at word 2 length 1;
+		replace snip with  "βράχος";
+		say "(Changing command to '[the player's command]'.)";
 
 Check answering Steve that:
 	instead say "You say '[the topic understood]' to Steve."
