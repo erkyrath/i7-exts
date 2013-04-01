@@ -314,20 +314,19 @@ Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
 -) instead of "Short Name Storage" in "Printing.i6t".
 
 Include (-
-[ SetPlayersCommand indt_from i len at;
+
+! This is a Glulx-only implementation.
+[ SetPlayersCommand indt_from i len;
     len = IT_CharacterLength(indt_from);
-    if (len > 118) len = 118;
-    #ifdef TARGET_ZCODE;
-    buffer->1 = len; at = 2;
-    #ifnot;
-    buffer-->0 = len; at = 4;
-    #endif;
-    for (i=0:i<len:i++) buffer->(i+at) = CharToCase(BlkValueRead(indt_from, i), 0);
-    for (:at+i<120:i++) buffer->(at+i) = ' ';
+    if (len > INPUT_BUFFER_LEN) len = INPUT_BUFFER_LEN;
+    buffer-->0 = len;
+    for (i=0:i<len:i++) buffer-->(i+1) = CharToCase(BlkValueRead(indt_from, i), 0);
+    for (:i+1<INPUT_BUFFER_LEN:i++) buffer-->(i+1) = ' ';
     VM_Tokenise(buffer, parse);
     players_command = 100 + WordCount(); ! The snippet variable ``player's command''
 ];
--) instead of "Setting the Player's Command" in "Indexed Text.i6t".
+
+-) instead of "Setting the Player's Command" in "IndexedText.i6t".
 
 Unicode Parser ends here.
 
