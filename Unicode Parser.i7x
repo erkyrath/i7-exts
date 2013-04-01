@@ -1,4 +1,4 @@
-Version 2 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+Version 3 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
 
 [Tell the I6 compiler to generate a dictionary containing Unicode values rather than 8-bit characters. This requires I6 version 6.32 or later.]
 Use DICT_CHAR_SIZE of 4.
@@ -399,7 +399,37 @@ Example: ** Ungrammatical Greek - Defining verb and noun synonyms containing Uni
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "A sign reads: Test me with 'παίρνω βράχος'!"
+Ancient Greece is a room. "You stand in the crossroads at the center of Classical Athens, circa 330 BC. Except that you used a cut-rate time machine to get here, so everybody is wearing blue jeans and you're pretty sure their Greek is by way of Google Translate."
+
+A sign is fixed in place in Greece. "A [sign] reads: Test me with 'παίρνω βράχος'!"
+After printing the name of the sign: say " (σήμα)".
+
+A rock is in Greece.
+After printing the name of the rock: say " (βράχος)".
+
+Include (- Class sign_name_class
+with name '@{3C3}@{3AE}@{3BC}@{3B1}'; -)
+before "Object Tree" in "Output.i6t".
+
+Include (- class sign_name_class -) when defining the sign.
+
+Include (- Class rock_name_class
+with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
+before "Object Tree" in "Output.i6t".
+
+Include (- class rock_name_class -) when defining the rock.
+
+Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
+after "Grammar" in "Output.i6t".
+
+
+Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure that everything works.
+
+"Tedious Test" by Andrew Plotkin.
+
+Include Unicode Parser by Andrew Plotkin.
+
+The Kitchen is a room. The description is "###."
 
 The lamp is in the Kitchen. The rock is in the Kitchen.
 
