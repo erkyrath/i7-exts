@@ -221,16 +221,20 @@ Array gg_lowercasebuf --> LOWERCASE_BUF_SIZE;
 
 Include (-
 
+! Unchanged.
 [ VM_InvalidDictionaryAddress addr;
     if (addr < 0) rtrue;
     rfalse;
 ];
 
+! Unchanged.
 [ VM_DictionaryAddressToNumber w; return w; ];
 [ VM_NumberToDictionaryAddress n; return n; ];
 
+! Now a word array, to match the buffer.
 Array gg_tokenbuf --> DICT_WORD_SIZE;
 
+! Updated for word-array buffer.
 [ GGWordCompare str1 str2 ix jx;
     for (ix=0 : ix<DICT_WORD_SIZE : ix++) {
         jx = (str1-->ix) - (str2-->ix);
@@ -477,7 +481,7 @@ Section: Details for the I6 hacker
 
 This extension modifies Inform's internal command buffers to be Unicode arrays (arrays of 32-bit integers) rather than plain character arrays (arrays of 8-bit characters). These are the "buffer", "buffer2", and "buffer3" arrays.
 
-We also update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(). ###and others!###  We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
+We update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(), WordAddress(), PrintSnippet(), SpliceSnippet(), CPrintOrRun(), SetPlayersCommand(). ###and others!###  We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
 
 Warning: Any extension that uses I6 code to manipulate the command buffer directly will break when used with this extension!
 
@@ -487,11 +491,10 @@ Section: Caveats
 This extension is extremely untested! Things which probably don't work:
 
 - Disambiguation
-- Replacing snippets in the player's command
 - Writing and reading command-history files
 
 Functions that need to be fixed:
-### Snippet...
+# Snippet...
 ### Parser__parse
 ### NounDomain
 # SetPlayersCommand
