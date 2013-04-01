@@ -478,11 +478,13 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "### examine article;."
+The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve."
 
 The lamp is in the Kitchen. The rock is in the Kitchen.
 
 An article is in the Kitchen.
+
+Steve is a person in the Kitchen.
 
 Check examining the article:
 	instead say "[A noun] is a device to test capitalization. [The noun] is not otherwise interesting; it's just [a noun]."
@@ -496,4 +498,13 @@ Include (- class rock_name_class -) when defining the rock.
 Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
 after "Grammar" in "Output.i6t".
 
+After reading a command: 
+	let T be indexed text; 
+	let T be the player's command;
+	if T matches the regular expression "^xyz":
+		replace word number 1 in T with "examine";
+		say "(Changing command to '[T]'.)";
+		change the text of the player's command to T.
 
+Check answering Steve that:
+	instead say "You say '[the topic understood]' to Steve."
