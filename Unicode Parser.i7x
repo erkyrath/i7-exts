@@ -272,23 +272,24 @@ Include (-
 -) after "Glulx-Only Printing Routines" in "Glulx.i6t".
 
 
-[I am Replacing WordAddress, PrintSnippet, SpliceSnippet, rather than using a template replacement.]
+[I am Replacing WordAddress rather than using a template replacement, because it's just one tiny function.]
 
 Include (-
 Replace WordAddress;
-Replace PrintSnippet;
-Replace SpliceSnippet;
 -) before "Parser.i6t".
 
 Include (-
 
-! WordAddress must account for the fact that buffer is a word array.
+! WordAddress returns the address of the beginning of the word. Thus,
+! the first letter is WordAddress(n)-->0, and the last letter is
+! WordAddress(n)-->(WordLength(n)-1).
 [ WordAddress wordnum; return buffer + WORDSIZE * parse-->(wordnum*3); ];
 
 -) after "Words" in "Parser.i6t".
 
 Include (-
 
+! Updated to support word-array buffer.
 [ PrintSnippet snip from to i w1 w2;
     w1 = snip/100; w2 = w1 + (snip%100) - 1;
     if ((w2<w1) || (w1<1) || (w2>WordCount())) {
@@ -299,7 +300,63 @@ Include (-
     for (i=from: i<to: i=i+4) print (char) i-->0;
 ];
 
--) after "Snippets" in "Parser.i6t".
+! Updated to support word-array buffer.
+[ SpliceSnippet snip t i w1 w2 nextw at endsnippet newlen;
+    w1 = snip/100; w2 = w1 + (snip%100) - 1;
+    if ((w2<w1) || (w1<1)) {
+        if ((w1 == 1) && (w2 == 0)) return;
+        return RunTimeProblem(RTP_SPLICEINVALIDSNIPPET, w1, w2);
+    }
+    @push say__p; @push say__pc;
+    nextw = w2 + 1;
+    at = (WordAddress(w1) - buffer) / WORDSIZE;
+    if (nextw <= WordCount()) endsnippet = 100*nextw + (WordCount() - nextw + 1);
+    buffer2-->0 = INPUT_BUFFER_LEN;
+    newlen = VM_PrintToBuffer(buffer2, INPUT_BUFFER_LEN, SpliceSnippet__TextPrinter, t, endsnippet);
+    for (i=0: (i<newlen) && (at+i<INPUT_BUFFER_LEN): i++) buffer-->(at+i) = buffer2-->(1+i);
+    buffer-->0 = at+i;
+    for (:at+i<INPUT_BUFFER_LEN:i++) buffer-->(at+i) = ' ';
+    VM_Tokenise(buffer, parse);
+    players_command = 100 + WordCount();
+    @pull say__pc; @pull say__p;
+];
+
+! Unchanged.
+[ SpliceSnippet__TextPrinter t endsnippet;
+    PrintText(t);
+    if (endsnippet) { print " "; PrintSnippet(endsnippet); }
+];
+
+! Unchanged.
+[ SnippetIncludes test snippet w1 w2 wlen i j;
+    w1 = snippet/100; w2 = w1 + (snippet%100) - 1;
+    if ((w2<w1) || (w1<1)) {
+        if ((w1 == 1) && (w2 == 0)) rfalse;
+        return RunTimeProblem(RTP_INCLUDEINVALIDSNIPPET, w1, w2);
+    }
+    if (metaclass(test) == Routine) {
+        wlen = snippet%100;
+        for (i=w1, j=wlen: j>0: i++, j-- ) {
+            if (((test)(i, 0)) ~= GPR_FAIL) return i*100+wn-i;
+        }
+    }
+    rfalse;
+];
+
+! Unchanged.
+[ SnippetMatches snippet topic_gpr rv;
+    wn=1;
+    if (topic_gpr == 0) rfalse;
+    if (metaclass(topic_gpr) == Routine) {
+        rv = (topic_gpr)(snippet/100, snippet%100);
+        if (rv ~= GPR_FAIL) rtrue;
+        rfalse;
+    }
+    RunTimeProblem(RTP_BADTOPIC);
+    rfalse;
+];
+
+-) instead of "Snippets" in "Parser.i6t".
 
 
 Include (-
@@ -420,7 +477,7 @@ Section: Details for the I6 hacker
 
 This extension modifies Inform's internal command buffers to be Unicode arrays (arrays of 32-bit integers) rather than plain character arrays (arrays of 8-bit characters). These are the "buffer", "buffer2", and "buffer3" arrays.
 
-We also update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(). We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
+We also update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(). ###and others!###  We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
 
 Warning: Any extension that uses I6 code to manipulate the command buffer directly will break when used with this extension!
 
