@@ -493,6 +493,197 @@ Array oops_workspace_uni --> OOPS_WORKSPACE_SIZE;
 
 
 Include (-
+! Updated buffer3 ("again") handling for word arrays
+
+    if (held_back_mode == 1) {
+        held_back_mode = 0;
+        VM_Tokenise(buffer, parse);
+        jump ReParse;
+    }
+
+  .ReType;
+
+    cobj_flag = 0;
+    actors_location = ScopeCeiling(player);
+    BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
+        Keyboard(buffer,parse);
+        players_command = 100 + WordCount();
+        num_words = WordCount();
+    } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
+
+  .ReParse;
+
+    parser_inflection = name;
+
+    ! Initially assume the command is aimed at the player, and the verb
+    ! is the first word
+
+    num_words = WordCount();
+    wn = 1;
+
+    #Ifdef LanguageToInformese;
+    LanguageToInformese();
+    ! Re-tokenise:
+    VM_Tokenise(buffer,parse);
+    #Endif; ! LanguageToInformese
+
+    num_words = WordCount();
+
+    k=0;
+    #Ifdef DEBUG;
+    if (parser_trace >= 2) {
+        print "[ ";
+        for (i=0 : i<num_words : i++) {
+
+            #Ifdef TARGET_ZCODE;
+            j = parse-->(i*2 + 1);
+            #Ifnot; ! TARGET_GLULX
+            j = parse-->(i*3 + 1);
+            #Endif; ! TARGET_
+            k = WordAddress(i+1);
+            l = WordLength(i+1);
+            print "~"; for (m=0 : m<l : m++) print (char) k->m; print "~ ";
+
+            if (j == 0) print "?";
+            else {
+                #Ifdef TARGET_ZCODE;
+                if (UnsignedCompare(j, HDR_DICTIONARY-->0) >= 0 &&
+                    UnsignedCompare(j, HDR_HIGHMEMORY-->0) < 0)
+                     print (address) j;
+                else print j;
+                #Ifnot; ! TARGET_GLULX
+                if (j->0 == $60) print (address) j;
+                else print j;
+                #Endif; ! TARGET_
+            }
+            if (i ~= num_words-1) print " / ";
+        }
+        print " ]^";
+    }
+    #Endif; ! DEBUG
+    verb_wordnum = 1;
+    actor = player;
+    actors_location = ScopeCeiling(player);
+    usual_grammar_after = 0;
+
+  .AlmostReParse;
+
+    scope_token = 0;
+    action_to_be = NULL;
+
+    ! Begin from what we currently think is the verb word
+
+  .BeginCommand;
+
+    wn = verb_wordnum;
+    verb_word = NextWordStopped();
+
+    ! If there's no input here, we must have something like "person,".
+
+    if (verb_word == -1) {
+        best_etype = STUCK_PE;
+        jump GiveError;
+    }
+
+    ! Now try for "again" or "g", which are special cases: don't allow "again" if nothing
+    ! has previously been typed; simply copy the previous text across
+
+    if (verb_word == AGAIN2__WD or AGAIN3__WD) verb_word = AGAIN1__WD;
+    if (verb_word == AGAIN1__WD) {
+        if (actor ~= player) {
+            L__M(##Miscellany, 20);
+            jump ReType;
+        }
+        #Ifdef TARGET_ZCODE;
+        if (buffer3->1 == 0) {
+            L__M(##Miscellany, 21);
+            jump ReType;
+        }
+        #Ifnot; ! TARGET_GLULX
+        if (buffer3-->0 == 0) {
+            L__M(##Miscellany, 21);
+            jump ReType;
+        }
+        #Endif; ! TARGET_
+        for (i=0 : i<INPUT_BUFFER_LEN : i++) buffer-->i = buffer3-->i;
+        VM_Tokenise(buffer,parse);
+        num_words = WordCount();
+        players_command = 100 + WordCount();
+        jump ReParse;
+    }
+
+    ! Save the present input in case of an "again" next time
+
+    if (verb_word ~= AGAIN1__WD)
+        for (i=0 : i<INPUT_BUFFER_LEN : i++) buffer3-->i = buffer-->i;
+
+    if (usual_grammar_after == 0) {
+        j = verb_wordnum;
+        i = RunRoutines(actor, grammar); 
+        #Ifdef DEBUG;
+        if (parser_trace >= 2 && actor.grammar ~= 0 or NULL)
+            print " [Grammar property returned ", i, "]^";
+        #Endif; ! DEBUG
+
+        if ((i ~= 0 or 1) && (VM_InvalidDictionaryAddress(i))) {
+            usual_grammar_after = verb_wordnum; i=-i;
+        }
+
+        if (i == 1) {
+            parser_results-->ACTION_PRES = action;
+            parser_results-->NO_INPS_PRES = 0;
+            parser_results-->INP1_PRES = noun;
+            parser_results-->INP2_PRES = second;
+            if (noun) parser_results-->NO_INPS_PRES = 1;
+            if (second) parser_results-->NO_INPS_PRES = 2;
+            rtrue;
+        }
+        if (i ~= 0) { verb_word = i; wn--; verb_wordnum--; }
+        else { wn = verb_wordnum; verb_word = NextWord(); }
+    }
+    else usual_grammar_after = 0;
+
+-) instead of "Parser Letter A" in "Parser.i6t";
+
+Include (-
+
+    ! At this point, the return value is all prepared, and we are only looking
+    ! to see if there is a "then" followed by subsequent instruction(s).
+
+  .LookForMore;
+
+    if (wn > num_words) rtrue;
+
+    i = NextWord();
+    if (i == THEN1__WD or THEN2__WD or THEN3__WD or comma_word) {
+        if (wn > num_words) {
+           held_back_mode = false;
+           return;
+        }
+        i = WordAddress(verb_wordnum);
+        j = WordAddress(wn);
+        for (: i<j : i=i+4) i-->0 = ' ';
+        i = NextWord();
+        if (i == AGAIN1__WD or AGAIN2__WD or AGAIN3__WD) {
+            ! Delete the words "then again" from the again buffer,
+            ! in which we have just realised that it must occur:
+            ! prevents an infinite loop on "i. again"
+
+            i = (WordAddress(wn-2)-buffer) / WORDSIZE;
+            if (wn > num_words) j = INPUT_BUFFER_LEN-1;
+            else j = (WordAddress(wn)-buffer) / WORDSIZE;
+            for (: i<j : i++) buffer3-->i = ' ';
+        }
+        VM_Tokenise(buffer,parse);
+        held_back_mode = true;
+        return;
+    }
+    best_etype = UPTO_PE;
+    jump GiveError;
+
+-) instead of "Parser Letter K" in "Parser.i6t";
+
+Include (-
 
 [ NounDomain domain1 domain2 context
     first_word i j k l answer_words marker;
@@ -1041,7 +1232,7 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve; x qrock; x qlamp; say qrock foo to steve; examine dfg rock / oops βράχος; get / βράχος, examine / βράχος."
+The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve; x qrock; x qlamp; say qrock foo to steve; examine dfg rock / oops βράχος; get / βράχος, examine / βράχος; get lamp then get rock; examine me / again; examine βράχος / again; i.again."
 
 The brass lamp is in the Kitchen. The rock is in the Kitchen.
 
