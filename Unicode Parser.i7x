@@ -706,7 +706,7 @@ Include (-
     buffer->1 = buffer->1 + l;
     if (buffer->1 >= (buffer->0 - 1)) buffer->1 = buffer->0;
     #Ifnot; ! TARGET_GLULX
-    k = WordAddress(match_from) - buffer;
+    k = (WordAddress(match_from) - buffer) / WORDSIZE;
     l = (buffer2-->0) + 1;
     for (j=INPUT_BUFFER_LEN-1 : j>=k+l : j-- ) buffer-->j = buffer-->(j-l);
     for (i=0 : i<l : i++) buffer-->(k+i) = buffer2-->(1+i);
@@ -994,13 +994,12 @@ This extension is intended for Inform 7 build 6G60. It has not been tested with 
 
 This extension is not fully tested! Things which probably don't work:
 
-- Disambiguation
 - Writing and reading command-history files
 
 Functions that need to be fixed:
 # Snippet...
 ### Parser__parse
-### NounDomain
+# NounDomain
 # SetPlayersCommand
 # Keyboard, for "oops"
 ### TestKeyboardPrimitive?
@@ -1042,7 +1041,7 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve; x qrock; x qlamp; say qrock foo to steve; examine dfg rock / oops βράχος."
+The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve; x qrock; x qlamp; say qrock foo to steve; examine dfg rock / oops βράχος; get / βράχος, examine / βράχος."
 
 The brass lamp is in the Kitchen. The rock is in the Kitchen.
 
