@@ -1174,7 +1174,7 @@ Section: Details for the I6 hacker
 
 This extension modifies Inform's internal command buffers to be Unicode arrays (arrays of 32-bit integers) rather than plain character arrays (arrays of 8-bit characters). These are the "buffer", "buffer2", and "buffer3" arrays.
 
-We update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(), WordAddress(), PrintSnippet(), SpliceSnippet(), CPrintOrRun(), SetPlayersCommand(). ###and others!###  We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
+We update the parser functions that manage these arrays: VM_ReadKeyboard(), VM_CopyBuffer(), VM_PrintToBuffer(), VM_Tokenise(), LTI_Insert(), GGWordCompare(), WordAddress(), PrintSnippet(), SpliceSnippet(), NounDomain(), CPrintOrRun(), SetPlayersCommand(), and of course a couple of section of Parser__parse(). We add a Glulx_PrintAnyToArrayUni() function, which prints to a Unicode array.
 
 Warning: Any extension that uses I6 code to manipulate the command buffer directly will break when used with this extension!
 
@@ -1185,16 +1185,14 @@ This extension is intended for Inform 7 build 6G60. It has not been tested with 
 
 This extension is not fully tested! Things which probably don't work:
 
-- Writing and reading command-history files
-
-Functions that need to be fixed:
-# Snippet...
-### Parser__parse
-# NounDomain
-# SetPlayersCommand
-# Keyboard, for "oops"
+### Writing and reading command-history files
+### trace 2?
 ### TestKeyboardPrimitive?
-
+### number parsing
+### DA_Topic?
+### DECIMAL_TOKEN
+### TIME_TOKEN
+### INDEXED_TEXT_TY_ROGPR?
 
 Example: ** Ungrammatical Greek - Defining verb and noun synonyms containing Unicode characters.
 
@@ -1273,3 +1271,10 @@ After reading a command:
 
 Check answering Steve that:
 	instead say "You say '[the topic understood]' to Steve."
+
+Counting is an action applying to one number.
+
+Understand "count [number]" as counting.
+
+Report counting:
+	say "You count to [the number understood]."
