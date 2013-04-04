@@ -1254,7 +1254,7 @@ before "Object Tree" in "Output.i6t".
 Include (- class sign_name_class -) when defining the sign.
 
 Include (- Class rock_name_class
-with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
+with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C3}'; -)
 before "Object Tree" in "Output.i6t".
 
 Include (- class rock_name_class -) when defining the rock.
@@ -1272,7 +1272,9 @@ Include Unicode Parser by Andrew Plotkin.
 The Kitchen is a room. The description is "To really test this extension, run through all of the following commands. (I can't use a 'test me' script, because Unicode isn't interpreted correctly in testing commands!)[para][command list]".
 
 To say command list:
-	say "  [fix]>> examine article[/fix]   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article.')[/em][br]";
+	say "  [fix]>> παίρνω βράχος[/fix]   [em](takes the rock)[/em][br]";
+	say "  [fix]>> drop ΒΡΑΧΟΣ[/fix]   [em](drops the rock)[/em][br]";
+	say "  [fix]>> examine article[/fix]   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article'; tests a/an/the/A/An/The)[/em][br]";
 	say "  [fix]>> xyz me[/fix]   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
 	say "  [fix]>> xyz βράχος[/fix]   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
 	say "  [fix]>> say hello there to steve[/fix]   [em](tests topic parsing)[/em][br]";
