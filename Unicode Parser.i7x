@@ -1156,6 +1156,93 @@ Include (-
 
 -) instead of "Setting the Player's Command" in "IndexedText.i6t".
 
+
+Include (-
+
+! Upate for word-array buffers.
+[ TIME_TOKEN first_word second_word at length flag
+    illegal_char offhour hr mn i original_wn;
+    original_wn = wn;
+{-call:Plugins::Parsing::Tokens::Values::time}
+    wn = original_wn;
+    first_word = NextWordStopped();
+    switch (first_word) {
+        'midnight': parsed_number = 0; return GPR_NUMBER;
+        'midday', 'noon': parsed_number = TWELVE_HOURS;
+        return GPR_NUMBER;
+    }
+    ! Next try the format 12:02
+    at = WordAddress(wn-1); length = WordLength(wn-1);
+    for (i=0: i<length: i++) {
+        switch (at-->i) {
+            ':': if (flag == false && i>0 && i<length-1) flag = true;
+            else illegal_char = true;
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9': ;
+            default: illegal_char = true;
+        }
+    }
+    if (length < 3 || length > 5 || illegal_char) flag = false;
+    if (flag) {
+        for (i=0: at-->i~=':': i++, hr=hr*10) hr = hr + at-->i - '0';
+        hr = hr/10;
+        for (i++: i<length: i++, mn=mn*10) mn = mn + at-->i - '0';
+        mn = mn/10;
+        second_word = NextWordStopped();
+        parsed_number = HoursMinsWordToTime(hr, mn, second_word);
+        if (parsed_number == -1) return GPR_FAIL;
+        if (second_word ~= 'pm' or 'am') wn--;
+        return GPR_NUMBER;
+    }
+    ! Lastly the wordy format
+    offhour = -1;
+    if (first_word == 'half') offhour = HALF_HOUR;
+    if (first_word == 'quarter') offhour = QUARTER_HOUR;
+    if (offhour < 0) offhour = TryNumber(wn-1);
+    if (offhour < 0 || offhour >= ONE_HOUR) return GPR_FAIL;
+    second_word = NextWordStopped();
+    switch (second_word) {
+        ! "six o'clock", "six"
+        'o^clock', 'am', 'pm', -1:
+            hr = offhour; if (hr > 12) return GPR_FAIL;
+        ! "quarter to six", "twenty past midnight"
+        'to', 'past':
+            mn = offhour; hr = TryNumber(wn);
+            if (hr <= 0) {
+                switch (NextWordStopped()) {
+                    'noon', 'midday': hr = 12;
+                    'midnight': hr = 0;
+                    default: return GPR_FAIL;
+                }
+            }
+            if (hr >= 13) return GPR_FAIL;
+            if (second_word == 'to') {
+                mn = ONE_HOUR-mn; hr--; if (hr<0) hr=23;
+            }
+            wn++; second_word = NextWordStopped();
+        ! "six thirty"
+        default:
+            hr = offhour; mn = TryNumber(--wn);
+            if (mn < 0 || mn >= ONE_HOUR) return GPR_FAIL;
+            wn++; second_word = NextWordStopped();
+    }
+    parsed_number = HoursMinsWordToTime(hr, mn, second_word);
+    if (parsed_number < 0) return GPR_FAIL;
+    if (second_word ~= 'pm' or 'am' or 'o^clock') wn--;
+    return GPR_NUMBER;
+];
+
+[ HoursMinsWordToTime hour minute word x;
+    if (hour >= 24) return -1;
+    if (minute >= ONE_HOUR) return -1;
+    x = hour*ONE_HOUR + minute; if (hour >= 13) return x;
+    x = x % TWELVE_HOURS; if (word == 'pm') x = x + TWELVE_HOURS;
+    if (word ~= 'am' or 'pm' && hour == 12) x = x + TWELVE_HOURS;
+    return x;
+];
+
+-) instead of "Understanding" in "Time.i6t".
+
+
 Unicode Parser ends here.
 
 
@@ -1226,11 +1313,9 @@ This extension is intended for Inform 7 build 6G60. It has not been tested with 
 This extension is not fully tested! Things which probably don't work:
 
 ### Writing and reading command-history files
-### trace 2?
 ### TestKeyboardPrimitive?
 ### DA_Topic?
 ### DECIMAL_TOKEN
-### TIME_TOKEN
 ### INDEXED_TEXT_TY_ROGPR?
 
 Example: ** Ungrammatical Greek - Defining verb and noun synonyms containing Unicode characters.
@@ -1289,9 +1374,14 @@ To say command list:
 	say "  [fix]>> get lamp then get rock   [/fix][em](tests command chaining)[/em][br]";
 	say "  [fix]>> examine me[/fix][br]";
 	say "  [fix].. again[/fix]   [em](tests 'again')[/em][br]";
-	say "  [fix]>> examine βράχος[/fix][br]";
+	say "  [fix]>> examine βράχος[/fix] [br]";
 	say "  [fix].. again[/fix]   [em](ditto, unicode)[/em][br]";
 	say "  [fix]>> i.again[/fix]   [em](tests a particular parser guard against infinite loop)[/em][br]";
+	say "  [fix]>> count 3. count 19. count 321. count five[/fix]   [em](test number parsing)[/em][br]";
+	say "  [fix]>> time 3[/fix]   [em](test time parsing)[/em][br]";
+	say "  [fix]>> time 11 pm[/fix]   [em](ditto; multiple on a line don't work)[/em][br]";
+	say "  [fix]>> time 4:50[/fix] [br]";
+	say "  [fix]>> time 20 to 5 pm[/fix] [br]";
 
 The brass lamp is in the Kitchen. The rock is in the Kitchen.
 
@@ -1353,3 +1443,12 @@ Understand "count [number]" as counting.
 
 Report counting:
 	say "You count to [the number understood]."
+
+Time-checking is an action applying to one time.
+
+Understand "time [time]" as time-checking.
+
+Report time-checking:
+	say "That's [the time understood]."
+
+
