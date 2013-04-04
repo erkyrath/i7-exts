@@ -1272,20 +1272,24 @@ Include Unicode Parser by Andrew Plotkin.
 The Kitchen is a room. The description is "To really test this extension, run through all of the following commands. (I can't use a 'test me' script, because Unicode isn't interpreted correctly in testing commands!)[para][command list]".
 
 To say command list:
-	say "  >> examine article   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article.')[/em][br]";
-	say "  >> xyz me   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
-	say "  >> xyz βράχος   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
-	say "  >> say hello there to steve   [em](tests topic parsing)[/em][br]";
-	say "  >> say παίρνω βράχος to steve   [em](ditto, unicode)[/em][br]";
-	say "  >> x qlamp   [em](examines the rock; tests replacing the player's command)[/em][br]";
-	say "  >> x qrock   [em](examines the lamp; ditto, unicode)[/em][br]";
-	say "  >> say qrock foo to steve   [em](tests splicing *and* replacement)[/em][br]";
-	say "  >> examine dfg rock[br]  ...  oops βράχος   [em](tests 'oops')[/em][br]";
-	say "  >> get   [em]('What do you want to get?')[/em][br]  ...  βράχος   [em](takes the rock; tests disambiguation splicing)[/em][br]";
-	say "  >> get lamp then get rock   [em](tests command chaining)[/em][br]";
-	say "  >> examine me[br]  ...  again   [em](tests 'again')[/em][br]";
-	say "  >> examine βράχος[br]  ...  again   [em](ditto, unicode)[/em][br]";
-	say "  >> i.again   [em](tests a particular parser guard against infinite looping)[/em][br]";
+	say "  [fix]>> examine article[/fix]   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article.')[/em][br]";
+	say "  [fix]>> xyz me[/fix]   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
+	say "  [fix]>> xyz βράχος[/fix]   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
+	say "  [fix]>> say hello there to steve[/fix]   [em](tests topic parsing)[/em][br]";
+	say "  [fix]>> say παίρνω βράχος to steve[/fix]   [em](ditto, unicode)[/em][br]";
+	say "  [fix]>> x qlamp[/fix]   [em](examines the rock; tests replacing the player's command)[/em][br]";
+	say "  [fix]>> x qrock[/fix]   [em](examines the lamp; ditto, unicode)[/em][br]";
+	say "  [fix]>> say qrock foo to steve[/fix]   [em](tests splicing *and* replacement)[/em][br]";
+	say "  [fix]>> examine dfg rock[/fix]   [em]('You can't see any such thing'...)[/em][br]";
+	say "  [fix].. oops βράχος[/fix]   [em](tests 'oops')[/em][br]";
+	say "  [fix]>> get   [/fix][em]('What do you want to get?')[/em][br]";
+	say "  [fix].. βράχος[/fix]   [em](takes the rock; tests disambiguation splicing)[/em][br]";
+	say "  [fix]>> get lamp then get rock   [/fix][em](tests command chaining)[/em][br]";
+	say "  [fix]>> examine me[/fix][br]";
+	say "  [fix].. again[/fix]   [em](tests 'again')[/em][br]";
+	say "  [fix]>> examine βράχος[/fix][br]";
+	say "  [fix].. again[/fix]   [em](ditto, unicode)[/em][br]";
+	say "  [fix]>> i.again[/fix]   [em](tests a particular parser guard against infinite loop)[/em][br]";
 
 The brass lamp is in the Kitchen. The rock is in the Kitchen.
 
@@ -1317,6 +1321,10 @@ To say em -- running on:
 	(- style underline; -).
 To say /em -- running on:
 	(- style roman; -).
+To say fix -- running on:
+	(- font off; -).
+To say /fix -- running on:
+	(- font on; -).
 
 After reading a command: 
 	let T be indexed text; 
