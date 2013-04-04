@@ -1157,6 +1157,39 @@ Include (-
 -) instead of "Setting the Player's Command" in "IndexedText.i6t".
 
 
+Include (-
+
+[ INDEXED_TEXT_TY_ROGPR indt
+    pos len wa wl wpos bdm ch own;
+    if (indt == 0) return GPR_FAIL;
+    bdm = true; own = wn;
+    len = BlkValueExtent(indt);
+    for (pos=0: pos<=len: pos++) {
+        if (pos == len) ch = 0; else ch = BlkValueRead(indt, pos);
+        if (ch == 32 or 9 or 10 or 0) {
+            if (bdm) continue;
+            bdm = true;
+            if (wpos ~= wl) return GPR_FAIL;
+            if (ch == 0) break;
+        } else {
+            if (bdm) {
+                bdm = false;
+                if (NextWordStopped() == -1) return GPR_FAIL;
+                wa = WordAddress(wn-1);
+                wl = WordLength(wn-1);
+                wpos = 0;
+            }
+            if (wa-->wpos ~= ch or IT_RevCase(ch)) return GPR_FAIL;
+            wpos++;
+        }
+    }
+    if (wn == own) return GPR_FAIL; ! Progress must be made to avoid looping
+    return GPR_PREPOSITION;
+];
+
+-) instead of "Recognition-only-GPR"  in "IndexedText.i6t".
+
+
 [I am Replacing DA_Topic rather than using a template replacement, because it's just one tiny function. See caveat above.]
 
 Include (-
@@ -1448,6 +1481,7 @@ To say command list:
 	say "  [fix]>> παίρνω βράχος[/fix]   [em](takes the rock)[/em][br]";
 	say "  [fix]>> drop ΒΡΑΧΟΣ[/fix]   [em](drops the rock)[/em][br]";
 	say "  [fix]>> examine article[/fix]   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article'; tests a/an/the/A/An/The)[/em][br]";
+	say "  [fix]>> examine brass lamp[/fix]   [em](tests property recognition of indexed text)[/em][br]";
 	say "  [fix]>> xyz me[/fix]   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
 	say "  [fix]>> xyz βράχος[/fix]   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
 	say "  [fix]>> say hello there to steve[/fix]   [em](tests topic parsing)[/em][br]";
@@ -1473,7 +1507,12 @@ To say command list:
 	say "  [fix]>> time 4:50[/fix] [br]";
 	say "  [fix]>> time 20 to 5 pm[/fix] [br]";
 
-The brass lamp is in the Kitchen. The rock is in the Kitchen.
+The lamp is in the Kitchen.
+The lamp has an indexed text called the adjective. The adjective of the lamp is "brass".
+The printed name of the lamp is "[adjective] lamp".
+Understand the adjective property as describing the lamp.
+
+The rock is in the Kitchen.
 
 An article is in the Kitchen.
 
