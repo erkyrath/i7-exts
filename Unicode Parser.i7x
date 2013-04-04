@@ -1,4 +1,4 @@
-Version 4 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+Version 5 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
 
 [Tell the I6 compiler to generate a dictionary containing Unicode values rather than 8-bit characters. This requires I6 version 6.32 or later.]
 Use DICT_CHAR_SIZE of 4.
@@ -1058,6 +1058,46 @@ Include (-
 
 Include (-
 
+! Adjust for word-array buffers.
+[ TryNumber wordnum   i j c num len mul tot d digit;
+    i = wn; wn = wordnum; j = NextWord(); wn = i;
+    j = NumberWord(j); ! Test for verbal forms ONE to TWENTY
+    if (j >= 1) return j;
+
+    num = WordAddress(wordnum); len = WordLength(wordnum);
+
+    if (len >= 4) mul=1000;
+    if (len == 3) mul=100;
+    if (len == 2) mul=10;
+    if (len == 1) mul=1;
+
+    tot = 0; c = 0; len = len-1;
+
+    for (c=0 : c<=len : c++) {
+        digit=num-->c;
+        if (digit == '0') { d = 0; jump digok; }
+        if (digit == '1') { d = 1; jump digok; }
+        if (digit == '2') { d = 2; jump digok; }
+        if (digit == '3') { d = 3; jump digok; }
+        if (digit == '4') { d = 4; jump digok; }
+        if (digit == '5') { d = 5; jump digok; }
+        if (digit == '6') { d = 6; jump digok; }
+        if (digit == '7') { d = 7; jump digok; }
+        if (digit == '8') { d = 8; jump digok; }
+        if (digit == '9') { d = 9; jump digok; }
+        return -1000;
+     .digok;
+        tot = tot+mul*d; mul = mul/10;
+    }
+    if (len > 3) tot=10000;
+    return tot;
+];
+
+-) instead of "TryNumber" in "Parser.i6t";
+
+
+Include (-
+
 Constant SHORT_NAME_BUFFER_LEN = 250;
 Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
 
@@ -1188,7 +1228,6 @@ This extension is not fully tested! Things which probably don't work:
 ### Writing and reading command-history files
 ### trace 2?
 ### TestKeyboardPrimitive?
-### number parsing
 ### DA_Topic?
 ### DECIMAL_TOKEN
 ### TIME_TOKEN
