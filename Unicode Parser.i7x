@@ -1269,7 +1269,23 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "### examine article; xyz me; xyz βράχος; say hello there to steve; say παίρνω βράχος to steve; x qrock; x qlamp; say qrock foo to steve; examine dfg rock / oops βράχος; get / βράχος, examine / βράχος; get lamp then get rock; examine me / again; examine βράχος / again; i.again."
+The Kitchen is a room. The description is "To really test this extension, run through all of the following commands. (I can't use a 'test me' script, because Unicode isn't interpreted correctly in testing commands!)[para][command list]".
+
+To say command list:
+	say "  >> examine article   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article.')[/em][br]";
+	say "  >> xyz me   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
+	say "  >> xyz βράχος   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
+	say "  >> say hello there to steve   [em](tests topic parsing)[/em][br]";
+	say "  >> say παίρνω βράχος to steve   [em](ditto, unicode)[/em][br]";
+	say "  >> x qlamp   [em](examines the rock; tests replacing the player's command)[/em][br]";
+	say "  >> x qrock   [em](examines the lamp; ditto, unicode)[/em][br]";
+	say "  >> say qrock foo to steve   [em](tests splicing *and* replacement)[/em][br]";
+	say "  >> examine dfg rock[br]  ...  oops βράχος   [em](tests 'oops')[/em][br]";
+	say "  >> get   [em]('What do you want to get?')[/em][br]  ...  βράχος   [em](takes the rock; tests disambiguation splicing)[/em][br]";
+	say "  >> get lamp then get rock   [em](tests command chaining)[/em][br]";
+	say "  >> examine me[br]  ...  again   [em](tests 'again')[/em][br]";
+	say "  >> examine βράχος[br]  ...  again   [em](ditto, unicode)[/em][br]";
+	say "  >> i.again   [em](tests a particular parser guard against infinite looping)[/em][br]";
 
 The brass lamp is in the Kitchen. The rock is in the Kitchen.
 
@@ -1291,6 +1307,16 @@ after "Grammar" in "Output.i6t".
 
 To decide what snippet is snippet at word (N - number) length (L - number):
 	(- (({N})*100 + ({L})) -).
+
+To say para -- running on:
+	(- DivideParagraphPoint(); new_line; -).
+To say br -- running on:
+	(- new_line; -).
+
+To say em -- running on:
+	(- style underline; -).
+To say /em -- running on:
+	(- style roman; -).
 
 After reading a command: 
 	let T be indexed text; 
