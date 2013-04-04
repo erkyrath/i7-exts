@@ -542,7 +542,7 @@ Include (-
             #Endif; ! TARGET_
             k = WordAddress(i+1);
             l = WordLength(i+1);
-            print "~"; for (m=0 : m<l : m++) print (char) k->m; print "~ ";
+            print "~"; for (m=0 : m<l : m++) print (char) k-->m; print "~ ";
 
             if (j == 0) print "?";
             else {
