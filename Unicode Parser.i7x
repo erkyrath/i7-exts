@@ -1370,6 +1370,9 @@ When you include this extension, I7 will appear to behave as it always does. How
 
 However, the I7 language does not currently permit this. So we have to indulge in some trickery to make these definitions possible.
 
+(By the way, if you're reading these docs in the I7 IDE, you'll see a lot of "[unicode ...]" substitutions in the sample code. You can type Unicode characters directly in your I7 source code! The samples should be written that way, but I7 mangles them when it formats the IDE documentation. Read the Unicode Parser.i7x file directly to see cleaner sample code.)
+
+
 Section: Unicode synonyms for verbs
 
 To define a verb synonym with Unicode characters:
@@ -1415,6 +1418,16 @@ This is also ugly. To define a synonym for an object, we have to define an I6 cl
 The rock_name_class class acts as a mix-in which adds the strings "βράχος" and "βράχοσ" to the rock. (I'm including the two variations on the final letter sigma.) We can now accept the command "παίρνω βράχος" (or "Παίρνω Βράχος").
 
 
+Section: Synonyms from Unicode properties
+
+It's possible to recognize an object from an indexed text property, and the indexed text can contain Unicode. This is less ugly, and you can set it up without requiring I6 code. But it's not very flexible; it only lets you recognize one Unicode word per object. (Or one per property, I suppose. You could add several properties that work this way.)
+
+	The lamp has an indexed text called the greek-synonym.
+	Understand the greek-synonym property as describing the lamp.
+	
+	The greek-synonym of the lamp is "λυχνία".
+
+
 Section: Details for the I6 hacker
 
 This extension modifies Inform's internal command buffers to be Unicode arrays (arrays of 32-bit integers) rather than plain character arrays (arrays of 8-bit characters). These are the "buffer", "buffer2", and "buffer3" arrays.
@@ -1432,7 +1445,6 @@ This extension is not fully tested! Things which probably don't work:
 
 ### Writing and reading command-history files
 ### TestKeyboardPrimitive?
-### INDEXED_TEXT_TY_ROGPR?
 
 Things which definitely don't work (as of 6G60):
 
@@ -1489,7 +1501,10 @@ To say command list:
 	say "  [fix]>> x qlamp[/fix]   [em](examines the rock; tests replacing the player's command)[/em][br]";
 	say "  [fix]>> x qrock[/fix]   [em](examines the lamp; ditto, unicode)[/em][br]";
 	say "  [fix]>> say qrock foo to steve[/fix]   [em](tests splicing *and* replacement)[/em][br]";
-	say "  [fix]>> set lamp to Ω37∞Б[/fix]   [em]('You set the lamp to 'ω37∞б''; tests displaying an action with a topic; also lowercasing)[/em][br]";
+	say "  [fix]>> set lamp to lead[/fix]   [em]('You set the lead lamp to 'lead''; tests displaying an action with a topic)[/em][br]";
+	say "  [fix]>> x lead lamp[/fix]   [em](recognition of new property)[/em][br]";
+	say "  [fix]>> set lamp to Ω37∞Б[/fix]   [em]('You set the ω37∞б lamp to 'ω37∞б''; ditto, unicode; also lowercasing)[/em][br]";
+	say "  [fix]>> x ω37∞б lamp[/fix]   [em](recognition of new property)[/em][br]";
 	say "  [fix]>> examine dfg rock[/fix]   [em]('You can't see any such thing'...)[/em][br]";
 	say "  [fix].. oops βράχος[/fix]   [em](tests 'oops')[/em][br]";
 	say "  [fix]>> get   [/fix][em]('What do you want to get?')[/em][br]";
@@ -1568,6 +1583,7 @@ Check answering Steve that:
 
 Check setting the lamp to:
 	say "(Current action: [current action].)[br]";
+	now the adjective of the lamp is the topic understood;
 	instead say "You set the lamp to '[the topic understood]'."
 
 Counting is an action applying to one number.
