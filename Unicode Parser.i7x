@@ -1160,6 +1160,65 @@ Include (-
 Include (-
 
 ! Upate for word-array buffers.
+! (Note: small numbers are parsed by TryNumber, but large numbers fall through to here.)
+[ DECIMAL_TOKEN wnc wna r n wa wl sign base digit digit_count original_wn group_wn;
+    wnc = wn; original_wn = wn; group_wn = wn;
+{-call:Plugins::Parsing::Tokens::Values::number}
+    wn = wnc;
+    r = ParseTokenStopped(ELEMENTARY_TT, NUMBER_TOKEN);
+    if ((r == GPR_NUMBER) && (parsed_number ~= 10000)) return r;
+    wn = wnc;
+    wa = WordAddress(wn);
+    wl = WordLength(wn);
+    sign = 1; base = 10; digit_count = 0;
+    if (wa-->0 ~= '-' or '$' or '0' or '1' or '2' or '3' or '4'
+        or '5' or '6' or '7' or '8' or '9')
+        return GPR_FAIL;
+    if (wa-->0 == '-') { sign = -1; wl--; wa=wa+WORDSIZE; }
+    if (wl == 0) return GPR_FAIL;
+    n = 0;
+    while (wl > 0) {
+        if (wa-->0 >= 'a') digit = wa-->0 - 'a' + 10;
+        else digit = wa-->0 - '0';
+        digit_count++;
+        switch (base) {
+            2:  if (digit_count == 17) return GPR_FAIL;
+            10:
+                #Iftrue (WORDSIZE == 2);
+                if (digit_count == 6) return GPR_FAIL;
+                if (digit_count == 5) {
+                    if (n > 3276) return GPR_FAIL;
+                    if (n == 3276) {
+                        if (sign == 1 && digit > 7) return GPR_FAIL;
+                        if (sign == -1 && digit > 8) return GPR_FAIL;
+                    }
+                }
+                #Ifnot; ! i.e., if (WORDSIZE == 4)
+                if (digit_count == 11) return GPR_FAIL;
+                if (digit_count == 10) {
+                    if (n > 214748364) return GPR_FAIL;
+                    if (n == 214748364) {
+                        if (sign == 1 && digit > 7) return GPR_FAIL;
+                        if (sign == -1 && digit > 8) return GPR_FAIL;
+                    }
+                }
+                #Endif; 
+            16: if (digit_count == 5) return GPR_FAIL;
+        }
+        if (digit >= 0 && digit < base) n = base*n + digit;
+        else return GPR_FAIL;
+        wl--; wa=wa+WORDSIZE;
+    }
+    parsed_number = n*sign; wn++;
+    return GPR_NUMBER;
+];
+
+-) instead of "Understanding" in "Number.i6t".
+
+
+Include (-
+
+! Upate for word-array buffers.
 [ TIME_TOKEN first_word second_word at length flag
     illegal_char offhour hr mn i original_wn;
     original_wn = wn;
@@ -1378,6 +1437,7 @@ To say command list:
 	say "  [fix].. again[/fix]   [em](ditto, unicode)[/em][br]";
 	say "  [fix]>> i.again[/fix]   [em](tests a particular parser guard against infinite loop)[/em][br]";
 	say "  [fix]>> count 3. count 19. count 321. count five[/fix]   [em](test number parsing)[/em][br]";
+	say "  [fix]>> count 98765. count -543210[/fix]   [em](test large number parsing)[/em][br]";
 	say "  [fix]>> time 3[/fix]   [em](test time parsing)[/em][br]";
 	say "  [fix]>> time 11 pm[/fix]   [em](ditto; multiple on a line don't work)[/em][br]";
 	say "  [fix]>> time 4:50[/fix] [br]";
