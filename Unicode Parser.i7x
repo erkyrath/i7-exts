@@ -1157,6 +1157,31 @@ Include (-
 -) instead of "Setting the Player's Command" in "IndexedText.i6t".
 
 
+[I am Replacing DA_Topic rather than using a template replacement, because it's just one tiny function. See caveat above.]
+
+Include (-
+Replace DA_Topic;
+-) before "Printing Actions" in "Actions.i6t".
+
+Include (-
+
+! Updated for word-array buffers.
+[ DA_Topic x a b c d i cf cw;
+    cw = x%100; cf = x/100;
+    print "~";
+    for (a=cf:d<cw:d++,a++) {
+        wn = a; b = WordAddress(a); c = WordLength(a);
+        for (i=0:i<c:i++) {
+            print (char) b-->i;
+        }
+        if (d<cw-1) print " ";
+    }
+    print "~";
+];
+
+-) after "Actions.i6t".
+
+
 Include (-
 
 ! Upate for word-array buffers.
@@ -1374,7 +1399,6 @@ This extension is not fully tested! Things which probably don't work:
 
 ### Writing and reading command-history files
 ### TestKeyboardPrimitive?
-### DA_Topic?
 ### INDEXED_TEXT_TY_ROGPR?
 
 Things which definitely don't work (as of 6G60):
@@ -1431,6 +1455,7 @@ To say command list:
 	say "  [fix]>> x qlamp[/fix]   [em](examines the rock; tests replacing the player's command)[/em][br]";
 	say "  [fix]>> x qrock[/fix]   [em](examines the lamp; ditto, unicode)[/em][br]";
 	say "  [fix]>> say qrock foo to steve[/fix]   [em](tests splicing *and* replacement)[/em][br]";
+	say "  [fix]>> set lamp to Ω37∞Б[/fix]   [em]('You set the lamp to 'ω37∞б''; tests displaying an action with a topic; also lowercasing)[/em][br]";
 	say "  [fix]>> examine dfg rock[/fix]   [em]('You can't see any such thing'...)[/em][br]";
 	say "  [fix].. oops βράχος[/fix]   [em](tests 'oops')[/em][br]";
 	say "  [fix]>> get   [/fix][em]('What do you want to get?')[/em][br]";
@@ -1501,6 +1526,10 @@ After reading a command:
 
 Check answering Steve that:
 	instead say "You say '[the topic understood]' to Steve."
+
+Check setting the lamp to:
+	say "(Current action: [current action].)[br]";
+	instead say "You set the lamp to '[the topic understood]'."
 
 Counting is an action applying to one number.
 
