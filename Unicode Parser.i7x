@@ -1509,153 +1509,157 @@ Things which definitely don't work (as of 6G60):
 
 Example: ** Ungrammatical Greek - Defining verb and noun synonyms containing Unicode characters.
 
-"Ungrammatical Greek" by Andrew Plotkin.
+In this sample, we accept the synonym "παίρνω" for taking, "σήμα" for the sign, and "βράχος" for the rock.
 
-Include Unicode Parser by Andrew Plotkin.
+We also accept the variant "παιρνω", and "σημα", and "βραχος", "βράχοσ", "βραχοσ".
 
-Ancient Greece is a room. "You stand in the crossroads at the center of Classical Athens, circa 330 BC. Except that you used a cut-rate time machine to get here, so everybody is wearing blue jeans and you're pretty sure their Greek is by way of Google Translate."
+	*: "Ungrammatical Greek"
+	
+	Include Unicode Parser by Andrew Plotkin.
 
-A sign is fixed in place in Greece. "A [sign] reads: Test me with 'παίρνω βράχος'!"
-After printing the name of the sign: say " (σήμα)".
+	Ancient Greece is a room. "You stand in the crossroads at the center of Classical Athens, circa 330 BC. Except that you used a cut-rate time machine to get here, so everybody is wearing blue jeans and you're pretty sure their Greek is by way of Google Translate."
 
-A rock is in Greece.
-After printing the name of the rock: say " (βράχος)".
+	A sign is fixed in place in Greece. "A [sign] reads: Test me with 'παίρνω βράχος'!"
+	After printing the name of the sign: say " (σήμα)".
 
-Include (- Class sign_name_class
-with name '@{3C3}@{3AE}@{3BC}@{3B1}'; -)
-before "Object Tree" in "Output.i6t".
+	A rock is in Greece.
+	After printing the name of the rock: say " (βράχος)".
 
-Include (- class sign_name_class -) when defining the sign.
+	Include (- Class sign_name_class
+	with name '@{3C3}@{3AE}@{3BC}@{3B1}' '@{3C3}@{3B7}@{3BC}@{3B1}'; -)
+	before "Object Tree" in "Output.i6t".
 
-Include (- Class rock_name_class
-with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C3}'; -)
-before "Object Tree" in "Output.i6t".
+	Include (- class sign_name_class -) when defining the sign.
 
-Include (- class rock_name_class -) when defining the rock.
+	Include (- Class rock_name_class
+	with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C3}'; -)
+	before "Object Tree" in "Output.i6t".
 
-Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
-after "Grammar" in "Output.i6t".
+	Include (- class rock_name_class -) when defining the rock.
+
+	Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
+	after "Grammar" in "Output.i6t".
 
 
 Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure that everything works.
 
-"Tedious Test" by Andrew Plotkin.
+	*: "Tedious Test"
 
-Include Unicode Parser by Andrew Plotkin.
+	Include Unicode Parser by Andrew Plotkin.
 
-The Kitchen is a room. The description is "To really test this extension, run through all of the following commands. (I can't use a 'test me' script for all of this, because Unicode isn't interpreted correctly in testing commands!)[para][command list]".
+	The Kitchen is a room. The description is "To really test this extension, run through all of the following commands. (I can't use a 'test me' script for all of this, because Unicode isn't interpreted correctly in testing commands!)[para][command list]".
 
-To say command list:
-	say "  [fix]>> test me[/fix]   [em]('x me'; tests a basic test command)[/em][br]";
-	say "  [fix]>> παίρνω βράχος[/fix]   [em](takes the rock)[/em][br]";
-	say "  [fix]>> drop ΒΡΑΧΟΣ[/fix]   [em](drops the rock)[/em][br]";
-	say "  [fix]>> examine article[/fix]   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article'; tests a/an/the/A/An/The)[/em][br]";
-	say "  [fix]>> examine brass lamp[/fix]   [em](tests property recognition of indexed text)[/em][br]";
-	say "  [fix]>> xyz me[/fix]   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
-	say "  [fix]>> xyz βράχος[/fix]   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
-	say "  [fix]>> say hello there to steve[/fix]   [em](tests topic parsing)[/em][br]";
-	say "  [fix]>> say παίρνω βράχος to steve[/fix]   [em](ditto, unicode)[/em][br]";
-	say "  [fix]>> x qlamp[/fix]   [em](examines the rock; tests replacing the player's command)[/em][br]";
-	say "  [fix]>> x qrock[/fix]   [em](examines the lamp; ditto, unicode)[/em][br]";
-	say "  [fix]>> say qrock foo to steve[/fix]   [em](tests splicing *and* replacement)[/em][br]";
-	say "  [fix]>> set lamp to lead[/fix]   [em]('You set the lead lamp to 'lead''; tests displaying an action with a topic)[/em][br]";
-	say "  [fix]>> x lead lamp[/fix]   [em](recognition of new property)[/em][br]";
-	say "  [fix]>> set lamp to Ω37∞Б[/fix]   [em]('You set the ω37∞б lamp to 'ω37∞б''; ditto, unicode; also lowercasing)[/em][br]";
-	say "  [fix]>> x ω37∞б lamp[/fix]   [em](recognition of new property)[/em][br]";
-	say "  [fix]>> examine dfg rock[/fix]   [em]('You can't see any such thing'...)[/em][br]";
-	say "  [fix].. oops βράχος[/fix]   [em](tests 'oops')[/em][br]";
-	say "  [fix]>> get   [/fix][em]('What do you want to get?')[/em][br]";
-	say "  [fix].. βράχος[/fix]   [em](takes the rock; tests disambiguation splicing)[/em][br]";
-	say "  [fix]>> get lamp then get rock   [/fix][em](tests command chaining)[/em][br]";
-	say "  [fix]>> examine me[/fix][br]";
-	say "  [fix].. again[/fix]   [em](tests 'again')[/em][br]";
-	say "  [fix]>> examine βράχος[/fix] [br]";
-	say "  [fix].. again[/fix]   [em](ditto, unicode)[/em][br]";
-	say "  [fix]>> i.again[/fix]   [em](tests a particular parser guard against infinite loop)[/em][br]";
-	say "  [fix]>> count 3. count 19. count 321. count five[/fix]   [em](test number parsing)[/em][br]";
-	say "  [fix]>> count 98765. count -543210[/fix]   [em](test large number parsing)[/em][br]";
-	say "  [fix]>> time 3[/fix]   [em](test time parsing)[/em][br]";
-	say "  [fix]>> time 11 pm[/fix]   [em](ditto; multiple on a line don't work)[/em][br]";
-	say "  [fix]>> time 4:50[/fix] [br]";
-	say "  [fix]>> time 20 to 5 pm[/fix] [br]";
+	To say command list:
+		say "  [fix]>> test me[/fix]   [em]('x me'; tests a basic test command)[/em][br]";
+		say "  [fix]>> παίρνω βράχος[/fix]   [em](takes the rock)[/em][br]";
+		say "  [fix]>> drop ΒΡΑΧΟΣ[/fix]   [em](drops the rock)[/em][br]";
+		say "  [fix]>> examine article[/fix]   [em](prints 'An article is a device to test capitalization. The article is not otherwise interesting; it's just an article'; tests a/an/the/A/An/The)[/em][br]";
+		say "  [fix]>> examine brass lamp[/fix]   [em](tests property recognition of indexed text)[/em][br]";
+		say "  [fix]>> xyz me[/fix]   [em](translated to 'examine me'; tests snippet splicing)[/em][br]";
+		say "  [fix]>> xyz βράχος[/fix]   [em](examines the rock; tests snippet splicing with unicode)[/em][br]";
+		say "  [fix]>> say hello there to steve[/fix]   [em](tests topic parsing)[/em][br]";
+		say "  [fix]>> say παίρνω βράχος to steve[/fix]   [em](ditto, unicode)[/em][br]";
+		say "  [fix]>> x qlamp[/fix]   [em](examines the rock; tests replacing the player's command)[/em][br]";
+		say "  [fix]>> x qrock[/fix]   [em](examines the lamp; ditto, unicode)[/em][br]";
+		say "  [fix]>> say qrock foo to steve[/fix]   [em](tests splicing *and* replacement)[/em][br]";
+		say "  [fix]>> set lamp to lead[/fix]   [em]('You set the lead lamp to 'lead''; tests displaying an action with a topic)[/em][br]";
+		say "  [fix]>> x lead lamp[/fix]   [em](recognition of new property)[/em][br]";
+		say "  [fix]>> set lamp to Ω37∞Б[/fix]   [em]('You set the ω37∞б lamp to 'ω37∞б''; ditto, unicode; also lowercasing)[/em][br]";
+		say "  [fix]>> x ω37∞б lamp[/fix]   [em](recognition of new property)[/em][br]";
+		say "  [fix]>> examine dfg rock[/fix]   [em]('You can't see any such thing'...)[/em][br]";
+		say "  [fix].. oops βράχος[/fix]   [em](tests 'oops')[/em][br]";
+		say "  [fix]>> get   [/fix][em]('What do you want to get?')[/em][br]";
+		say "  [fix].. βράχος[/fix]   [em](takes the rock; tests disambiguation splicing)[/em][br]";
+		say "  [fix]>> get lamp then get rock   [/fix][em](tests command chaining)[/em][br]";
+		say "  [fix]>> examine me[/fix][br]";
+		say "  [fix].. again[/fix]   [em](tests 'again')[/em][br]";
+		say "  [fix]>> examine βράχος[/fix] [br]";
+		say "  [fix].. again[/fix]   [em](ditto, unicode)[/em][br]";
+		say "  [fix]>> i.again[/fix]   [em](tests a particular parser guard against infinite loop)[/em][br]";
+		say "  [fix]>> count 3. count 19. count 321. count five[/fix]   [em](test number parsing)[/em][br]";
+		say "  [fix]>> count 98765. count -543210[/fix]   [em](test large number parsing)[/em][br]";
+		say "  [fix]>> time 3[/fix]   [em](test time parsing)[/em][br]";
+		say "  [fix]>> time 11 pm[/fix]   [em](ditto; multiple on a line don't work)[/em][br]";
+		say "  [fix]>> time 4:50[/fix] [br]";
+		say "  [fix]>> time 20 to 5 pm[/fix] [br]";
 
-The lamp is in the Kitchen.
-The lamp has an indexed text called the adjective. The adjective of the lamp is "brass".
-The printed name of the lamp is "[adjective] lamp".
-Understand the adjective property as describing the lamp.
+	The lamp is in the Kitchen.
+	The lamp has an indexed text called the adjective. The adjective of the lamp is "brass".
+	The printed name of the lamp is "[adjective] lamp".
+	Understand the adjective property as describing the lamp.
 
-The rock is in the Kitchen.
+	The rock is in the Kitchen.
 
-An article is in the Kitchen.
+	An article is in the Kitchen.
 
-Steve is a person in the Kitchen.
+	Steve is a person in the Kitchen.
 
-Check examining the article:
-	instead say "[A noun] is a device to test capitalization. [The noun] is not otherwise interesting; it's just [a noun]."
+	Check examining the article:
+		instead say "[A noun] is a device to test capitalization. [The noun] is not otherwise interesting; it's just [a noun]."
 
-Include (- Class rock_name_class
-with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}'; -)
-before "Object Tree" in "Output.i6t".
+	Include (- Class rock_name_class
+	with name '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3AC}@{3C7}@{3BF}@{3C3}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C2}' '@{3B2}@{3C1}@{3B1}@{3C7}@{3BF}@{3C3}'; -)
+	before "Object Tree" in "Output.i6t".
 
-Include (- class rock_name_class -) when defining the rock.
+	Include (- class rock_name_class -) when defining the rock.
 
-Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
-after "Grammar" in "Output.i6t".
+	Include (- Verb '@{3C0}@{3B1}@{3AF}@{3C1}@{3BD}@{3C9}' '@{3C0}@{3B1}@{3B9}@{3C1}@{3BD}@{3C9}' = 'get'; -)
+	after "Grammar" in "Output.i6t".
 
-To decide what snippet is snippet at word (N - number) length (L - number):
-	(- (({N})*100 + ({L})) -).
+	To decide what snippet is snippet at word (N - number) length (L - number):
+		(- (({N})*100 + ({L})) -).
 
-To say para -- running on:
-	(- DivideParagraphPoint(); new_line; -).
-To say br -- running on:
-	(- new_line; -).
+	To say para -- running on:
+		(- DivideParagraphPoint(); new_line; -).
+	To say br -- running on:
+		(- new_line; -).
 
-To say em -- running on:
-	(- style underline; -).
-To say /em -- running on:
-	(- style roman; -).
-To say fix -- running on:
-	(- font off; -).
-To say /fix -- running on:
-	(- font on; -).
+	To say em -- running on:
+		(- style underline; -).
+	To say /em -- running on:
+		(- style roman; -).
+	To say fix -- running on:
+		(- font off; -).
+	To say /fix -- running on:
+		(- font on; -).
 
-After reading a command: 
-	let T be indexed text; 
-	let T be the player's command;
-	if T matches the regular expression "^xyz":
-		replace word number 1 in T with "examine";
-		say "(Changing command to '[T]'.)";
-		change the text of the player's command to T;
-	if word number 2 in T is "qlamp":
-		let snip be snippet at word 2 length 1;
-		replace snip with  "lamp";
-		say "(Changing command to '[the player's command]'.)";
-	if word number 2 in T is "qrock":
-		let snip be snippet at word 2 length 1;
-		replace snip with  "βράχος";
-		say "(Changing command to '[the player's command]'.)";
+	After reading a command: 
+		let T be indexed text; 
+		let T be the player's command;
+		if T matches the regular expression "^xyz":
+			replace word number 1 in T with "examine";
+			say "(Changing command to '[T]'.)";
+			change the text of the player's command to T;
+		if word number 2 in T is "qlamp":
+			let snip be snippet at word 2 length 1;
+			replace snip with  "lamp";
+			say "(Changing command to '[the player's command]'.)";
+		if word number 2 in T is "qrock":
+			let snip be snippet at word 2 length 1;
+			replace snip with  "βράχος";
+			say "(Changing command to '[the player's command]'.)";
 
-Check answering Steve that:
-	instead say "You say '[the topic understood]' to Steve."
+	Check answering Steve that:
+		instead say "You say '[the topic understood]' to Steve."
 
-Check setting the lamp to:
-	say "(Current action: [current action].)[br]";
-	now the adjective of the lamp is the topic understood;
-	instead say "You set the lamp to '[the topic understood]'."
+	Check setting the lamp to:
+		say "(Current action: [current action].)[br]";
+		now the adjective of the lamp is the topic understood;
+		instead say "You set the lamp to '[the topic understood]'."
 
-Counting is an action applying to one number.
+	Counting is an action applying to one number.
 
-Understand "count [number]" as counting.
+	Understand "count [number]" as counting.
 
-Report counting:
-	say "You count to [the number understood]."
+	Report counting:
+		say "You count to [the number understood]."
 
-Time-checking is an action applying to one time.
+	Time-checking is an action applying to one time.
 
-Understand "time [time]" as time-checking.
+	Understand "time [time]" as time-checking.
 
-Report time-checking:
-	say "That's [the time understood]."
+	Report time-checking:
+		say "That's [the time understood]."
 
-Test me with "x me".
+	Test me with "x me".
 
