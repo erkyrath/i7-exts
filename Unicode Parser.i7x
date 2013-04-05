@@ -1369,6 +1369,9 @@ Replace TestKeyboardPrimitive;
 
 Include (-
 
+! if any test scenarios...
+#Iftrue ({-value:NUMBER_CREATED(test_scenario)} > 0);
+
 [ TestKeyboardPrimitive a_buffer a_table p i j l spaced ch;
     if (test_sp == 0) {
         test_stack-->2 = 1;
@@ -1409,6 +1412,8 @@ Include (-
         } else test_stack-->(test_sp-3) = i;
     }
 ];
+
+#endif; ! ...if any test scenarios
 
 -) after "Test Command" in "Tests.i6t".
 
