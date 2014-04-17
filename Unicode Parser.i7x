@@ -1,9 +1,11 @@
-Version 6 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+Version 7 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+
+[Modernized for 6K92.]
 
 [Tell the I6 compiler to generate a dictionary containing Unicode values rather than 8-bit characters. This requires I6 version 6.32 or later.]
 Use DICT_CHAR_SIZE of 4.
 
-
+[Change the three buffer arrays from length/byte format to simple word arrays.]
 Include (-
 Array gg_event --> 4;
 Array gg_arguments buffer 28;
@@ -51,8 +53,6 @@ Include (-
             glk_stream_close(gg_commandstr, 0);
             gg_commandstr = 0;
             gg_command_reading = false;
-            ! L__M(##CommandsRead, 5); would come after prompt
-            ! fall through to normal user input.
         }
         else {
             ! Trim the trailing newline
@@ -329,7 +329,7 @@ Include (-
 
 ! Unchanged.
 [ SpliceSnippet__TextPrinter t endsnippet;
-    PrintText(t);
+    TEXT_TY_Say(t);
     if (endsnippet) { print " "; PrintSnippet(endsnippet); }
 ];
 
@@ -399,7 +399,9 @@ Array oops_workspace_uni --> OOPS_WORKSPACE_SIZE;
             @push etype; etype = BLANKLINE_PE;
             players_command = 100;
             BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
-            if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) L__M(##Miscellany,10);
+            if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
+              PARSER_ERROR_INTERNAL_RM('X', noun); new_line;
+            }
             EndActivity(PRINTING_A_PARSER_ERROR_ACT);
             @pull etype;
             continue;
@@ -410,9 +412,9 @@ Array oops_workspace_uni --> OOPS_WORKSPACE_SIZE;
     
         w = a_table-->1;
         if (w == OOPS1__WD or OOPS2__WD or OOPS3__WD) {
-            if (oops_from == 0) { L__M(##Miscellany, 14); continue; }
-            if (nw == 1) { L__M(##Miscellany, 15); continue; }
-            if (nw > 2) { L__M(##Miscellany, 16); continue; }
+            if (oops_from == 0) { PARSER_COMMAND_INTERNAL_RM('A'); new_line; continue; }
+            if (nw == 1) { PARSER_COMMAND_INTERNAL_RM('B'); new_line; continue; }
+            if (nw > 2) { PARSER_COMMAND_INTERNAL_RM('C'); new_line; continue; }
         
             ! So now we know: there was a previous mistake, and the player has
             ! attempted to correct a single word of it.
@@ -482,7 +484,7 @@ Array oops_workspace_uni --> OOPS_WORKSPACE_SIZE;
             SL_Location(); print "^";
             ! print (name) location, "^";
             VM_Style(NORMAL_VMSTY);
-            L__M(##Miscellany, 13);
+            IMMEDIATELY_UNDO_RM('E'); new_line;
             continue;
         }
         return nw;
@@ -507,8 +509,7 @@ Include (-
     actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
         Keyboard(buffer,parse);
-        players_command = 100 + WordCount();
-        num_words = WordCount();
+        num_words = WordCount(); players_command = 100 + num_words;
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
 
   .ReParse;
@@ -518,8 +519,8 @@ Include (-
     ! Initially assume the command is aimed at the player, and the verb
     ! is the first word
 
-    num_words = WordCount();
-    wn = 1;
+    num_words = WordCount(); players_command = 100 + num_words;
+    wn = 1; inferred_go = false;
 
     #Ifdef LanguageToInformese;
     LanguageToInformese();
@@ -527,7 +528,7 @@ Include (-
     VM_Tokenise(buffer,parse);
     #Endif; ! LanguageToInformese
 
-    num_words = WordCount();
+    num_words = WordCount(); players_command = 100 + num_words;
 
     k=0;
     #Ifdef DEBUG;
@@ -581,8 +582,10 @@ Include (-
     ! If there's no input here, we must have something like "person,".
 
     if (verb_word == -1) {
-        best_etype = STUCK_PE;
-        jump GiveError;
+        best_etype = STUCK_PE; jump GiveError;
+    }
+    if (verb_word == comma_word) {
+        best_etype = COMMABEGIN_PE; jump GiveError;
     }
 
     ! Now try for "again" or "g", which are special cases: don't allow "again" if nothing
@@ -591,24 +594,23 @@ Include (-
     if (verb_word == AGAIN2__WD or AGAIN3__WD) verb_word = AGAIN1__WD;
     if (verb_word == AGAIN1__WD) {
         if (actor ~= player) {
-            L__M(##Miscellany, 20);
-            jump ReType;
+            best_etype = ANIMAAGAIN_PE;
+            jump GiveError;
         }
         #Ifdef TARGET_ZCODE;
         if (buffer3->1 == 0) {
-            L__M(##Miscellany, 21);
+            PARSER_COMMAND_INTERNAL_RM('D'); new_line;
             jump ReType;
         }
         #Ifnot; ! TARGET_GLULX
         if (buffer3-->0 == 0) {
-            L__M(##Miscellany, 21);
+            PARSER_COMMAND_INTERNAL_RM('D'); new_line;
             jump ReType;
         }
         #Endif; ! TARGET_
         for (i=0 : i<INPUT_BUFFER_LEN : i++) buffer-->i = buffer3-->i;
         VM_Tokenise(buffer,parse);
-        num_words = WordCount();
-        players_command = 100 + WordCount();
+        num_words = WordCount(); players_command = 100 + num_words;
         jump ReParse;
     }
 
@@ -660,9 +662,9 @@ Include (-
            held_back_mode = false;
            return;
         }
-        i = WordAddress(verb_wordnum);
+        if (verb_wordnum > 0) i = WordAddress(verb_wordnum); else i = WordAddress(1);
         j = WordAddress(wn);
-        for (: i<j : i=i+4) i-->0 = ' ';
+        if (i<=j) for (: i<j : i=i+4) i-->0 = ' ';
         i = NextWord();
         if (i == AGAIN1__WD or AGAIN2__WD or AGAIN3__WD) {
             ! Delete the words "then again" from the again buffer,
@@ -685,7 +687,7 @@ Include (-
 
 Include (-
 
-[ NounDomain domain1 domain2 context
+[ NounDomain domain1 domain2 context dont_ask
     first_word i j k l answer_words marker;
     #Ifdef DEBUG;
     if (parser_trace >= 4) {
@@ -754,7 +756,19 @@ Include (-
 
     number_of_classes = 0;
 
-    if (number_matched == 1) i = match_list-->0;
+    if (number_matched == 1) {
+        i = match_list-->0;
+                if (indef_mode == 1 && indef_type & PLURAL_BIT ~= 0) {
+                        if (context == MULTI_TOKEN or MULTIHELD_TOKEN or
+                                MULTIEXCEPT_TOKEN or MULTIINSIDE_TOKEN or
+                                NOUN_TOKEN or HELD_TOKEN or CREATURE_TOKEN) {
+                                BeginActivity(DECIDING_WHETHER_ALL_INC_ACT, i);
+                                if ((ForActivity(DECIDING_WHETHER_ALL_INC_ACT, i)) &&
+                                        (RulebookFailed())) rfalse;
+                                EndActivity(DECIDING_WHETHER_ALL_INC_ACT, i);
+                        }
+                }
+    }
     if (number_matched > 1) {
         i = true;
         if (number_matched > 1)
@@ -784,6 +798,8 @@ Include (-
         return i;
     }
 
+        if (dont_ask) return match_list-->0;
+
     ! If we get here, there was no obvious choice of object to make.  If in
     ! fact we've already gone past the end of the player's typing (which
     ! means the match list must contain every object in scope, regardless
@@ -803,7 +819,8 @@ Include (-
             marker++;
         if (match_list-->marker hasnt animate) j = 0;
     }
-    if (j) L__M(##Miscellany, 45); else L__M(##Miscellany, 46);
+    if (j) PARSER_CLARIF_INTERNAL_RM('A');
+    else PARSER_CLARIF_INTERNAL_RM('B');
 
     j = number_of_classes; marker = 0;
     for (i=1 : i<=number_of_classes : i++) {
@@ -812,15 +829,15 @@ Include (-
 
         if (match_classes-->marker > 0) print (the) k; else print (a) k;
 
-        if (i < j-1)  print (string) COMMA__TX;
+        if (i < j-1)  print ", ";
         if (i == j-1) {
             #Ifdef SERIAL_COMMA;
             if (j ~= 2) print ",";
             #Endif; ! SERIAL_COMMA
-            print (string) OR__TX;
+            PARSER_CLARIF_INTERNAL_RM('H');
         }
     }
-    L__M(##Miscellany, 57);
+    print "?^";
 
     .SkipWhichQuestion; EndActivity(ASKING_WHICH_DO_YOU_MEAN_ACT);
 
@@ -848,7 +865,7 @@ Include (-
             multiple_object-->0 = i+l;
             rtrue;
         }
-        L__M(##Miscellany, 47);
+        PARSER_CLARIF_INTERNAL_RM('C');
         jump WhichOne;
     }
 
@@ -911,15 +928,14 @@ Include (-
 
     .RECONSTRUCT_INPUT;
 
-    num_words = WordCount();
+    num_words = WordCount(); players_command = 100 + num_words;
     wn = 1;
     #Ifdef LanguageToInformese;
     LanguageToInformese();
     ! Re-tokenise:
     VM_Tokenise(buffer,parse);
     #Endif; ! LanguageToInformese
-    num_words = WordCount();
-    players_command = 100 + WordCount();
+    num_words = WordCount(); players_command = 100 + num_words;
     actors_location = ScopeCeiling(player);
     FollowRulebook(Activity_after_rulebooks-->READING_A_COMMAND_ACT, true);
 
@@ -931,13 +947,23 @@ Include (-
 
   .Incomplete;
 
-    if (context == CREATURE_TOKEN) L__M(##Miscellany, 48);
-    else                           L__M(##Miscellany, 49);
-
+    if (context == CREATURE_TOKEN) PARSER_CLARIF_INTERNAL_RM('D', actor);
+    else                           PARSER_CLARIF_INTERNAL_RM('E', actor);
+    new_line;
+    
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i=' ';
     #Endif; ! TARGET_ZCODE
     answer_words = Keyboard(buffer2, parse2);
+
+        ! Look for a comma, and interpret this as a fresh conversation command
+        ! if so:
+
+        for (i=1 : i<=answer_words : i++)
+                if (WordFrom(i, parse2) == comma_word) {
+                        VM_CopyBuffer(buffer, buffer2);
+                        return REPARSE_CODE;
+                }
 
     first_word=(parse2-->1);
     #Ifdef LanguageIsVerb;
@@ -951,7 +977,7 @@ Include (-
 
     if (first_word ~= 0) {
         j = first_word->#dict_par1;
-        if (0 ~= j&1) {
+        if ((0 ~= j&1) && ~~LanguageVerbMayBeName(first_word)) {
             VM_CopyBuffer(buffer, buffer2);
             return REPARSE_CODE;
         }
@@ -1053,6 +1079,8 @@ Include (-
 
 ]; ! end of NounDomain
 
+[ PARSER_CLARIF_INTERNAL_R; ];
+
 -) instead of "Noun Domain" in "Parser.i6t";
 
 
@@ -1144,50 +1172,58 @@ Array StorageForShortName --> SHORT_NAME_BUFFER_LEN;
 Include (-
 
 ! This is a Glulx-only implementation.
-[ SetPlayersCommand indt_from i len;
-    len = IT_CharacterLength(indt_from);
+[ SetPlayersCommand from_txt i len p cp;
+    cp = from_txt-->0; p = TEXT_TY_Temporarily_Transmute(from_txt);
+    len = TEXT_TY_CharacterLength(from_txt);
     if (len > INPUT_BUFFER_LEN) len = INPUT_BUFFER_LEN;
     buffer-->0 = len;
-    for (i=0:i<len:i++) buffer-->(i+1) = CharToCase(BlkValueRead(indt_from, i), 0);
+    for (i=0:i<len:i++) buffer-->(i+1) = CharToCase(BlkValueRead(from_txt, i), 0);
     for (:i+1<INPUT_BUFFER_LEN:i++) buffer-->(i+1) = ' ';
     VM_Tokenise(buffer, parse);
     players_command = 100 + WordCount(); ! The snippet variable ``player's command''
+    TEXT_TY_Untransmute(from_txt, p, cp);
 ];
 
--) instead of "Setting the Player's Command" in "IndexedText.i6t".
+-) instead of "Setting the Player's Command" in "Text.i6t".
 
 
 Include (-
 
-[ INDEXED_TEXT_TY_ROGPR indt
-    pos len wa wl wpos bdm ch own;
-    if (indt == 0) return GPR_FAIL;
-    bdm = true; own = wn;
-    len = BlkValueExtent(indt);
-    for (pos=0: pos<=len: pos++) {
-        if (pos == len) ch = 0; else ch = BlkValueRead(indt, pos);
-        if (ch == 32 or 9 or 10 or 0) {
-            if (bdm) continue;
-            bdm = true;
-            if (wpos ~= wl) return GPR_FAIL;
-            if (ch == 0) break;
-        } else {
-            if (bdm) {
-                bdm = false;
-                if (NextWordStopped() == -1) return GPR_FAIL;
-                wa = WordAddress(wn-1);
-                wl = WordLength(wn-1);
-                wpos = 0;
-            }
-            if (wa-->wpos ~= ch or IT_RevCase(ch)) return GPR_FAIL;
-            wpos++;
+[ TEXT_TY_ROGPR txt p cp r;
+        if (txt == 0) return GPR_FAIL;
+        cp = txt-->0; p = TEXT_TY_Temporarily_Transmute(txt);
+        r = TEXT_TY_ROGPRI(txt);
+        TEXT_TY_Untransmute(txt, p, cp);
+        return r;
+];
+[ TEXT_TY_ROGPRI txt
+        pos len wa wl wpos bdm ch own;
+        bdm = true; own = wn;
+        len = BlkValueLBCapacity(txt);
+        for (pos=0: pos<=len: pos++) {
+                if (pos == len) ch = 0; else ch = BlkValueRead(txt, pos);
+                if (ch == 32 or 9 or 10 or 0) {
+                        if (bdm) continue;
+                        bdm = true;
+                        if (wpos ~= wl) return GPR_FAIL;
+                        if (ch == 0) break;
+                } else {
+                        if (bdm) {
+                                bdm = false;
+                                if (NextWordStopped() == -1) return GPR_FAIL;
+                                wa = WordAddress(wn-1);
+                                wl = WordLength(wn-1);
+                                wpos = 0;
+                        }
+                        if (wa-->wpos ~= ch or TEXT_TY_RevCase(ch)) return GPR_FAIL;
+                        wpos++;
+                }
         }
-    }
-    if (wn == own) return GPR_FAIL; ! Progress must be made to avoid looping
-    return GPR_PREPOSITION;
+        if (wn == own) return GPR_FAIL; ! Progress must be made to avoid looping
+        return GPR_PREPOSITION;
 ];
 
--) instead of "Recognition-only-GPR"  in "IndexedText.i6t".
+-) instead of "Recognition-only-GPR" in "Text.i6t".
 
 
 [I am Replacing DA_Topic rather than using a template replacement, because it's just one tiny function. See caveat above.]
@@ -1494,9 +1530,9 @@ We update the parser functions that manage these arrays: VM_ReadKeyboard, VM_Cop
 
 Section: Caveats
 
-This extension is intended for Inform 7 build 6G60. It has not been tested with any earlier (or later) version.
+This extension is intended for Inform 7 build 6K92. It will not work with earlier versions, and has not been tested with any later version.
 
-Things which definitely don't work (as of 6G60):
+Things which definitely don't work (as of 6K92): ####
 
 - Parsing defined units, such as "$1.25" or "26 kg". The parsing routines for these are generated by I7.
 
