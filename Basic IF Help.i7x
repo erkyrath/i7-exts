@@ -1,6 +1,7 @@
-Version 1 of Basic IF Help by Andrew Plotkin begins here.
+Version 2 of Basic IF Help by Andrew Plotkin begins here.
 
 "Provides a HELP (TOPIC) command which gives tutorial information about IF."
+[Modernized for 6K92.]
 
 A help-topic is a kind of thing. The printed name is usually "help topic".
 
@@ -39,8 +40,8 @@ To say help-topic -- running on:
 To decide what action name is the action-to-be:
 	(- action_to_be -).
 
-Rule for printing a parser error when the latest parser error is the noun did not make sense in that context error and action-to-be is the help-invoking action:
-	say "There is no help information on that subject. Type [help-style]help[/help-style] for subjects you can learn about.";
+Rule for printing a parser error when the latest parser error is the noun did not make sense in that context error and action-to-be is the help-invoking action (this is the no help information parser error rule):
+	say "There is no help information on that subject. Type [help-style]help[/help-style] for subjects you can learn about." (A).
 
 Bare-help-invoking is an action out of world applying to nothing.
 Move-help-invoking is an action out of world applying to one visible thing.
@@ -379,7 +380,7 @@ The description is "[help-style]verbose[/help-style]: See a detailed description
 Help-score is a help-topic.
 Understand "score" as help-score.
 
-Help-score has some text called game-specific help. The game-specific help of help-score is "[italic type][story title][roman type] [if the no scoring option is active]does not have[else]has[end if] a [help-style]score[/help-style] command."
+Help-score has some text called game-specific help. The game-specific help of help-score is "[italic type][story title][roman type] [if the scoring option is not active]does not have[else]has[end if] a [help-style]score[/help-style] command."
 
 The description is "[help-style]score[/help-style]: Measure your progress in the game.
 [para]In some games, [help-style]score[/help-style] will tell you how far you've advanced through the game. This is usually measured in points -- although different games will report your progress differently.
