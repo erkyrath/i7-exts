@@ -1189,6 +1189,7 @@ Include (-
 
 Include (-
 
+! Unchanged.
 [ TEXT_TY_ROGPR txt p cp r;
         if (txt == 0) return GPR_FAIL;
         cp = txt-->0; p = TEXT_TY_Temporarily_Transmute(txt);
@@ -1196,6 +1197,7 @@ Include (-
         TEXT_TY_Untransmute(txt, p, cp);
         return r;
 ];
+! WordAddress returns --> array now.
 [ TEXT_TY_ROGPRI txt
         pos len wa wl wpos bdm ch own;
         bdm = true; own = wn;
