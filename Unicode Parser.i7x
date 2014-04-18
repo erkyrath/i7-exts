@@ -937,7 +937,7 @@ Include (-
     #Endif; ! LanguageToInformese
     num_words = WordCount(); players_command = 100 + num_words;
     actors_location = ScopeCeiling(player);
-    FollowRulebook(Activity_after_rulebooks-->READING_A_COMMAND_ACT, true);
+    FollowRulebook(Activity_after_rulebooks-->READING_A_COMMAND_ACT);
 
     return REPARSE_CODE;
 
