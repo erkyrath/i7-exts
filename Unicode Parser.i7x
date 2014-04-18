@@ -1398,6 +1398,213 @@ Include (-
 
 -) instead of "Understanding" in "Time.i6t".
 
+[I am Replacing FLOAT_TOKEN rather than using a template replacement, because it's just one not-so-tiny function. See caveat above.]
+
+Include (-
+Replace FloatParse;
+Replace FLOAT_TOKEN;
+-) before "Printing reals" in "RealNumber.i6t".
+
+Include (-
+! This now operates on a word array.
+[ FloatParse buf len useall
+	res ix val ch ten negative intpart fracpart fracdiv
+	expon expnegative count;
+	
+!	print "FloatParse <";
+!	for (ix=0: ix<len: ix++) print (char) buf-->ix;
+!	print ">^";
+
+	if (len == 0)
+		return FLOAT_NAN;
+		
+	ix = 0;
+	negative = false;
+	intpart = 0;
+	fracpart = 0;
+	@numtof 10 ten;
+
+	! Sign character (optional)
+	ch = buf-->ix;
+	if (ch == '-') {
+		negative = true;
+		ix++;
+	}
+	else if (ch == '+') {
+		ix++;
+	}
+
+	! Some digits (optional)
+	for (count=0 : ix<len : ix++, count++) {
+		ch = buf-->ix;
+		if (ch < '0' || ch > '9')
+			break;
+		val = (ch - '0');
+		@numtof val val;
+		@fmul intpart ten intpart;
+		@fadd intpart val intpart;
+	}
+
+	! Decimal point and more digits (optional)
+	if (ix<len && buf-->ix == '.') {
+		ix++;
+		@numtof 1 fracdiv;
+		for ( : ix<len : ix++, count++) {
+			ch = buf-->ix;
+			if (ch < '0' || ch > '9')
+				break;
+			val = (ch - '0');
+			@numtof	val val;
+			@fmul fracpart ten fracpart;
+			@fadd fracpart val fracpart;
+			@fmul fracdiv ten fracdiv;
+		}
+		@fdiv fracpart fracdiv fracpart;
+	}
+
+	! If there are no digits before *or* after the decimal point, fail.
+	if (count == 0)
+		return FLOAT_NAN;
+
+	! Combine the integer and fractional parts.
+	@fadd intpart fracpart res;
+
+	! Exponent (optional)
+	if (ix<len && buf-->ix == 'e' or 'E' or ' ' or '*' or 'x' or 'X' or $D7) {
+		if (buf-->ix == 'e' or 'E') {
+			! no spaces, just the 'e'
+			ix++;
+			if (ix == len)
+				return FLOAT_NAN;
+		}
+		else {
+			! any number of spaces, "*", any number of spaces more, "10^"
+			while (ix < len && buf-->ix == ' ')
+				ix++;
+			if (ix == len)
+				return FLOAT_NAN;
+			if (buf-->ix ~= '*' or 'x' or 'X' or $D7)
+				return FLOAT_NAN;
+			ix++;
+			while (ix < len && buf-->ix == ' ')
+				ix++;
+			if (ix == len)
+				return FLOAT_NAN;
+			if (buf-->ix ~= '1')
+				return FLOAT_NAN;
+			ix++;
+			if (buf-->ix ~= '0')
+				return FLOAT_NAN;
+			ix++;
+			if (buf-->ix ~= $5E)
+				return FLOAT_NAN;
+			ix++;
+		}
+
+		! Sign character (optional)
+		expnegative = false;
+		ch = buf-->ix;
+		if (ch == '-') {
+			expnegative = true;
+			ix++;
+		}
+		else if (ch == '+') {
+			ix++;
+		}
+
+		expon = 0;
+		! Some digits (mandatory)
+		for (count=0 : ix<len : ix++, count++) {
+			ch = buf-->ix;
+			if (ch < '0' || ch > '9')
+				break;
+			expon = 10*expon + (ch - '0');
+		}
+
+		if (count == 0)
+			return FLOAT_NAN;
+
+		if (expnegative)
+			expon = -expon;
+
+		if (expon) {
+			@numtof expon expon;
+			@pow ten expon val;
+			@fmul res val res;
+		}
+	}
+
+	if (negative) {
+		! set the value's sign bit
+		res = $80000000 | res;
+	}
+
+	if (useall && ix ~= len)
+		return FLOAT_NAN;
+	return res;
+];
+
+! WordAddress() returns --> array now.
+[ FLOAT_TOKEN buf bufend ix ch firstwd newstart newlen lastchar lastwasdot;
+	if (wn > num_words)
+		return GPR_FAIL;
+
+	! We're going to collect a set of words. Start with zero words.
+	firstwd = wn;
+	buf = WordAddress(wn);
+	bufend = buf;
+	lastchar = 0;
+
+	while (wn <= num_words) {
+		newstart = WordAddress(wn);
+		if (newstart ~= bufend) {
+			! There's whitespace between the previous word and this one.
+			! Whitespace is okay around an asterisk...
+			if ((lastchar ~= '*' or 'x' or 'X' or $D7)
+				&& (newstart-->0 ~= '*' or 'x' or 'X' or $D7)) {
+				! But around any other character, it's not.
+				! Don't include the new word.
+				break;
+			}
+		}
+		newlen = WordLength(wn);
+		for (ix=0 : ix<newlen : ix++) {
+			ch = newstart-->ix;
+			if (~~((ch >= '0' && ch <= '9')
+				|| (ch == '-' or '+' or 'E' or 'e' or '.' or 'x' or 'X' or '*' or $D7 or $5E)))
+				break;
+		}
+		if (ix < newlen) {
+			! This word contains an invalid character.
+			! Don't include the new word.
+			break;
+		}
+		! Okay, include it.
+		bufend = newstart + newlen*WORDSIZE;
+		wn++;
+		lastchar = (bufend-WORDSIZE)-->0;
+		lastwasdot = (newlen == 1 && lastchar == '.');
+	}
+
+	if (wn > firstwd && lastwasdot) {
+		! Exclude a trailing period.
+		wn--;
+		bufend = bufend - WORDSIZE;
+	}
+
+	if (wn == firstwd) {
+		! No words accepted.
+		return GPR_FAIL;
+	}
+
+	parsed_number = FloatParse(buf, (bufend-buf)/WORDSIZE, true);
+	if (parsed_number == FLOAT_NAN)
+		return GPR_FAIL;
+	return GPR_NUMBER;
+];
+
+-) after "Printing reals" in "RealNumber.i6t".
+
 
 [I am Replacing TestKeyboardPrimitive rather than using a template replacement, because it's just one tiny function. See caveat above.]
 
