@@ -1823,6 +1823,8 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 		say "  [fix]>> i.again[/fix]   [em](tests a particular parser guard against infinite loop)[/em][br]";
 		say "  [fix]>> count 3. count 19. count 321. count five[/fix]   [em](test number parsing)[/em][br]";
 		say "  [fix]>> count 98765. count -543210[/fix]   [em](test large number parsing)[/em][br]";
+		say "  [fix]>> measure 3. measure -2.1. measure 1.2e3. measure 4*10^-1[/fix]   [em](test real number parsing)[/em][br]";
+		say "  [fix]>> measure -4.jump. measure 3.1 * 10^1. examine me[/fix]   [em](more real number parsing)[/em][br]";
 		say "  [fix]>> time 3[/fix]   [em](test time parsing)[/em][br]";
 		say "  [fix]>> time 11 pm[/fix]   [em](ditto; multiple on a line don't work)[/em][br]";
 		say "  [fix]>> time 4:50[/fix] [br]";
@@ -1898,6 +1900,13 @@ Example: **** Tedious UniParse Test - A bunch of boring test cases to ensure tha
 
 	Report counting:
 		say "You count to [the number understood]."
+
+	Measuring is an action applying to one real number.
+
+	Understand "measure [real number]" as measuring.
+
+	Report measuring:
+		say "You measure [the real number understood]."
 
 	Time-checking is an action applying to one time.
 
