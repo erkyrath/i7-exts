@@ -11,6 +11,9 @@ Definition: a supporter is empty rather than non-empty if the first thing held b
 Chapter - Table of Locale Priorities
 
 Include (-
+! Sort the first N rows of a table, rather than the whole thing. The rest
+! of the table is untouched. Blank rows are sorted down to position N (not
+! to the very end).
 [ TableSortPartial tab rows col dir test_flag algorithm i j k f;
 	for (i=1:i<=tab-->0:i++) {
 		j = tab-->i; ! Address of column table
@@ -37,9 +40,10 @@ To sort (T - table name) up to row (N - number) in (TC - table column) order
         (documented at ph_sortcolumn):
         (- TableSortPartial({T}, {N}, {TC}, 1); -).
 
-[We never want to search (or sort) through the entire table, so we manually keep track of the number of "live" rows.]
+[We never want to search (or sort) through the entire Table of Locale Priorities, so we manually keep track of the number of "live" rows. We'll also avoid use of the I7 notion of blank rows. Unused rows will be marked by "nothing" in the object column.]
 The locale-table-count is a number that varies.
 
+[This replacement phrase is heavily optimized. It behaves the same as the standard version, except that deleted rows get "nothing" in the object column instead of being marked blank.]
 To set the/-- locale priority of (O - an object) to (N - a number):
 	if O is a thing:
 		[say "### setting priority of [shortname O] to [N]..."; [###]]
@@ -76,7 +80,7 @@ To set the/-- locale priority of (O - an object) to (N - a number):
 					now the notable-object entry is O;
 					now the locale description priority entry is N;
 				else:
-					[use the null row]
+					[use the found null row]
 					choose row blanknum in the Table of Locale Priorities;
 					now the notable-object entry is O;
 					now the locale description priority entry is N;
@@ -157,6 +161,7 @@ This is the optimized you-can-also-see rule:
 	continue the activity.
 
 
+[###]
 To say shortname (O - object): (- @push parameter_object; parameter_object = {O}; STANDARD_NAME_PRINTING_R(); @pull parameter_object; -).
 
 To dump the Table of Locale Priorities:
@@ -168,6 +173,7 @@ To dump the Table of Locale Priorities:
 
 Chapter - Improved WriteListFrom
 
+[This replacement is more efficient in the common cases of ObjectTreeIterator and MarkedListIterator.]
 Include (-
 [ WriteListFrom first style depth noactivity iter i a ol;
 	@push c_iterator; @push c_style; @push c_depth; @push c_margin;
@@ -214,6 +220,7 @@ Include (-
 			WriteListR(first, c_depth, true);
 			say__p = 1;
 		} else {
+			! loops through all objects
 			objectloop (ol provides list_together) ol.list_together = 0;
 			CarryOutActivity(LISTING_CONTENTS_ACT, parent(first));
 		}
@@ -224,6 +231,8 @@ Include (-
 -) instead of "WriteListFrom" in "ListWriter.i6t".
 
 Chapter - Faster Listing Phrases
+
+[Add a set of "say the list of..." phrases that are more efficient for the common case of a container/supporter.]
 
 Include (-
 [ WriteListOfMarkedContentsObjects style common_parent
