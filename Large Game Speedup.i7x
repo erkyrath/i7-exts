@@ -105,7 +105,7 @@ This is the optimized you-can-also-see rule:
 	repeat with I running from 1 to locale-table-count:
 		let O be the notable-object in row I of  the Table of Locale Priorities;
 		if O is not nothing:
-			let N be the locale description priority in row I of  the Table of Locale Priorities;
+			let N be the locale description priority in row I of the Table of Locale Priorities;
 			[say "[O] - [N].";]
 			if N is greater than 0,
 				now O is marked for listing;
