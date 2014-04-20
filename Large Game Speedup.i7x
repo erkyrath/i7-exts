@@ -4,6 +4,8 @@ Use authorial modesty.
 
 Chapter - Miscellaneous Definitions
 
+Use static object grouping translates as (- Constant STATIC_OBJECT_GROUPING; -). 
+
 [These adjectives are much faster than "if nothing is in..." or "if the number of things in ... is zero". (Note that the Standard Rules do not define "empty" on containers and supporters; these adjectives are my invention.)]
 Definition: a container is empty rather than non-empty if the first thing held by it is nothing.
 Definition: a supporter is empty rather than non-empty if the first thing held by it is nothing.
@@ -220,8 +222,10 @@ Include (-
 			WriteListR(first, c_depth, true);
 			say__p = 1;
 		} else {
+			#ifndef STATIC_OBJECT_GROUPING;
 			! loops through all objects
 			objectloop (ol provides list_together) ol.list_together = 0;
+			#endif; ! STATIC_OBJECT_GROUPING
 			CarryOutActivity(LISTING_CONTENTS_ACT, parent(first));
 		}
 	}
@@ -316,6 +320,28 @@ To say is-are the list of (OS - description of objects) *in (parent - object):
 		give subst__v workflag2; else give subst__v ~workflag2;
 		WriteListOfMarkedContentsObjects(ENGLISH_BIT+DEFART_BIT+ISARE_BIT, {parent});
 		@pull subst__v; -).
+
+Chapter - Static Object Grouping
+
+The initially listing contents rules are a rulebook.
+
+When play begins (this is the initially list contents rule):
+	if the static object grouping option is active:
+		follow the initially listing contents rules.
+
+To initially group (OS - description of objects) together: (- InitiallyGroupTogether({OS}, {-list-together}); -).
+To initially group (OS - description of objects) together giving articles: (- InitiallyGroupTogether({OS}, {-articled-list-together}); -).
+To initially group (OS - description of objects) together as (T - text): (- InitiallyGroupTogether({OS}, {T}); -).
+
+Include (-
+! We've commented out the code in WriteListFrom that clears the list_together flag. Instead we do it all at startup time, here.
+[ InitiallyGroupTogether desc func  obj;
+	obj = nothing;
+	while (obj = desc(-2, obj)) {
+		obj.list_together = func;
+	}
+];
+-).
 
 
 Large Game Speedup ends here.
