@@ -108,7 +108,7 @@ This is the optimized you-can-also-see rule:
 	let the marked count be 0;
 	now all things are not marked for listing;  [loops through all things]
 	repeat with I running from 1 to locale-table-count:
-		let O be the notable-object in row I of  the Table of Locale Priorities;
+		let O be the notable-object in row I of the Table of Locale Priorities;
 		if O is not nothing:
 			let N be the locale description priority in row I of the Table of Locale Priorities;
 			[say "[O] - [N].";]
@@ -135,7 +135,10 @@ This is the optimized you-can-also-see rule:
 				say "can [if the locale paragraph count is greater than 0]also [end if]see ";
 				let the common holder be nothing;
 				let contents form of list be true;
-				repeat with list item running through marked for listing things: [loops through all things]
+				repeat with I running from 1 to locale-table-count:
+					let list item be the notable-object in row I of the Table of Locale Priorities;
+					if list item is nothing or list item is not marked for listing:
+						next;
 					if the holder of the list item is not the common holder:
 						if the common holder is nothing,
 							now the common holder is the holder of the list item;
