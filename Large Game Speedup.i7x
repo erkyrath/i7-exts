@@ -2,9 +2,13 @@ Version 1 of Large Game Speedup by Andrew Plotkin begins here.
 
 Use authorial modesty.
 
+Chapter - Miscellaneous Definitions
+
+[These adjectives are much faster than "if nothing is in..." or "if the number of things in ... is zero"]
+Definition: a container is empty rather than non-empty if the first thing held by it is nothing.
+Definition: a supporter is empty rather than non-empty if the first thing held by it is nothing.
 
 Chapter - Table of Locale Priorities
-
 
 Include (-
 [ TableSortPartial tab rows col dir test_flag algorithm i j k f;
