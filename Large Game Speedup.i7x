@@ -4,7 +4,7 @@ Use authorial modesty.
 
 Chapter - Miscellaneous Definitions
 
-[These adjectives are much faster than "if nothing is in..." or "if the number of things in ... is zero"]
+[These adjectives are much faster than "if nothing is in..." or "if the number of things in ... is zero". (Note that the Standard Rules do not define "empty" on containers and supporters; these adjectives are my invention.)]
 Definition: a container is empty rather than non-empty if the first thing held by it is nothing.
 Definition: a supporter is empty rather than non-empty if the first thing held by it is nothing.
 
@@ -166,6 +166,62 @@ To dump the Table of Locale Priorities:
 		say "### ... [shortname notable-object entry] : [locale description priority entry][line break]";
 
 
+Chapter - Improved WriteListFrom
+
+Include (-
+[ WriteListFrom first style depth noactivity iter i a ol;
+	@push c_iterator; @push c_style; @push c_depth; @push c_margin;
+    if (iter) c_iterator = iter; else c_iterator = ObjectTreeIterator;
+    c_style = style; c_depth = depth;
+	c_margin = 0; if (style & EXTRAINDENT_BIT) c_margin = 1;
+
+	! Set or clear the list_filter_permits flag. Try to do it efficiently.
+	if (c_iterator == ObjectTreeIterator) {
+		! For the tree iterator, we follow the tree.
+		for (a = first : a : a = sibling(a)) {
+			if ((list_filter_routine) && (list_filter_routine(a) == false))
+				give a ~list_filter_permits;
+			else
+				give a list_filter_permits;
+		}
+	}
+	else if (c_iterator == MarkedListIterator) {
+		! For the list iterator, we follow the list.
+		for (i=0: i<MarkedObjectLength: i++) {
+			a = MarkedObjectArray-->i;
+			if ((list_filter_routine) && (list_filter_routine(a) == false))
+				give a ~list_filter_permits;
+			else
+				give a list_filter_permits;
+		}
+	}
+	else {
+		! The sad inefficient old way -- loops through all objects.
+		objectloop (a ofclass Object) {
+			if ((list_filter_routine) && (list_filter_routine(a) == false))
+				give a ~list_filter_permits;
+			else
+				give a list_filter_permits;
+		}
+	}
+
+    first = c_iterator(first, depth, 0, START_ITF);
+	if (first == nothing) {
+        print (string) NOTHING__TX;
+        if (style & NEWLINE_BIT ~= 0) new_line;
+    } else {
+		if ((noactivity) || (iter)) {
+			WriteListR(first, c_depth, true);
+			say__p = 1;
+		} else {
+			objectloop (ol provides list_together) ol.list_together = 0;
+			CarryOutActivity(LISTING_CONTENTS_ACT, parent(first));
+		}
+	}
+
+    @pull c_margin; @pull c_depth; @pull c_style; @pull c_iterator;
+];
+-) instead of "WriteListFrom" in "ListWriter.i6t".
 
 Chapter - Faster Listing Phrases
 
