@@ -319,3 +319,7 @@ To say is-are the list of (OS - description of objects) *in (parent - object):
 
 
 Large Game Speedup ends here.
+
+---- DOCUMENTATION ----
+
+###Help.
