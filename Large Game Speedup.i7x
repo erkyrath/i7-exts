@@ -101,19 +101,21 @@ The optimized you-can-also-see rule is listed instead of the you-can-also-see ru
 This is the optimized you-can-also-see rule:
 	let the domain be the parameter-object;
 	let the mentionable count be 0;
+	let the marked count be 0;
 	now all things are not marked for listing;  [loops through all things]
 	repeat with I running from 1 to locale-table-count:
 		let O be the notable-object in row I of  the Table of Locale Priorities;
 		if O is not nothing:
 			let N be the locale description priority in row I of the Table of Locale Priorities;
 			[say "[O] - [N].";]
-			if N is greater than 0,
+			if N is greater than 0 and O is not mentioned:
 				now O is marked for listing;
+				increment the marked count;
 			increase the mentionable count by 1;
 	if the mentionable count is greater than 0:
-		now all mentioned things are not marked for listing; [loops through all things]
+		[note that mentioned things have not been marked for listing]
 		begin the listing nondescript items activity with the domain;
-		if the number of marked for listing things is 0: [loops through all things]
+		if the marked count is 0:
 			abandon the listing nondescript items activity with the domain;
 		otherwise:
 			if handling the listing nondescript items activity:
