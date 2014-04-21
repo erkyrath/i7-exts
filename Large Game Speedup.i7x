@@ -1,5 +1,7 @@
 Version 1 of Large Game Speedup by Andrew Plotkin begins here.
 
+"Performance improvements for games with several hundred objects."
+
 Use authorial modesty.
 
 Chapter - Miscellaneous Definitions
@@ -348,4 +350,60 @@ Large Game Speedup ends here.
 
 ---- DOCUMENTATION ----
 
-###Help.
+Inform's Standard Rules take some shortcuts which are acceptable for most games, but which become inefficient in very large games. In particular, the "look" action can take several times longer than necessary.
+
+If your game has less than a hundred things, you don't need this extension. The problems we're talking about arise when the game has four or five hundred things defined.
+
+(Of course, if you have hundreds of things *in one room*, that will always be slow! And this extension does not address the problem of having big slow "every turn" rules. This is purely about the "look" action, and some related phrases that print lists.)
+
+The problem, in brief, is code such as
+
+	now all things are not mentioned;
+
+or
+
+	repeat through all things:
+
+(Or the Inform 6 equivalents.) The Standard Rules have such code in a few places. This extension removes some (though not all) of these.
+
+- We improve the code that handles the Table of Locale Priorities. (Which is defined as having a blank row for each thing in the game.) It no longer has to repeat through or sort the entire table; it just deals with as many rows as needed to manage the current room.
+
+- We improve the I6 list writer. Again, this removes most of the places where the code was iterating through all objects.
+
+- We define more efficient "to say the list of..." phrases. One often writes phrases like
+
+	say the list of things in the fridge;
+	say a list of people on the sofa;
+
+Despite their appearance, these wind up iterating through the entire universe, not just the container or supporter in question. This extension defines fast alternatives:
+
+	say the list of things *in the fridge;
+	say a list of people *in the sofa;
+
+The star indicates that the "*in" phrase is mandatory, and understood as a parent object to iterate through. (Note that it is "*in", not "*on", even for supporters.)
+
+- We define an efficient "empty" adjective for containers and supporters. The Standard Rules do not define this, and it's tempting to use idioms such as "if nothing is in the box" or "if the number of things in the box is zero". These are slow. The "if the box is empty" term defined here is fast.
+
+(If you have defined an "empty" term for your containers or supporters, this extension will conflict with it. Sorry.)
+
+- Finally, we define an alternate way to group objects in lists. The Standard Rules recompute object grouping every time a list is printed. But in most games, object groups are fixed -- perhaps the Tarot cards are one group, the Scrabble tiles are another group, and so on. So it's possible to compute this once, when the game begins, and then leave it alone.
+
+Because this alternate plan is less flexible, it doesn't happen automatically. You have to invoke it by defining an option:
+
+	Use static object grouping.
+
+You must then modify all your "Before listing contents..." grouping rules. If you have a rule such as
+
+	Before listing contents:
+		group Tarot cards together.
+
+...change it to:
+
+	Rule for initially listing contents:
+		initially group Tarot cards together.
+
+Do *not* use the standard "group X together" phrases when static option grouping is on; always use the "initially group X together" form. (The "...giving articles" and "...as (text)" variants are available.) And don't do either in a "before listing contents" rule. Move all of this logic to a "rule for initially listing contents".
+
+So how much does this extension improve life?
+
+###
