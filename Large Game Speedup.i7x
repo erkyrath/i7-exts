@@ -356,6 +356,8 @@ If your game has less than a hundred things, you don't need this extension. The 
 
 (Of course, if you have hundreds of things *in one room*, that will always be slow! And this extension does not address the problem of having big slow "every turn" rules. This is purely about the "look" action, and some related phrases that print lists.)
 
+(This extension was written for Inform 6G60. It has not been tested with earlier or later releases)
+
 The problem, in brief, is code such as
 
 	now all things are not mentioned;
@@ -404,6 +406,97 @@ You must then modify all your "Before listing contents..." grouping rules. If yo
 
 Do *not* use the standard "group X together" phrases when static option grouping is on; always use the "initially group X together" form. (The "...giving articles" and "...as (text)" variants are available.) And don't do either in a "before listing contents" rule. Move all of this logic to a "rule for initially listing contents".
 
-So how much does this extension improve life?
+Example: ** Four Hundred Things - A small game with a lot of stuff.
 
-###
+This game contains 400 offstage objects. (We build these 50 at a time, because the compiler refuses to create hundreds at once.) It demonstrates the "static object grouping" option, and the fast idiom for listing contents.
+
+How much does this improve performance? I tested the example below with and without Large Game Speedup. (When removing the extension, I added a definition "a supporter is empty if nothing is on it." I also changed the "*in" and "initially listing" rules back to their standard forms.)
+
+For each command, I list the number of Glulx VM opcodes and the time taken by the command in two interpreters (Glulxe in C, Quixe in JS). Tests on a 2.7GHz iMac.
+
+	LOOK in Kitchen:
+	without: 992782 cycles (100.917 ms C, 1835 ms JS)
+	with: 169161 cycles (27.129 ms C, 282 ms JS)
+
+	JUMP
+	without: 54292 cycles (17.293 ms C, 116 ms JS)
+	with: 42825 cycles (16.724 ms C, 100 ms JS)
+
+	EXAMINE MIRROR in Kitchen
+	without: 70567 cycles (19.259 ms C, 167 ms JS)
+	with: 41287 cycles (16.647 ms C, 86 ms JS)
+
+	LOOK in Game Room
+	without: 1020821 cycles (100.751 ms C, 1808 ms JS)
+	with: 207776 cycles (30.075 ms C, 384 ms JS)
+
+As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut to a fraction of a second.
+
+
+	*: "Four Hundred Things"
+
+	Include Large Game Speedup by Andrew Plotkin.
+
+	Use static object grouping.
+
+	The player carries the bar of soap.
+
+	The Kitchen is a room. "You're in the Kitchen. The Bathroom is east, and the Game Room is south."
+
+	The table is a fixed in place supporter in the Kitchen.
+	The description is "The table only shows up in the room description if something is on it."
+
+	Rule for writing a paragraph about the table:
+		now the table is mentioned;
+		if the table is not empty:
+			say "A table stands here. On it [is-are a list of things *in the table]."
+
+	The apple is in the Kitchen.
+	The wedge of cheese is on the table.
+
+	The mirror is in the Kitchen. "A portable mirror stands to one side."
+
+	Check examining the mirror:
+		instead say "In the mirror you see [a list of things *in the location]."
+	Check searching the mirror:
+		instead try examining the mirror.
+
+	The Bathroom is east of the Kitchen. "This is the Bathroom. If you drop the soap here, you won't be able to see it. (Except in the mirror.)"
+
+	The counter is a scenery supporter in the Bathroom.
+	The description is "This is an ordinary scenery supporter."
+
+	After choosing notable locale objects for the Bathroom:
+		set the locale priority of the soap to 0.
+
+	The Game Room is south of the Kitchen. "Games are piled around you."
+
+	A piece is a kind of thing. The king, the pawn, the rook, and the bishop are pieces.
+	All pieces are in the Game Room.
+	A card is a kind of thing. The jack, the trey, and the ace are cards.
+	All cards are in the Game Room.
+
+	Rule for initially listing contents:
+		initially group pieces together as "chess pieces";
+		initially group cards together.
+
+	Before grouping together cards: 
+		say "[listing group size in words] playing cards (". 
+	After grouping together cards: 
+		say ")".
+
+	Instead of jumping:
+		say "You jump up and see all the rooms: [the list of rooms]."
+
+	A clone is a kind of thing.
+	There are 50 clones.
+	There are 50 clones.
+	There are 50 clones.
+	There are 50 clones.
+	There are 50 clones.
+	There are 50 clones.
+	There are 50 clones.
+	There are 50 clones.
+
+	Test me with "jump / get cheese, mirror / look / get apple / east / drop soap / put apple on counter / look / look in mirror / w / s / drop all / look".
+
