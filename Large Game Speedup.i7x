@@ -50,7 +50,6 @@ The locale-table-count is a number that varies.
 [This replacement phrase is heavily optimized. It behaves the same as the standard version, except that deleted rows get "nothing" in the object column instead of being marked blank.]
 To set the/-- locale priority of (O - an object) to (N - a number):
 	if O is a thing:
-		[say "### setting priority of [shortname O] to [N]..."; [###]]
 		if N <= 0:
 			now O is mentioned;
 		[search the active part of the table for O; also note the first null row]
@@ -87,8 +86,7 @@ To set the/-- locale priority of (O - an object) to (N - a number):
 					[use the found null row]
 					choose row blanknum in the Table of Locale Priorities;
 					now the notable-object entry is O;
-					now the locale description priority entry is N;
-		[dump the Table of Locale Priorities; [###]]
+					now the locale description priority entry is N.
 
 The optimized initialise locale description rule is listed instead of the initialise locale description rule in the before printing the locale description rulebook.
 This is the optimized initialise locale description rule:
@@ -101,8 +99,6 @@ The optimized interesting locale paragraphs rule is listed instead of the intere
 This is the optimized interesting locale paragraphs rule:
 	let the domain be the parameter-object;
 	sort the Table of Locale Priorities up to row locale-table-count in locale description priority order;
-	[say "### Sorted:[line break]";
-	dump the Table of Locale Priorities; [###]]
 	repeat with I running from 1 to locale-table-count:
 		let O be the notable-object in row I of  the Table of Locale Priorities;
 		if O is not nothing:
@@ -163,16 +159,6 @@ This is the optimized you-can-also-see rule:
 				unfilter list recursion;
 			end the listing nondescript items activity with the domain;
 	continue the activity.
-
-
-[###]
-To say shortname (O - object): (- @push parameter_object; parameter_object = {O}; STANDARD_NAME_PRINTING_R(); @pull parameter_object; -).
-
-To dump the Table of Locale Priorities:
-	[say "### locale-table-count is [locale-table-count][line break]";]
-	repeat with I running from 1 to locale-table-count:
-		choose row I in the Table of Locale Priorities;
-		say "### ... [shortname notable-object entry] : [locale description priority entry][line break]";
 
 
 Chapter - Improved WriteListFrom
