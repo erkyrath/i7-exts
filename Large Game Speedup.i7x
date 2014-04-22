@@ -1,4 +1,4 @@
-Version 1 of Large Game Speedup by Andrew Plotkin begins here.
+Version 2 of Large Game Speedup by Andrew Plotkin begins here.
 
 "Performance improvements for games with several hundred objects."
 
@@ -171,34 +171,12 @@ Include (-
     c_style = style; c_depth = depth;
 	c_margin = 0; if (style & EXTRAINDENT_BIT) c_margin = 1;
 
-	! Set or clear the list_filter_permits flag. Try to do it efficiently.
-	if (c_iterator == ObjectTreeIterator) {
-		! For the tree iterator, we follow the tree.
-		for (a = first : a : a = sibling(a)) {
-			if ((list_filter_routine) && (list_filter_routine(a) == false))
-				give a ~list_filter_permits;
-			else
-				give a list_filter_permits;
-		}
-	}
-	else if (c_iterator == MarkedListIterator) {
-		! For the list iterator, we follow the list.
-		for (i=0: i<MarkedObjectLength: i++) {
-			a = MarkedObjectArray-->i;
-			if ((list_filter_routine) && (list_filter_routine(a) == false))
-				give a ~list_filter_permits;
-			else
-				give a list_filter_permits;
-		}
-	}
-	else {
-		! The sad inefficient old way -- loops through all objects.
-		objectloop (a ofclass Object) {
-			if ((list_filter_routine) && (list_filter_routine(a) == false))
-				give a ~list_filter_permits;
-			else
-				give a list_filter_permits;
-		}
+	! The sad inefficient old way -- loops through all objects.
+	objectloop (a ofclass Object) {
+		if ((list_filter_routine) && (list_filter_routine(a) == false))
+			give a ~list_filter_permits;
+		else
+			give a list_filter_permits;
 	}
 
     first = c_iterator(first, depth, 0, START_ITF);
@@ -398,23 +376,7 @@ This game contains 400 offstage objects. (We build these 50 at a time, because t
 
 How much does this improve performance? I tested the example below with and without Large Game Speedup. (When removing the extension, I added a definition "a supporter is empty if nothing is on it." I also changed the "*in" and "initially listing" rules back to their standard forms.)
 
-For each command, I list the number of Glulx VM opcodes and the time taken by the command in two interpreters (Glulxe in C, Quixe in JS). Tests on a 2.7GHz iMac.
-
-	LOOK in Kitchen:
-	without: 992782 cycles (100.917 ms C, 1835 ms JS)
-	with: 169161 cycles (27.129 ms C, 282 ms JS)
-
-	JUMP
-	without: 54292 cycles (17.293 ms C, 116 ms JS)
-	with: 42825 cycles (16.724 ms C, 100 ms JS)
-
-	EXAMINE MIRROR in Kitchen
-	without: 70567 cycles (19.259 ms C, 167 ms JS)
-	with: 41287 cycles (16.647 ms C, 86 ms JS)
-
-	LOOK in Game Room
-	without: 1020821 cycles (100.751 ms C, 1808 ms JS)
-	with: 207776 cycles (30.075 ms C, 384 ms JS)
+### Speed not measured in this version.
 
 As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut to a fraction of a second.
 
