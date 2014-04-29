@@ -1,4 +1,4 @@
-Version 2 of Large Game Speedup by Andrew Plotkin begins here.
+Version 3 of Large Game Speedup by Andrew Plotkin begins here.
 
 "Performance improvements for games with several hundred objects."
 
@@ -409,6 +409,9 @@ As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut t
 
 	The table is a fixed in place supporter in the Kitchen.
 	The description is "The table only shows up in the room description if something is on it."
+
+	The backpack is a container in the Kitchen.
+	The book is in the backpack.
 
 	Rule for writing a paragraph about the table:
 		now the table is mentioned;
