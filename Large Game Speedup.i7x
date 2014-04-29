@@ -165,18 +165,50 @@ Chapter - Improved WriteListFrom
 
 [This replacement is more efficient in the common cases of ObjectTreeIterator and MarkedListIterator.]
 Include (-
+
+! Set/clear the list_filter_permits attribute, by using list_filter_routine.
+! Do this recursively on the object and its contents (if any).
+[ ListFilterContents a o;
+	if ((list_filter_routine) && (list_filter_routine(a) == false))
+		give a ~list_filter_permits;
+	else
+		give a list_filter_permits;
+		
+	objectloop (o in a) {
+		ListFilterContents(o);
+	}
+];
+
 [ WriteListFrom first style depth noactivity iter i a ol;
 	@push c_iterator; @push c_style; @push c_depth; @push c_margin;
     if (iter) c_iterator = iter; else c_iterator = ObjectTreeIterator;
     c_style = style; c_depth = depth;
 	c_margin = 0; if (style & EXTRAINDENT_BIT) c_margin = 1;
 
-	! The sad inefficient old way -- loops through all objects.
-	objectloop (a ofclass Object) {
-		if ((list_filter_routine) && (list_filter_routine(a) == false))
-			give a ~list_filter_permits;
-		else
-			give a list_filter_permits;
+	! Set or clear the list_filter_permits flag. Try to do it efficiently.
+	if (c_iterator == ObjectTreeIterator) {
+		! For the tree iterator, we follow the tree.
+		for (a = first : a : a = sibling(a)) {
+			ListFilterContents(a);
+		}
+	}
+	else if (c_iterator == MarkedListIterator) {
+		! For the list iterator, we follow the list.
+		for (i=0: i<MarkedObjectLength: i++) {
+			a = MarkedObjectArray-->i;
+			ListFilterContents(a);
+		}
+	}
+	else {
+		! The sad inefficient old way -- loops through all objects.
+		! (We don't bother with recursion because we're hitting all objects
+		! anyway.)
+		objectloop (a ofclass Object) {
+			if ((list_filter_routine) && (list_filter_routine(a) == false))
+				give a ~list_filter_permits;
+			else
+				give a list_filter_permits;
+		}
 	}
 
     first = c_iterator(first, depth, 0, START_ITF);
@@ -411,6 +443,7 @@ As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut t
 	The description is "The table only shows up in the room description if something is on it."
 
 	The backpack is a container in the Kitchen.
+	Understand "back", "pack" as backpack.
 	The book is in the backpack.
 
 	Rule for writing a paragraph about the table:
