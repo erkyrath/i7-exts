@@ -411,20 +411,20 @@ How much does this improve performance? I tested the example below with and with
 For each command, I list the number of Glulx VM opcodes and the time taken by the command in two interpreters (Glulxe in C, Quixe in JS). Tests on a 2.7GHz iMac.
 
 	LOOK in Kitchen:
-	without: 992782 cycles (100.917 ms C, 1835 ms JS)
-	with: 317377 cycles (40.567 ms C, ??? ms JS)
+	without: 1013460 cycles (103.647 ms C, ??? ms JS)
+	with: 180832 cycles (28.818 ms C, ??? ms JS)
 
 	JUMP
-	without: 54292 cycles (17.293 ms C, 116 ms JS)
-	with: 54292 cycles (17.348 ms C, ??? ms JS)
+	without: 54474 cycles (18.451 ms C, ??? ms JS)
+	with: 43752 cycles (16.606 ms C, ??? ms JS)
 
 	EXAMINE MIRROR in Kitchen
-	without: 70567 cycles (19.259 ms C, 167 ms JS)
-	with: 52563 cycles (18.062 ms C, ??? ms JS)
+	without: 75159 cycles (20.602 ms C, ??? ms JS)
+	with: 45975 cycles (17.757 ms C, ??? ms JS)
 
 	LOOK in Game Room
-	without: 1020821 cycles (100.751 ms C, 1808 ms JS)
-	with: 342866 cycles (43.152 ms C, ??? ms JS)
+	without: 1025383 cycles (105.147 ms C, ??? ms JS)
+	with: 208800 cycles (31.347 ms C, ??? ms JS)
 
 As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut to a fraction of a second.
 
