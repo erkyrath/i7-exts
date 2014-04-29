@@ -376,7 +376,23 @@ This game contains 400 offstage objects. (We build these 50 at a time, because t
 
 How much does this improve performance? I tested the example below with and without Large Game Speedup. (When removing the extension, I added a definition "a supporter is empty if nothing is on it." I also changed the "*in" and "initially listing" rules back to their standard forms.)
 
-### Speed not measured in this version.
+For each command, I list the number of Glulx VM opcodes and the time taken by the command in two interpreters (Glulxe in C, Quixe in JS). Tests on a 2.7GHz iMac.
+
+	LOOK in Kitchen:
+	without: 992782 cycles (100.917 ms C, 1835 ms JS)
+	with: 317377 cycles (40.567 ms C, ??? ms JS)
+
+	JUMP
+	without: 54292 cycles (17.293 ms C, 116 ms JS)
+	with: 54292 cycles (17.348 ms C, ??? ms JS)
+
+	EXAMINE MIRROR in Kitchen
+	without: 70567 cycles (19.259 ms C, 167 ms JS)
+	with: 52563 cycles (18.062 ms C, ??? ms JS)
+
+	LOOK in Game Room
+	without: 1020821 cycles (100.751 ms C, 1808 ms JS)
+	with: 342866 cycles (43.152 ms C, ??? ms JS)
 
 As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut to a fraction of a second.
 
