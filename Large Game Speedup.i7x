@@ -1,4 +1,4 @@
-Version 3 of Large Game Speedup by Andrew Plotkin begins here.
+Version 4 of Large Game Speedup by Andrew Plotkin begins here.
 
 "Performance improvements for games with several hundred objects."
 
@@ -43,6 +43,23 @@ Include (-
 To sort (T - table name) up to row (N - number) in (TC - table column) order
         (documented at ph_sortcolumn):
         (- TableSortPartial({T}, {N}, {TC}, 1); -).
+
+[We have to clear these flags for every thing. It's worth having a routine that skips I7's usual SetEitherOrProperty() mechanism and all its safety checks.]
+To rapidly set all things not mentioned: (- OptimizedAllThingsUnsetMentioned(); -).
+To rapidly set all things not marked for listing: (- OptimizedAllThingsUnsetWorkflag(); -).
+
+Include (-
+[ OptimizedAllThingsUnsetMentioned obj;
+	for (obj=IK2_First: obj: obj=obj.IK2_Link) {
+		give obj ~mentioned;
+	}
+];
+[ OptimizedAllThingsUnsetWorkflag obj;
+	for (obj=IK2_First: obj: obj=obj.IK2_Link) {
+		give obj ~workflag;
+	}
+];
+-).
 
 [We never want to search (or sort) through the entire Table of Locale Priorities, so we manually keep track of the number of "live" rows. We'll also avoid use of the I7 notion of blank rows. Unused rows will be marked by "nothing" in the object column.]
 The locale-table-count is a number that varies.
@@ -91,7 +108,7 @@ To set the/-- locale priority of (O - an object) to (N - a number):
 The optimized initialise locale description rule is listed instead of the initialise locale description rule in the before printing the locale description rulebook.
 This is the optimized initialise locale description rule:
 	now the locale paragraph count is 0;
-	now all things are not mentioned; [loops through all things]
+	rapidly set all things not mentioned; [loops through all things]
 	[Mark the table as empty (without blanking every single row)]
 	now the locale-table-count is zero.
 
@@ -110,7 +127,7 @@ This is the optimized you-can-also-see rule:
 	let the domain be the parameter-object;
 	let the mentionable count be 0;
 	let the marked count be 0;
-	now all things are not marked for listing;  [loops through all things]
+	rapidly set all things not marked for listing;  [loops through all things]
 	repeat with I running from 1 to locale-table-count:
 		let O be the notable-object in row I of the Table of Locale Priorities;
 		if O is not nothing:
@@ -412,7 +429,7 @@ For each command, I list the number of Glulx VM opcodes and the time taken by th
 
 	LOOK in Kitchen:
 	without: 1013460 cycles (103.647 ms C, 1918 ms JS)
-	with: 180832 cycles (28.818 ms C, 331 ms JS)
+	with: 77386 cycles (20.791 ms C, 193 ms JS)
 
 	JUMP
 	without: 54474 cycles (18.451 ms C, 117 ms JS)
@@ -424,7 +441,7 @@ For each command, I list the number of Glulx VM opcodes and the time taken by th
 
 	LOOK in Game Room
 	without: 1025383 cycles (105.147 ms C, 1844 ms JS)
-	with: 208800 cycles (31.347 ms C, 372 ms JS)
+	with: 105354 cycles (22.663 ms C, 193 ms JS)
 
 As you see, a lag of nearly two seconds (in the Javascript interpreter) is cut to a fraction of a second.
 
