@@ -24,9 +24,9 @@ To say /cmd-style:
 		say italic type;
 
 Table of Tutorial Prompts
-prompt	complete (truth state)	order (number)
-"You interact with this game by typing commands. Type [cmd-style]LOOK[/cmd-style] to repeat the description of what you see."	--	1
-"You've got the hang of it! This is the end of the tutorial. Remember, if you're not sure what to try, [cmd-style]LOOK[/cmd-style] around and try to [cmd-style]EXAMINE[/cmd-style] whatever you see."	--	9
+prompt	order (number)	complete (truth state)
+"You interact with this game by typing commands. Type [cmd-style]LOOK[/cmd-style] to repeat the description of what you see."	1
+"You've got the hang of it! This is the end of the tutorial. Remember, if you're not sure what to try, [cmd-style]LOOK[/cmd-style] around and try to [cmd-style]EXAMINE[/cmd-style] whatever you see."	9
 
 The active prompt row is initially 0.
 
