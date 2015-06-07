@@ -1,7 +1,5 @@
 Version 1 of Integrated Tutorial by Andrew Plotkin begins here.
 
-To decide what number is the currently chosen row: (- ({-my:ct_1}) -).
-
 Current-tut-style is initially false.
 
 To say tut-style:
@@ -23,34 +21,86 @@ To say /cmd-style:
 	if current-tut-style is true:
 		say italic type;
 
-Table of Tutorial Prompts
-prompt	order (number)	complete (truth state)
-"You interact with this game by typing commands. Type [cmd-style]LOOK[/cmd-style] to repeat the description of what you see."	1
-"You've got the hang of it! This is the end of the tutorial. Remember, if you're not sure what to try, [cmd-style]LOOK[/cmd-style] around and try to [cmd-style]EXAMINE[/cmd-style] whatever you see."	9
+A tutorial-prompt is a kind of object.
+A tutorial-prompt has a text called the description.
+A tutorial-prompt has a number called the tutorial-priority. The tutorial-priority of a tutorial-prompt is usually 2.
+A tutorial-prompt has a number called the display-count.
+A tutorial-prompt can be complete.
+A tutorial-prompt can be active or inactive. A tutorial-prompt is usually active.
 
-The active prompt row is initially 0.
+Prompt-displaying is an object-based rulebook.
+
+Last prompt-displaying rule for a tutorial-prompt (called TP):
+	if the description of TP is not empty:
+		say "[tut-style][description of TP][/tut-style]";
+	else:
+		say "[tut-style](BUG) [TP] has no description.[run paragraph on][/tut-style]";
+
+Selecting tutorial target is a rulebook. [### returning an object... action-based? can we do that off a stored action?]
+
+Table of Tutorial Prompts
+prompt (tutorial-prompt)	priority (number)
+with 6 blank rows
 
 When play begins:
-	repeat through the Table of Tutorial Prompts:
-		if there is no order entry:
-			now the order entry is 2;
-		if the order entry is 0:
-			blank out the whole row;
-	sort the Table of Tutorial Prompts in order order;
-	cue the next prompt;
-
-To cue the next prompt:
-	repeat through the Table of Tutorial Prompts:
-		if there is a complete entry and the complete entry is true:
+	let N be the number of blank rows in the Table of Tutorial Prompts;
+	let M be the number of tutorial-prompts;
+	if M > N:
+		say "(BUG) You have more tutorial prompts defined than can be listed in the internal table. Extend the table with a declaration like:[paragraph break]Table of Tutorial Prompts (continued)[line break]with [M - N] blank rows[paragraph break]";
+		continue the action;
+	now N is 1;
+	repeat with TP running through tutorial-prompts:
+		if TP is TP-null:
 			next;
-		now the active prompt row is the currently chosen row;
+		choose row N from the Table of Tutorial Prompts;
+		now the prompt entry is TP;
+		now the priority entry is the tutorial-priority of TP;
+		increment N;
+	sort the Table of Tutorial Prompts in priority order;
+	prepare the next tutorial-prompt;
+
+Current-tutorial-prompt is a tutorial-prompt that varies.
+Cued-tutorial-prompts is a list of tutorial-prompts that varies.
+
+To prepare the next tutorial-prompt:
+	now current-tutorial-prompt is TP-null;
+	repeat through the Table of Tutorial Prompts:
+		let TP be the prompt entry;
+		if TP is inactive or TP is complete:
+			next;
+		now current-tutorial-prompt is TP;
+		break;
+	if current-tutorial-prompt is TP-null:
+		say "### end of tutorial.";
 		stop;
-	say "### tutorial is complete.";
+	cue current-tutorial-prompt;
+
+To cue (TP - tutorial-prompt):
+	add TP to cued-tutorial-prompts.
+
+To mark (TP - tutorial-prompt) complete:
+	if TP is not complete:
+		now TP is complete;
+		if TP is the current-tutorial-prompt:
+			prepare the next tutorial-prompt;
+
+Ever-read-command is initially false;
 
 Before reading a command:
-	if the active prompt row is not 0:
-		choose row active prompt row in the Table of Tutorial Prompts;
-		say "[tut-style][prompt entry][/tut-style]";
+	now ever-read-command is true;
+	if cued-tutorial-prompts is not empty:
+		repeat with TP running through cued-tutorial-prompts:
+			follow the prompt-displaying rules for TP;
+	now cued-tutorial-prompts is {};
+
+TP-null is an inactive tutorial-prompt.
+The description is "(This prompt should never appear.)"
+
+TP-look is a tutorial-prompt.
+The description is "You interact with this game by typing commands. Type [cmd-style]LOOK[/cmd-style] to repeat the description of what you see."
+
+After looking when ever-read-command is true:
+	mark TP-look complete;
 
 Integrated Tutorial ends here.
 
@@ -100,4 +150,7 @@ That's not a verb I recognise.
 # counters for each prompt
 # "help" repeats a prompt (but don't rely on this, games may strike it)
 # self-completing prompts, cue up next thing next turn
+
+#Table of Tutorial Prompts (continued)
+#with 5 blank rows
 
