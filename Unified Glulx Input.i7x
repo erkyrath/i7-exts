@@ -47,6 +47,7 @@ Include (-
 		(+ story-window +).current_input_request = (+ line-input +);
 	}
 
+	!### we should call this before any blocking input. in minor cases (a rejected keystroke) we could skip it, but that's probably too much work.
 	if (location ~= nothing && parent(player) ~= nothing) DrawStatusLine();
 	
 	done = false;
@@ -67,6 +68,7 @@ Include (-
 		}
 	}
 	
+	!### we should call this after every player input which is accepted
 	quotewin_close_if_open();
 ];
 
@@ -86,6 +88,19 @@ Include (-
 Unified Glulx Input ends here.
 
 ---- DOCUMENTATION ----
+
+Here's the summary:
+
+All input will occur in an AwaitInput routine. This will be able to return any kind of event (not just a text buffer). It will display the prompt, draw/redraw the status line, accept input, filter it for the caller, and return it.
+
+Displaying the prompt and filtering input events will become rulebooks, so that games can customize them. (The HandleGlkEvent hook will change to a rulebook.)
+
+AwaitInput will be responsible for requesting and cancelling Glk input. (Again, customizable via rulebook, so games can add custom input types.)
+
+The parser will invoke a rulebook/activity to convert new event types directly into actions.
+
+The first draft will be concerned only with the story window. I will extend it to status window input later. Eventually it will have to be compatible with the Multiple Windows extension, but I don't know whether that means adapting this extension to that one or vice versa. (Probably both.)
+
 
 * Old plan
 
@@ -165,5 +180,5 @@ Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
 - Always run in no-echo mode? Should probably make this a global variable; certain tricks are only possible in no-echo mode.
 - HandleGlkEvent? Entirely replaced by the AwaitInput rulebook.
-
+- ParseToken__: Still worrying.
 
