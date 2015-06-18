@@ -182,3 +182,11 @@ Questions:
 - HandleGlkEvent? Entirely replaced by the AwaitInput rulebook.
 - ParseToken__: Still worrying.
 
+Test cases:
+- Change the prompt for YesOrNo, or for the main game
+- Keystroke-only game -- char input rather than line input
+- A game with a timer interrupt
+- A timer-only game
+- Hyperlinks only
+- Hyperlinks or text input
+- Hyperlinks that create synthetic text input
