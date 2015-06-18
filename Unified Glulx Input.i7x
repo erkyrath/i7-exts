@@ -6,7 +6,7 @@ Unified Glulx Input ends here.
 
 * Old plan
 
-Keyboard (called only from parser, three spots)
+Keyboard: high-level (called only from parser, three spots)
 - loop until nonblank:
 - save oops_workspace
 - prompt
@@ -15,11 +15,11 @@ Keyboard (called only from parser, three spots)
 - do oops substitution
 - handle undo, save undo
 
-KeyboardPrimitive (called from Keyboard, YesOrNo, READ_FINAL_ANSWER_R) (always with a status line)
+KeyboardPrimitive: thin wrapper around VM_ReadKeyboard (called from Keyboard, YesOrNo, READ_FINAL_ANSWER_R) (always with a status line)
 - divert to TestKeyboardPrimitive if there's a "test me"
 - VM_ReadKeyboard
 
-VM_ReadKeyboard (called only from KeyboardPrimitive)
+VM_ReadKeyboard: low-level (called only from KeyboardPrimitive)
 - grab command-stream entry if available
 - glk_request_line_event
 - loop until line input:
@@ -30,10 +30,17 @@ VM_ReadKeyboard (called only from KeyboardPrimitive)
 - VM_Tokenise
 - close quote window if open
 
+VM_KeyDelay: low-level (but called from extensions)
+- glk_request_char_event, glk_request_timer_events
+- loop until line input:
+-   glk_select
+-   HandleGlkEvent on events (can break or continue loop)
+-   fails to status line on arrange events!
+- cancel both event types
 
 * New plan
 
-Keyboard: same call context. (Except the return value changes.) (And we should add a third array argument for nontextual input. The return argument will indicate what kind of input we got, I guess.)
+Keyboard: same call context. (Except the return value changes. It now returns an input event representation, of which the buffer/parse is just one part.) (We should add a third array argument for nontextual input.)
 - loop until nonblank: (make this optional?)
 - save oops_workspace (if line input is not in progress!)
 - set up line input request (ditto!)
@@ -42,7 +49,13 @@ Keyboard: same call context. (Except the return value changes.) (And we should a
 - handle undo, save undo (ditto?)
 - return result of AwaitInput
 
-AwaitInput: the low-level routine. Callers set up request variables. Leaves input requested only actually if in progress, so we only need "real" cancels, not bureaucratic cancels. (I.e.: we minimize request and cancel calls.)
+VM_KeyDelay: now a high-level call, parallel to Parser__parse use of Keyboard.
+- set up char input request 
+- AwaitInput
+- (AwaitInput's rulebook should handle status line, stop on key or timer.)
+- return key or timer info
+
+AwaitInput: the low-level routine. Callers set up request variables. Leaves input requested only actually if in progress, so we only need "real" cancels, not bureaucratic cancels. (I.e.: we minimize request/cancel calls.)
 - display prompt (if beginning line input) (must be context-sensitive!)
 - check command-stream entry if available
 - check test status if available (TestKeyboardPrimitive should return flag!)
@@ -65,5 +78,6 @@ READ_FINAL_ANSWER_R is similar to YesOrNo, except it only accepts textbuffer inp
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
 - Always run in no-echo mode? Should probably make this a global variable; certain tricks are only possible in no-echo mode.
+- HandleGlkEvent? Entirely replaced by the AwaitInput rulebook.
 
 
