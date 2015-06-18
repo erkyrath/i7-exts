@@ -1,4 +1,87 @@
-Version 1 of Unified Glulx Input by Andrew Plotkin begins here.
+Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
+
+Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
+
+A glk-window is a kind of object.
+A glk-window has a text-input-mode called the input-request.
+A glk-window can be hyperlink-input.
+Include (-
+	with current_input_request (+ no-input +), ! of type text-input-modes
+-) when defining a glk-window.
+
+The story-window is a glk-window. The input-request of the story-window is line-input.
+The status-window is a glk-window.
+
+Include (-
+Array inputevent --> 4;
+-) after "Variables and Arrays" in "Glulx.i6t";
+
+Include (-
+
+[ AwaitInput a_buffer a_table a_event    done;
+	! ### probably we put prompt-and-status inside the loop
+	
+	! ### prompt
+	print ">"; !###
+	! ### test input
+	
+	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
+		glk_cancel_line_event(gg_mainwin, gg_event);
+		print "(DEBUG) cancel line input mode^";
+	}
+	else if ( (+ story-window +).current_input_request == (+ char-input +) ) {
+		glk_cancel_char_event(gg_mainwin);
+		print "(DEBUG) cancel char input mode^";
+	}
+	(+ story-window +).current_input_request = (+ no-input +);
+	
+	if (GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) ) == (+ line-input +)) {
+		!print "(DEBUG) req line input mode^";
+		!### permit preload
+		glk_request_line_event(gg_mainwin, a_buffer+WORDSIZE, INPUT_BUFFER_LEN-WORDSIZE, 0);
+		(+ story-window +).current_input_request = (+ line-input +);
+	}
+	else if (GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) ) == (+ char-input +)) {
+		!print "(DEBUG) req char input mode^";
+		glk_request_char_event(gg_mainwin);
+		(+ story-window +).current_input_request = (+ line-input +);
+	}
+
+	if (location ~= nothing && parent(player) ~= nothing) DrawStatusLine();
+	
+	done = false;
+	while (~~done) {
+		glk_select(gg_event);
+		!### rulebook
+		switch (gg_event-->0) {
+			evtype_Arrange:
+				DrawStatusLine();
+			evtype_LineInput:
+				if (gg_event-->1 == gg_mainwin) {
+					(+ story-window +).current_input_request = (+ no-input +); ! complete
+					a_buffer-->0 = gg_event-->2;
+					VM_Tokenise(a_buffer, a_table);
+					!### write to command stream if open
+					done = true;
+				}
+		}
+	}
+	
+	quotewin_close_if_open();
+];
+
+[ quotewin_close_if_open;
+	if (gg_quotewin) {
+		glk_window_close(gg_quotewin, 0);
+		gg_quotewin = 0;
+	}
+];
+
+[ VM_ReadKeyboard a_buffer a_table;
+	AwaitInput(a_buffer, a_table, 0);
+];
+
+-) instead of "Keyboard Input" in "Glulx.i6t".
 
 Unified Glulx Input ends here.
 
@@ -65,6 +148,9 @@ AwaitInput: the low-level routine. Callers set up request variables. Leaves inpu
 -   dispatch events via rulebook.
 -   the rulebook can continue the loop; stop the loop; fill out line buffer and stop the loop. (That last may involving cancelling input-in-progress, or not.)
 -   (by default, arrange event refreshes the status line and continues loop)
+- write event to transcript stream
+- VM_Tokenise (if line input)
+- close quote window if open
 - return event info
 
 Now, when Parser__parse calls Keyboard, it may discover a non-textbuffer result. It should fill out parser_results (via rulebook) and immediately return. Skip over all again/buffering and similar textual hackery. If the rulebook doesn't decide on a result, we have a "parser error"; complain and jump to ReType.
