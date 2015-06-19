@@ -18,7 +18,14 @@ Array inputevent --> 4;
 
 Include (-
 
+! Block and await an acceptable input. What "acceptable" means is customizable, but the standard behavior for parser games is:
+! - arrange events cause a status-line redraw
+! - line-input events are accepted and returned
+! - all others events are ignored
+! This function also handles displaying the prompt, redrawing the status line, and managing the Glk library's input event requests.
+! AwaitInput takes three arguments: a line input buffer, a buffer for parsing words from line input, and an event structure. (If the caller is not interested in line input, the first two arguments are ignored.)
 [ AwaitInput a_buffer a_table a_event    done;
+	! ### cleaner if we rearrange the arguments!
 	! ### probably we put prompt-and-status inside the loop
 	
 	! ### prompt
