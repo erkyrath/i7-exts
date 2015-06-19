@@ -23,7 +23,8 @@ Include (-
 	
 	! ### prompt
 	print ">"; !###
-	! ### test input
+	
+	! ### test or command-stream input
 	
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
@@ -79,11 +80,124 @@ Include (-
 	}
 ];
 
-[ VM_ReadKeyboard a_buffer a_table;
-	AwaitInput(a_buffer, a_table, 0);
+-) instead of "Keyboard Input" in "Glulx.i6t".
+
+Include (-
+
+[ Keyboard  a_buffer a_table a_event    nw i w w2 x1 x2;
+	sline1 = score; sline2 = turns; !### should be part of status-line-updating
+
+	! Repeat loop until an acceptable input arrives.
+	while (true) {
+		! Save the start of the buffer, in case "oops" needs to restore it
+		!### but not if input is still in progress?
+		for (i=0 : i<64 : i++) oops_workspace->i = a_buffer->i;
+		
+		!### set keyboard-input? Customizably!
+		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +), (+ line-input +) );
+		AwaitInput(a_buffer, a_table, a_event);
+		
+		! Set nw to the number of words
+		nw = a_table-->0;
+		
+		! If the line was blank, get a fresh line
+		if (nw == 0) {
+			@push etype; etype = BLANKLINE_PE;
+			players_command = 100;
+			BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
+			if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
+				PARSER_ERROR_INTERNAL_RM('X', noun); new_line;
+			}
+			EndActivity(PRINTING_A_PARSER_ERROR_ACT);
+			@pull etype;
+			continue;
+		}
+		
+		! Unless the opening word was OOPS, return
+		! Conveniently, a_table-->1 is the first word on both the Z-machine and Glulx
+		
+		w = a_table-->1;
+		if (w == OOPS1__WD or OOPS2__WD or OOPS3__WD) {
+			if (oops_from == 0) { PARSER_COMMAND_INTERNAL_RM('A'); new_line; continue; }
+			if (nw == 1) { PARSER_COMMAND_INTERNAL_RM('B'); new_line; continue; }
+			if (nw > 2) { PARSER_COMMAND_INTERNAL_RM('C'); new_line; continue; }
+		
+			! So now we know: there was a previous mistake, and the player has
+			! attempted to correct a single word of it.
+		
+			for (i=0 : i<INPUT_BUFFER_LEN : i++) buffer2->i = a_buffer->i;
+			x1 = a_table-->6; ! Start of word following "oops"
+			x2 = a_table-->5; ! Length of word following "oops"
+		
+			! Repair the buffer to the text that was in it before the "oops"
+			! was typed:
+			for (i=0 : i<64 : i++) a_buffer->i = oops_workspace->i;
+			VM_Tokenise(a_buffer,a_table);
+		
+			! Work out the position in the buffer of the word to be corrected:
+			w = a_table-->(3*oops_from);      ! Start of word to go
+			w2 = a_table-->(3*oops_from - 1); ! Length of word to go
+		
+			! Write spaces over the word to be corrected:
+			for (i=0 : i<w2 : i++) a_buffer->(i+w) = ' ';
+		
+			if (w2 < x2) {
+				! If the replacement is longer than the original, move up...
+				for ( i=INPUT_BUFFER_LEN-1 : i>=w+x2 : i-- )
+					a_buffer->i = a_buffer->(i-x2+w2);
+		
+				! ...increasing buffer size accordingly.
+				a_buffer-->0 = (a_buffer-->0) + (x2-w2);
+			}
+		
+			! Write the correction in:
+			for (i=0 : i<x2 : i++) a_buffer->(i+w) = buffer2->(i+x1);
+		
+			VM_Tokenise(a_buffer, a_table);
+			nw = a_table-->0;
+		
+			return nw;
+		}
+
+		! Undo handling
+	
+		if ((w == UNDO1__WD or UNDO2__WD or UNDO3__WD) && (nw==1)) {
+			Perform_Undo();
+			continue;
+		}
+		i = VM_Save_Undo();
+		#ifdef PREVENT_UNDO; undo_flag = 0; #endif;
+		#ifndef PREVENT_UNDO; undo_flag = 2; #endif;
+		if (i == -1) undo_flag = 0;
+		if (i == 0) undo_flag = 1;
+		if (i == 2) {
+			VM_RestoreWindowColours();
+			VM_Style(SUBHEADER_VMSTY);
+			SL_Location(); print "^";
+			! print (name) location, "^";
+			VM_Style(NORMAL_VMSTY);
+			IMMEDIATELY_UNDO_RM('E'); new_line;
+			continue;
+		}
+		return nw;
+	}
 ];
 
--) instead of "Keyboard Input" in "Glulx.i6t".
+-) instead of "Reading the Command" in "Parser.i6t".
+
+Include (-
+
+!### temp shim, called from yesorno, finalquestion
+[ KeyboardPrimitive a_buffer a_parse;
+	AwaitInput(a_buffer, a_parse, 0);
+];
+
+!### temp shim, called from Tests.i6t
+[ VM_ReadKeyboard a_buffer a_parse;
+];
+
+-) instead of "Keyboard Primitive" in "Parser.i6t".
+
 
 Unified Glulx Input ends here.
 
