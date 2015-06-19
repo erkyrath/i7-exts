@@ -299,6 +299,7 @@ Questions:
 Test cases:
 - Change the prompt for YesOrNo, or for the main game
 - Keystroke-only game -- char input rather than line input
+- Keystroke-only game that calls YesOrNo for a single line input
 - A game with a timer interrupt
 - A timer-only game
 - Hyperlinks only
