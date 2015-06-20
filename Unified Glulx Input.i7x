@@ -203,6 +203,26 @@ Include (-
 
 Include (-
 
+[ YesOrNo i j;
+    for (::) {
+        AwaitInput( (+ yes-no context +), inputevent, buffer, parse);
+        j = parse-->0;
+        if (j) { ! at least one word entered
+            i = parse-->1;
+            if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
+            if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
+        }
+        ! bad response; try again
+        YES_OR_NO_QUESTION_INTERNAL_RM('A'); !###
+    }
+];
+
+[ YES_OR_NO_QUESTION_INTERNAL_R; ];
+
+-) instead of "Yes/No Questions" in "Parser.i6t".
+
+Include (-
+
 !### temp shim, called from yesorno, finalquestion
 [ KeyboardPrimitive a_buffer a_parse;
 	AwaitInput(0, 0, a_buffer, a_parse);
