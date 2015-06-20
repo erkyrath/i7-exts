@@ -47,7 +47,7 @@ Include (-
 ! AwaitInput takes three arguments: an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
 [ AwaitInput incontext a_event a_buffer a_table    done;
-	a_event-->0 = evtype_None;
+	!a_event-->0 = evtype_None;
 	
 	! ### probably we put prompt-and-status inside the loop
 	
@@ -79,6 +79,7 @@ Include (-
 	}
 
 	!### we should call this before any blocking input. in minor cases (a rejected keystroke) we could skip it, but that's probably too much work.
+	sline1 = score; sline2 = turns;
 	if (location ~= nothing && parent(player) ~= nothing) DrawStatusLine();
 	
 	done = false;
@@ -116,8 +117,6 @@ Include (-
 Include (-
 
 [ Keyboard  a_buffer a_table a_event    nw i w w2 x1 x2;
-	sline1 = score; sline2 = turns; !### should be part of status-line-updating
-
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
@@ -265,7 +264,8 @@ To decide whether player consents asking (T1 - text) and (T2 - text):
 	if YesOrNoPrompt:
 		decide yes.
 
-The print the final prompt rule is not listed in any rulebook.
+The print the final prompt rule is not listed in any rulebook. [Prompt-printing is now taken care of by the prompt displaying rules.]
+The display final status line rule is not listed in any rulebook. [This rule updated status line globals. That's now built into AwaitInput.]
 
 Include (-
 
