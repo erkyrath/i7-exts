@@ -18,12 +18,11 @@ Array inputevent --> 4;
 
 Include (-
 
-! Block and await an acceptable input. What "acceptable" means is customizable, but the standard behavior for parser games is:
-! - arrange events cause a status-line redraw
-! - line-input events are accepted and returned
-! - all others events are ignored
-! This function also handles displaying the prompt, redrawing the status line, and managing the Glk library's input event requests.
+! AwaitInput: block and await an acceptable input. What "acceptable" means is customizable. Typically the caller will be interested in some event types (e.g., line input), will allow others to do their job (arrange events redrawing the status window), and will ignore the rest (keep awaiting input).
+! This is the low-level entry point to the Glk input system; all input requests funnel down to this function. It sets up the Glk input request events and calls glk_select().
+! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes three arguments: a line input buffer, a buffer for parsing words from line input, and an event structure. (If the caller is not interested in line input, the first two arguments are ignored.)
+
 [ AwaitInput a_buffer a_table a_event    done;
 	! ### cleaner if we rearrange the arguments!
 	! ### probably we put prompt-and-status inside the loop
@@ -259,7 +258,7 @@ VM_KeyDelay: low-level (but called from extensions)
 
 * New plan
 
-Keyboard: same call context. (Except the return value changes. It now returns an input event representation, of which the buffer/parse is just one part.) (We should add a third array argument for nontextual input.)
+Keyboard: same call context. (Except the return value changes. It now returns an input event representation, of which the buffer/parse is just one part.) (We should add a third array argument for nontextual input.) (And rename it to ParserInput!)
 - loop until nonblank: (make this optional?)
 - save oops_workspace (if line input is not in progress!)
 - set up line input request (ditto!)
@@ -268,7 +267,7 @@ Keyboard: same call context. (Except the return value changes. It now returns an
 - handle undo, save undo (ditto?)
 - return result of AwaitInput
 
-VM_KeyDelay: now a high-level call, parallel to Parser__parse use of Keyboard.
+VM_KeyDelay: now a high-level call, parallel to Parser__parse use of Keyboard. (Rename...)
 - set up char input request 
 - AwaitInput
 - (AwaitInput's rulebook should handle status line, stop on key or timer.)
