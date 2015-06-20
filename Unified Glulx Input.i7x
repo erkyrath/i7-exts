@@ -1,12 +1,18 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
-Input-context is a kind of value. The input-contexts are primary context, disambig context, yes-no context, final question context.
+Input-context is a kind of value. The input-contexts are primary context, disambig context, yes-no question context, final question context.
 
 The prompt displaying rules are an input-context based rulebook.
 
+Rule for prompt displaying the yes-no question context (this is the yes-no question prompt rule):
+	instead say ">" (A).
+Rule for prompt displaying the final question context (this is the final question prompt rule):
+	instead say ">" (A).
 Rule for prompt displaying an input-context (this is the default prompt rule):
-	say ">" (A).
-The default prompt rule is listed last in the prompt displaying rules.
+	instead say the command prompt.
+The final question prompt rule is listed last in the prompt displaying rules.
+The yes-no question prompt rule is listed last in the prompt displaying rules.
+The default prompt rule is listed last in the prompt displaying rules. [really truly last]
 
 Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
 
@@ -202,7 +208,7 @@ Include (-
 
 [ YesOrNo i j;
     for (::) {
-        AwaitInput( (+ yes-no context +), inputevent, buffer, parse);
+        AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
         j = parse-->0;
         if (j) { ! at least one word entered
             i = parse-->1;
