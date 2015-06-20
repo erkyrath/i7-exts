@@ -37,6 +37,7 @@ The status-window is a glk-window.
 
 Include (-
 Array inputevent --> 4;
+Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
 Include (-
@@ -47,7 +48,7 @@ Include (-
 ! AwaitInput takes three arguments: an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
 [ AwaitInput incontext a_event a_buffer a_table    done;
-	!a_event-->0 = evtype_None;
+	!###a_event-->0 = evtype_None;
 	
 	! ### probably we put prompt-and-status inside the loop
 	
