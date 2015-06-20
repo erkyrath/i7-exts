@@ -250,6 +250,12 @@ Include (-
 
 To decide whether YesOrNoPrompt: (- YesOrNoPrompt() -).
 
+To decide whether player consents asking (T1 - text):
+	now the extended yes-no prompt is T1;
+	now the repeat yes-no prompt is "Please answer yes or no";
+	if YesOrNoPrompt:
+		decide yes.
+
 To decide whether player consents asking (T1 - text) and (T2 - text):
 	now the extended yes-no prompt is T1;
 	now the repeat yes-no prompt is T2;
