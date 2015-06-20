@@ -1,17 +1,26 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
-Input-context is a kind of value. The input-contexts are primary context, disambig context, yes-no question context, final question context.
+Input-context is a kind of value. The input-contexts are primary context, disambig context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context.
 
 The prompt displaying rules are an input-context based rulebook.
 
+The extended yes-no prompt is a text that varies.
+The repeat yes-no prompt is a text that varies.
+
 Rule for prompt displaying the yes-no question context (this is the yes-no question prompt rule):
 	instead say ">" (A).
+Rule for prompt displaying the extended yes-no question context (this is the extended yes-no question prompt rule):
+	instead say "[extended yes-no prompt] >" (A).
+Rule for prompt displaying the repeat yes-no question context (this is the repeat yes-no question prompt rule):
+	instead say "[repeat yes-no prompt] >" (A).
 Rule for prompt displaying the final question context (this is the final question prompt rule):
 	instead follow the print the final prompt rule.
 Rule for prompt displaying an input-context (this is the default prompt rule):
 	instead say the command prompt.
 The final question prompt rule is listed last in the prompt displaying rules.
 The yes-no question prompt rule is listed last in the prompt displaying rules.
+The extended yes-no question prompt rule is listed last in the prompt displaying rules.
+The repeat yes-no question prompt rule is listed last in the prompt displaying rules.
 The default prompt rule is listed last in the prompt displaying rules. [really truly last]
 
 Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
@@ -216,13 +225,36 @@ Include (-
             if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
         }
         ! bad response; try again
-        YES_OR_NO_QUESTION_INTERNAL_RM('A'); !###
+        YES_OR_NO_QUESTION_INTERNAL_RM('A');
+    }
+];
+
+[ YesOrNoPrompt i j incontext;
+	incontext = (+ extended yes-no question context +);
+    for (::) {
+        AwaitInput(incontext, inputevent, buffer, parse);
+        j = parse-->0;
+        if (j) { ! at least one word entered
+            i = parse-->1;
+            if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
+            if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
+        }
+        ! bad response; try again
+		incontext = (+ repeat yes-no question context +);
     }
 ];
 
 [ YES_OR_NO_QUESTION_INTERNAL_R; ];
 
 -) instead of "Yes/No Questions" in "Parser.i6t".
+
+To decide whether YesOrNoPrompt: (- YesOrNoPrompt() -).
+
+To decide whether player consents asking (T1 - text) and (T2 - text):
+	now the extended yes-no prompt is T1;
+	now the repeat yes-no prompt is T2;
+	if YesOrNoPrompt:
+		decide yes.
 
 The print the final prompt rule is not listed in any rulebook.
 
