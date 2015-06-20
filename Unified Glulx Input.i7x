@@ -23,8 +23,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes three arguments: a line input buffer, a buffer for parsing words from line input, and an event structure. (If the caller is not interested in line input, the first two arguments are ignored.)
 
-[ AwaitInput a_buffer a_table a_event    done;
-	! ### cleaner if we rearrange the arguments!
+[ AwaitInput a_event a_buffer a_table    done;
 	! ### probably we put prompt-and-status inside the loop
 	
 	! ### prompt
@@ -101,7 +100,7 @@ Include (-
 		
 		!### set keyboard-input? Customizably!
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +), (+ line-input +) );
-		AwaitInput(a_buffer, a_table, a_event);
+		AwaitInput(a_event, a_buffer, a_table);
 		
 		! Set nw to the number of words
 		nw = a_table-->0;
@@ -195,7 +194,7 @@ Include (-
 
 !### temp shim, called from yesorno, finalquestion
 [ KeyboardPrimitive a_buffer a_parse;
-	AwaitInput(a_buffer, a_parse, 0);
+	AwaitInput(0, a_buffer, a_parse);
 ];
 
 !### temp shim, called from Tests.i6t
