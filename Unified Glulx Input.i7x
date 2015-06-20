@@ -4,12 +4,9 @@ Input-context is a kind of value. The input-contexts are primary context, disamb
 
 The prompt displaying rules are an input-context based rulebook.
 
-Rule for prompt displaying an input-context (called C):
-	say "[C]>";
-	
-When play begins:
-	follow the prompt displaying rules for yes-no context;
-	say " foo."
+Rule for prompt displaying an input-context (this is the default prompt rule):
+	say ">" (A).
+The default prompt rule is listed last in the prompt displaying rules.
 
 Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
 
@@ -221,12 +218,21 @@ Include (-
 
 -) instead of "Yes/No Questions" in "Parser.i6t".
 
+The print the final prompt rule is not listed in any rulebook.
+
 Include (-
 
-!### temp shim, called from yesorno, finalquestion
-[ KeyboardPrimitive a_buffer a_parse;
-	AwaitInput(0, 0, a_buffer, a_parse);
+[ READ_FINAL_ANSWER_R;
+    AwaitInput( (+ final question context +), inputevent, buffer, parse);
+	players_command = 100 + WordCount();
+	num_words = WordCount();
+	wn = 1;
+	rfalse;
 ];
+
+-) instead of "Read The Final Answer Rule" in "OrderOfPlay.i6t".
+
+Include (-
 
 !### temp shim, called from Tests.i6t
 [ VM_ReadKeyboard a_buffer a_parse;
