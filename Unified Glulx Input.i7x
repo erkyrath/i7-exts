@@ -49,11 +49,11 @@ Include (-
 [ AwaitInput incontext a_event a_buffer a_table    done;
 	! ### probably we put prompt-and-status inside the loop
 	
-	! ### prompt
 	FollowRulebook((+ prompt displaying rules +), incontext, true);
 	
 	! ### test or command-stream input
 	
+	! ### really we should be able to continue line/char input here -- skip prompt
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
 		print "(DEBUG) cancel line input mode^";
