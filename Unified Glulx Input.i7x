@@ -7,7 +7,7 @@ The prompt displaying rules are an input-context based rulebook.
 Rule for prompt displaying the yes-no question context (this is the yes-no question prompt rule):
 	instead say ">" (A).
 Rule for prompt displaying the final question context (this is the final question prompt rule):
-	instead say ">" (A).
+	instead follow the print the final prompt rule.
 Rule for prompt displaying an input-context (this is the default prompt rule):
 	instead say the command prompt.
 The final question prompt rule is listed last in the prompt displaying rules.
