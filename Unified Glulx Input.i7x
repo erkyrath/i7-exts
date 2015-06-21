@@ -52,7 +52,17 @@ Include (-
 	
 	! ### probably we put prompt-and-status inside the loop
 	
+	! This block emulates the old PrintPrompt call. ### make activity before/after?
+	RunTimeProblemShow();
+	ClearRTP();
+	style roman;
+	! In the old-fashioned YesOrNo sequence, we want to print the prompt after the caller's printed question, with no line break. In all other cases, we ensure a line break.
+	if (incontext ~= (+ yes-no question context +) ) {
+		EnsureBreakBeforePrompt();
+	}
 	FollowRulebook((+ prompt displaying rules +), incontext, true);
+	ClearBoxedText();
+	ClearParagraphing(14);
 	
 	! ### test or command-stream input
 	
