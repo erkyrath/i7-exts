@@ -117,7 +117,7 @@ Include (-
 
 Include (-
 
-[ Keyboard  a_event a_buffer a_table    nw i w w2 x1 x2;
+[ ParserInput  a_event a_buffer a_table    nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
@@ -293,7 +293,7 @@ Include (-
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
-		Keyboard(inputevent, buffer,parse);
+		ParserInput(inputevent, buffer,parse);
 		num_words = WordCount(); players_command = 100 + num_words;
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
 
@@ -594,7 +594,7 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i = ' ';
     #Endif; ! TARGET_ZCODE
-    answer_words=Keyboard(inputevent, buffer2, parse2);
+    answer_words=ParserInput(inputevent, buffer2, parse2);
 
     ! Conveniently, parse2-->1 is the first word in both ZCODE and GLULX.
     first_word = (parse2-->1);
@@ -701,7 +701,7 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i=' ';
     #Endif; ! TARGET_ZCODE
-    answer_words = Keyboard(inputevent, buffer2, parse2);
+    answer_words = ParserInput(inputevent, buffer2, parse2);
 
 	! Look for a comma, and interpret this as a fresh conversation command
 	! if so:
