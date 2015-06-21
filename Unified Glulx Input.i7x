@@ -890,7 +890,7 @@ VM_KeyDelay: low-level (but called from extensions)
 
 * New plan
 
-Keyboard: same call context. (Except the return value changes. It now returns an input event representation, of which the buffer/parse is just one part.) (We should add a third array argument for nontextual input.) (And rename it to ParserInput!)
+ParserInput: same call context. (Except the return value changes. It now returns an input event representation, of which the buffer/parse is just one part.) (We should add a third array argument for nontextual input.) (And rename it to ParserInput!)
 - loop until nonblank: (make this optional?)
 - save oops_workspace (if line input is not in progress!)
 - set up line input request (ditto!)
@@ -899,7 +899,7 @@ Keyboard: same call context. (Except the return value changes. It now returns an
 - handle undo, save undo (ditto?)
 - return result of AwaitInput
 
-VM_KeyDelay: now a high-level call, parallel to Parser__parse use of Keyboard. (Rename...)
+VM_KeyDelay: now a high-level call, parallel to Parser__parse use of ParserInput. (Rename...)
 - set up char input request 
 - AwaitInput
 - (AwaitInput's rulebook should handle status line, stop on key or timer.)
@@ -920,9 +920,9 @@ AwaitInput: the low-level routine. Callers set up request variables. Leaves inpu
 - close quote window if open
 - return event info
 
-Now, when Parser__parse calls Keyboard, it may discover a non-textbuffer result. It should fill out parser_results (via rulebook) and immediately return. Skip over all again/buffering and similar textual hackery. If the rulebook doesn't decide on a result, we have a "parser error"; complain and jump to ReType.
+Now, when Parser__parse calls ParserInput, it may discover a non-textbuffer result. It should fill out parser_results (via rulebook) and immediately return. Skip over all again/buffering and similar textual hackery. If the rulebook doesn't decide on a result, we have a "parser error"; complain and jump to ReType.
 
-The secondary Keyboard calls (in NounDomain) cause messiness. They should certainly cause NounDomain to return REPARSE_CODE (the "treat as new command" case). Some NounDomain calls are in Parser__parse and loop straight back to Reparse, which is fine; that leads to the rulebook-and-return code path. Others are in ParseToken__. Those worry me.
+The secondary ParserInput calls (in NounDomain) cause messiness. They should certainly cause NounDomain to return REPARSE_CODE (the "treat as new command" case). Some NounDomain calls are in Parser__parse and loop straight back to Reparse, which is fine; that leads to the rulebook-and-return code path. Others are in ParseToken__. Those worry me.
 
 YesOrNo will set up line input request and call AwaitInput. It should reject all non-textbuffer results. Stay in the loop until "yes" or "no" is typed. (Special case: run the rulebook, accept saying-yes/saying-no actions as an answer? Rulebook will have to be context-sensitive.) (If you call YesOrNo when line input is already in progress, it gets interrupted.)
 
