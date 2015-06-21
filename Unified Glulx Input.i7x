@@ -61,7 +61,7 @@ Include (-
 ! AwaitInput: block and await an acceptable input. What "acceptable" means is customizable. Typically the caller will be interested in some event types (e.g., line input), will allow others to do their job (arrange events redrawing the status window), and will ignore the rest (keep awaiting input).
 ! This is the low-level entry point to the Glk input system; all input requests funnel down to this function. It sets up the Glk input request events and calls glk_select().
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
-! AwaitInput takes three arguments: an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
+! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
 [ AwaitInput incontext a_event a_buffer a_table    done;
 	a_event-->0 = evtype_None;
@@ -150,6 +150,7 @@ Include (-
 ! ParserInput: block and await acceptable input.
 ! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
 ! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
+
 [ ParserInput  incontext a_event a_buffer a_table    nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
@@ -260,7 +261,7 @@ Include (-
 		!### set keyboard-input? Customizably!
 		AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
 		
-		!### parse result via rulebook -- accept, reject, or synthetic action
+		!### parse result via rulebook -- accept, reject, synthetic text line, or synthetic action
 		
 		j = parse-->0;
 		if (j) { ! at least one word entered
@@ -279,7 +280,7 @@ Include (-
 		!### set keyboard-input? Customizably!
 		AwaitInput(incontext, inputevent, buffer, parse);
 		
-		!### parse result via rulebook -- accept, reject, or synthetic action
+		!### parse result via rulebook -- accept, reject, synthetic text line, or synthetic action
 		
 		j = parse-->0;
 		if (j) { ! at least one word entered
