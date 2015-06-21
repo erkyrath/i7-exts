@@ -1,6 +1,9 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
-Input-context is a kind of value. The input-contexts are primary context, disambig context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context.
+Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context.
+
+Definition: an input-context is command if it is primary context or it is disambiguation context.
+Definition: an input-context is yes-no if it is yes-no question context or it is extended yes-no question context or it is repeat yes-no question context.
 
 The prompt displaying rules are an input-context based rulebook.
 
