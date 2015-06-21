@@ -234,40 +234,40 @@ Include (-
 Include (-
 
 [ YesOrNo i j;
-    for (::) {
+	for (::) {
 		!### set keyboard-input? Customizably!
-        AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
-        
-        !### parse result via rulebook -- accept, reject, or synthetic action
-        
-        j = parse-->0;
-        if (j) { ! at least one word entered
-            i = parse-->1;
-            if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
-            if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
-        }
-        ! bad response; try again
-        YES_OR_NO_QUESTION_INTERNAL_RM('A');
-    }
+		AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
+		
+		!### parse result via rulebook -- accept, reject, or synthetic action
+		
+		j = parse-->0;
+		if (j) { ! at least one word entered
+			i = parse-->1;
+			if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
+			if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
+		}
+		! bad response; try again
+		YES_OR_NO_QUESTION_INTERNAL_RM('A');
+	}
 ];
 
 [ YesOrNoPrompt i j incontext;
 	incontext = (+ extended yes-no question context +);
-    for (::) {
+	for (::) {
 		!### set keyboard-input? Customizably!
-        AwaitInput(incontext, inputevent, buffer, parse);
-        
-        !### parse result via rulebook -- accept, reject, or synthetic action
-        
-        j = parse-->0;
-        if (j) { ! at least one word entered
-            i = parse-->1;
-            if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
-            if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
-        }
-        ! bad response; try again
+		AwaitInput(incontext, inputevent, buffer, parse);
+		
+		!### parse result via rulebook -- accept, reject, or synthetic action
+		
+		j = parse-->0;
+		if (j) { ! at least one word entered
+			i = parse-->1;
+			if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
+			if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
+		}
+		! bad response; try again
 		incontext = (+ repeat yes-no question context +);
-    }
+	}
 ];
 
 [ YES_OR_NO_QUESTION_INTERNAL_R; ];
@@ -295,9 +295,9 @@ Include (-
 
 [ READ_FINAL_ANSWER_R;
 	!### set keyboard-input? Customizably!
-    AwaitInput( (+ final question context +), inputevent, buffer, parse);
-    !### parse how? rulebook?
-    
+	AwaitInput( (+ final question context +), inputevent, buffer, parse);
+	!### parse how? rulebook?
+	
 	players_command = 100 + WordCount();
 	num_words = WordCount();
 	wn = 1;
@@ -305,6 +305,9 @@ Include (-
 ];
 
 -) instead of "Read The Final Answer Rule" in "OrderOfPlay.i6t".
+
+
+[Replacements for the parser code that used to call Keyboard(). It now calls ParserInput() with a slightly different calling convention. Only the bits of code around the ParserInput() calls has changed.]
 
 Include (-
 
@@ -856,6 +859,7 @@ Include (-
 
 -) instead of "Noun Domain" in "Parser.i6t".
 
+[### temporary]
 Include (-
 !### temp shim, called from Tests.i6t
 [ VM_ReadKeyboard a_buffer a_parse;
