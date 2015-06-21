@@ -139,7 +139,7 @@ Include (-
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
 		!### but not if input is still in progress?
-		for (i=0 : i<64 : i++) oops_workspace->i = a_buffer->i;
+		Memcpy(oops_workspace, a_buffer, 64);
 		
 		!### set keyboard-input? Customizably!
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +), (+ line-input +) );
@@ -179,7 +179,7 @@ Include (-
 		
 			! Repair the buffer to the text that was in it before the "oops"
 			! was typed:
-			for (i=0 : i<64 : i++) a_buffer->i = oops_workspace->i;
+			Memcpy(a_buffer, oops_workspace, 64);
 			VM_Tokenise(a_buffer,a_table);
 		
 			! Work out the position in the buffer of the word to be corrected:
