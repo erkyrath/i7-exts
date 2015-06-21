@@ -128,6 +128,9 @@ Include (-
 
 Include (-
 
+! ParserInput: block and await acceptable input.
+! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
+! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
 [ ParserInput  a_event a_buffer a_table    nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
@@ -202,6 +205,7 @@ Include (-
 		}
 
 		! Undo handling
+		! ### only if the player *could* have entered an UNDO command!
 	
 		if ((w == UNDO1__WD or UNDO2__WD or UNDO3__WD) && (nw==1)) {
 			Perform_Undo();
@@ -231,7 +235,11 @@ Include (-
 
 [ YesOrNo i j;
     for (::) {
+		!### set keyboard-input? Customizably!
         AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
+        
+        !### parse result via rulebook -- accept, reject, or synthetic action
+        
         j = parse-->0;
         if (j) { ! at least one word entered
             i = parse-->1;
@@ -246,7 +254,11 @@ Include (-
 [ YesOrNoPrompt i j incontext;
 	incontext = (+ extended yes-no question context +);
     for (::) {
+		!### set keyboard-input? Customizably!
         AwaitInput(incontext, inputevent, buffer, parse);
+        
+        !### parse result via rulebook -- accept, reject, or synthetic action
+        
         j = parse-->0;
         if (j) { ! at least one word entered
             i = parse-->1;
@@ -282,7 +294,10 @@ The display final status line rule is not listed in any rulebook. [This rule upd
 Include (-
 
 [ READ_FINAL_ANSWER_R;
+	!### set keyboard-input? Customizably!
     AwaitInput( (+ final question context +), inputevent, buffer, parse);
+    !### parse how? rulebook?
+    
 	players_command = 100 + WordCount();
 	num_words = WordCount();
 	wn = 1;
