@@ -950,6 +950,7 @@ Test cases:
 - Keystroke-only game -- char input rather than line input
 - Keystroke-only game that calls YesOrNo for a single line input
 - A game with a timer interrupt
+- A game with a timer that increases the score (so we see status window updates without interrupting editing)
 - A timer-only game
 - Hyperlinks only
 - Hyperlinks or text input
