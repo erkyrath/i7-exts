@@ -134,7 +134,7 @@ Include (-
 ! ParserInput: block and await acceptable input.
 ! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
 ! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
-[ ParserInput  a_event a_buffer a_table    nw i w w2 x1 x2;
+[ ParserInput  incontext a_event a_buffer a_table    nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
@@ -143,7 +143,7 @@ Include (-
 		
 		!### set keyboard-input? Customizably!
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +), (+ line-input +) );
-		AwaitInput( (+ primary context +), a_event, a_buffer, a_table);
+		AwaitInput(incontext, a_event, a_buffer, a_table);
 		
 		! Set nw to the number of words
 		nw = a_table-->0;
@@ -325,7 +325,7 @@ Include (-
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
-		ParserInput(inputevent, buffer,parse);
+		ParserInput( (+ primary context +), inputevent, buffer, parse);
 		num_words = WordCount(); players_command = 100 + num_words;
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
 
@@ -626,7 +626,7 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i = ' ';
     #Endif; ! TARGET_ZCODE
-    answer_words=ParserInput(inputevent, buffer2, parse2);
+    answer_words=ParserInput( (+ disambiguation context +), inputevent, buffer2, parse2);
 
     ! Conveniently, parse2-->1 is the first word in both ZCODE and GLULX.
     first_word = (parse2-->1);
@@ -733,7 +733,7 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i=' ';
     #Endif; ! TARGET_ZCODE
-    answer_words = ParserInput(inputevent, buffer2, parse2);
+    answer_words = ParserInput( (+ disambiguation context +), inputevent, buffer2, parse2);
 
 	! Look for a comma, and interpret this as a fresh conversation command
 	! if so:
