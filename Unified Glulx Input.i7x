@@ -220,7 +220,7 @@ Include (-
 			VM_Tokenise(a_buffer, a_table);
 			nw = a_table-->0;
 		
-			return nw;
+			return;
 		}
 
 		! Undo handling
@@ -244,7 +244,7 @@ Include (-
 			IMMEDIATELY_UNDO_RM('E'); new_line;
 			continue;
 		}
-		return nw;
+		return;
 	}
 ];
 
@@ -650,7 +650,8 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i = ' ';
     #Endif; ! TARGET_ZCODE
-    answer_words=ParserInput( (+ disambiguation context +), inputevent, buffer2, parse2);
+    ParserInput( (+ disambiguation context +), inputevent2, buffer2, parse2);
+    #Ifdef TARGET_ZCODE; answer_words = parse2->1; #ifnot; answer_words = parse2-->0; #endif;
 
     ! Conveniently, parse2-->1 is the first word in both ZCODE and GLULX.
     first_word = (parse2-->1);
@@ -757,7 +758,8 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i=' ';
     #Endif; ! TARGET_ZCODE
-    answer_words = ParserInput( (+ disambiguation context +), inputevent, buffer2, parse2);
+    ParserInput( (+ disambiguation context +), inputevent2, buffer2, parse2);
+	#Ifdef TARGET_ZCODE; answer_words = parse2->1; #ifnot; answer_words = parse2-->0; #endif;
 
 	! Look for a comma, and interpret this as a fresh conversation command
 	! if so:
