@@ -53,6 +53,7 @@ Include (-
 	! ### probably we put prompt-and-status inside the loop
 	
 	! This block emulates the old PrintPrompt call. ### make activity before/after?
+	! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* going in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
 	RunTimeProblemShow();
 	ClearRTP();
 	style roman;
