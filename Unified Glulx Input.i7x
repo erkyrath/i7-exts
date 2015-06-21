@@ -22,10 +22,14 @@ The status-window is a glk-window.
 
 Section - Prompt Displaying
 
+[This rulebook, as you might guess, is in charge of displaying the prompt before player input. Its parameter is an input-context, which distinguishes regular game input from other questions (yes-or-no, the final game question, etc).]
 The prompt displaying rules are an input-context based rulebook.
 
+[These globals are used by the extended yes-or-no system (YesOrNoPrompt). The classic YesOrNo does not use them.]
 The extended yes-no prompt is a text that varies.
 The repeat yes-no prompt is a text that varies.
+
+[The default prompt rules are a bit complicated because we want to keep supporting the old prompt customization tools, which date from across Inform's history. For example, the default prompt rule displays the old "command prompt" global variable, which defaults to ">".]
 
 Rule for prompt displaying the yes-no question context (this is the yes-no question prompt rule):
 	instead say ">" (A).
