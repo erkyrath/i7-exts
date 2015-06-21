@@ -1,9 +1,26 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
+Section - Basic Types
+
 Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context.
 
 Definition: an input-context is command if it is primary context or it is disambiguation context.
 Definition: an input-context is yes-no if it is yes-no question context or it is extended yes-no question context or it is repeat yes-no question context.
+
+Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
+
+A glk-window is a kind of object.
+A glk-window has a text-input-mode called the input-request.
+A glk-window can be hyperlink-input.
+Include (-
+	with current_input_request (+ no-input +), ! of type text-input-modes
+-) when defining a glk-window.
+
+The story-window is a glk-window. The input-request of the story-window is line-input.
+The status-window is a glk-window.
+
+
+Section - Prompt Displaying
 
 The prompt displaying rules are an input-context based rulebook.
 
@@ -26,22 +43,18 @@ The extended yes-no question prompt rule is listed last in the prompt displaying
 The repeat yes-no question prompt rule is listed last in the prompt displaying rules.
 The default prompt rule is listed last in the prompt displaying rules. [really truly last]
 
-Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
 
-A glk-window is a kind of object.
-A glk-window has a text-input-mode called the input-request.
-A glk-window can be hyperlink-input.
-Include (-
-	with current_input_request (+ no-input +), ! of type text-input-modes
--) when defining a glk-window.
+Section - A Few Globals
 
-The story-window is a glk-window. The input-request of the story-window is line-input.
-The status-window is a glk-window.
+[These event structures are now used in parallel with the buffer and parse arrays. For example, we'll call ParserInput(context, inputevent, buffer, parse) or ParserInput(context, inputevent2, buffer2, parse2).]
 
 Include (-
 Array inputevent --> 4;
 Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
+
+
+Section - AwaitInput
 
 Include (-
 
@@ -128,6 +141,9 @@ Include (-
 ];
 
 -) instead of "Keyboard Input" in "Glulx.i6t".
+
+
+Section - ParserInput
 
 Include (-
 
@@ -234,6 +250,9 @@ Include (-
 
 -) instead of "Reading the Command" in "Parser.i6t".
 
+
+Section - Yes-No Questions
+
 Include (-
 
 [ YesOrNo i j;
@@ -294,6 +313,9 @@ To decide whether player consents asking (T1 - text) and (T2 - text):
 The print the final prompt rule is not listed in any rulebook. [Prompt-printing is now taken care of by the prompt displaying rules.]
 The display final status line rule is not listed in any rulebook. [This rule updated status line globals. That's now built into AwaitInput.]
 
+
+Section - The Final Question
+
 Include (-
 
 [ READ_FINAL_ANSWER_R;
@@ -309,6 +331,8 @@ Include (-
 
 -) instead of "Read The Final Answer Rule" in "OrderOfPlay.i6t".
 
+
+Section - Parser Code Replacements
 
 [Replacements for the parser code that used to call Keyboard(). It now calls ParserInput() with a slightly different calling convention. Only the bits of code around the ParserInput() calls has changed.]
 
