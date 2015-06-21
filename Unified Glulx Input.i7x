@@ -13,7 +13,7 @@ A glk-window is a kind of object.
 A glk-window has a text-input-mode called the input-request.
 A glk-window can be hyperlink-input.
 Include (-
-	with current_input_request (+ no-input +), ! of type text-input-modes
+	with current_input_request (+ no-input +), ! of type text-input-mode
 -) when defining a glk-window.
 
 The story-window is a glk-window. The input-request of the story-window is line-input.
@@ -41,6 +41,7 @@ Rule for prompt displaying the final question context (this is the final questio
 	instead follow the print the final prompt rule.
 Rule for prompt displaying an input-context (this is the default prompt rule):
 	instead say the command prompt.
+
 The final question prompt rule is listed last in the prompt displaying rules.
 The yes-no question prompt rule is listed last in the prompt displaying rules.
 The extended yes-no question prompt rule is listed last in the prompt displaying rules.
