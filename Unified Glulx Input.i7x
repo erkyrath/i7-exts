@@ -166,11 +166,14 @@ Include (-
 		!### set keyboard-input? Customizably!
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +), (+ line-input +) );
 		AwaitInput(incontext, a_event, a_buffer, a_table);
+
+		!### parse a_event via rulebook -- accept, reject, synthetic text line, or synthetic action
 		
 		! Set nw to the number of words
 		nw = a_table-->0;
 		
 		! If the line was blank, get a fresh line
+		! ### customizable? how does this interact with undo/oopsage?
 		if (nw == 0) {
 			@push etype; etype = BLANKLINE_PE;
 			players_command = 100;
@@ -285,7 +288,7 @@ Include (-
 		!### set keyboard-input? Customizably!
 		AwaitInput(incontext, inputevent, buffer, parse);
 		
-		!### parse result via rulebook -- accept, reject, synthetic text line, or synthetic action
+		!### parse inputevent via rulebook -- accept, reject, synthetic text line, or synthetic action
 		
 		j = parse-->0;
 		if (j) { ! at least one word entered
