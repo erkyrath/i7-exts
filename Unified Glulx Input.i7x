@@ -31,22 +31,17 @@ The repeat yes-no prompt is a text that varies.
 
 [The default prompt rules are a bit complicated because we want to keep supporting the old prompt customization tools, which date from across Inform's history. For example, the default prompt rule displays the old "command prompt" global variable, which defaults to ">".]
 
-Rule for prompt displaying the yes-no question context (this is the yes-no question prompt rule):
+Last prompt displaying rule for the yes-no question context (this is the yes-no question prompt rule):
 	instead say ">" (A).
-Rule for prompt displaying the extended yes-no question context (this is the extended yes-no question prompt rule):
+Last prompt displaying rule for the extended yes-no question context (this is the extended yes-no question prompt rule):
 	instead say "[extended yes-no prompt] >" (A).
-Rule for prompt displaying the repeat yes-no question context (this is the repeat yes-no question prompt rule):
+Last prompt displaying rule for the repeat yes-no question context (this is the repeat yes-no question prompt rule):
 	instead say "[repeat yes-no prompt] >" (A).
-Rule for prompt displaying the final question context (this is the final question prompt rule):
+Last prompt displaying rule for the final question context (this is the final question prompt rule):
 	instead follow the print the final prompt rule.
-Rule for prompt displaying an input-context (this is the default prompt rule):
+Last prompt displaying rule for an input-context (this is the default prompt rule):
+	[really truly last]
 	instead say the command prompt.
-
-The final question prompt rule is listed last in the prompt displaying rules.
-The yes-no question prompt rule is listed last in the prompt displaying rules.
-The extended yes-no question prompt rule is listed last in the prompt displaying rules.
-The repeat yes-no question prompt rule is listed last in the prompt displaying rules.
-The default prompt rule is listed last in the prompt displaying rules. [really truly last]
 
 
 Section - A Few Globals
@@ -996,11 +991,18 @@ YesOrNo will set up line input request and call AwaitInput. It should reject all
 
 READ_FINAL_ANSWER_R is similar to YesOrNo, except it only accepts textbuffer input. (But this textbuffer may result from the glk_select rulebook.)
 
+* Planning
+
+We have three customization rulebooks, looks like:
+
+"Setting up input"
+
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
 - Always run in no-echo mode? Should probably make this a global variable; certain tricks are only possible in no-echo mode.
 - HandleGlkEvent? Entirely replaced by the AwaitInput rulebook.
 - ParseToken__: Still worrying.
+- The reading-a-command activity? This only applies to complete valid commands (not disambiguations). (Except that's not consistent -- the after runs for some disambig prompts, but not all; the before applies only to primary prompts.)
 
 Test cases:
 - Change the prompt for YesOrNo, or for the main game
