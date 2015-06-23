@@ -1021,7 +1021,7 @@ A rejection here is an undo point (unfortunately). Same goes for text input that
 
 Principles:
 - Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
-- In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting).
+- In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
 - The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
 
 Questions:
