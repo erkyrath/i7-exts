@@ -69,7 +69,7 @@ Include (-
 	! ### probably we put prompt-and-status inside the loop
 	
 	! This block emulates the old PrintPrompt call. ### make activity before/after?
-	! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* going in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
+	! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* go in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
 	RunTimeProblemShow();
 	ClearRTP();
 	style roman;
@@ -261,7 +261,7 @@ Include (-
 
 [ YesOrNo i j;
 	for (::) {
-		!### set keyboard-input? Customizably!
+		!### set keyboard-input? Customizably?
 		AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
 		
 		!### parse result via rulebook -- accept, reject, synthetic text line, or synthetic action
@@ -280,7 +280,7 @@ Include (-
 [ YesOrNoPrompt i j incontext;
 	incontext = (+ extended yes-no question context +);
 	for (::) {
-		!### set keyboard-input? Customizably!
+		!### set keyboard-input? Customizably?
 		AwaitInput(incontext, inputevent, buffer, parse);
 		
 		!### parse inputevent via rulebook -- accept, reject, synthetic text line, or synthetic action
@@ -323,7 +323,7 @@ Section - The Final Question
 Include (-
 
 [ READ_FINAL_ANSWER_R;
-	!### set keyboard-input? Customizably!
+	!### set keyboard-input? Customizably?
 	AwaitInput( (+ final question context +), inputevent, buffer, parse);
 	!### parse how? rulebook?
 	
@@ -993,9 +993,36 @@ READ_FINAL_ANSWER_R is similar to YesOrNo, except it only accepts textbuffer inp
 
 * Planning
 
-We have three customization rulebooks, looks like:
+We have four customization rulebooks, looks like. They're all input-context based.
 
-"Setting up input"
+"Setting up input": Called at the top of the ParserInput loop. Apply whichever input flags you want to the windows.
+
+Default: request line input only.
+
+"Prompt displaying": Called in AwaitInput (in the loop?) when input is about to begin.
+
+Default: print ">" or one of the yes-no/final prompts.
+
+"Handling input": Called in the AwaitInput loop after glk_select. Decide whether to accept event, reject it, or rewrite and accept it (as a different event).
+
+Default: arrange->status line; text/mouse/hyperlink->accept.
+
+Rejecting input here is not an undo point.
+
+Not used for yes-no/final question input. (These are assumed to be pure text. If you want to change that, write new input routines that call AwaitInput differently.)
+
+This will need global vars for the event/buffer/parse arrays. (Or rulebook vars?)
+
+"Accepting a command": Called after ParserInput. Can reject input event, rewrite it, accept it as-is, or accept it as a particular action (bypassing the parser).
+
+Default: no change.
+
+A rejection here is an undo point (unfortunately). Same goes for text input that is rejected later by the parser.
+
+Principles:
+- Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
+- In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting).
+- The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
 
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
