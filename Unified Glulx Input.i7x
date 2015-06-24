@@ -104,7 +104,6 @@ Include (-
 	
 		! If we're not already awaiting input, print the prompt. We also take care of other beginning-of-turn business, like showing RTPs and quote-boxes and cleaning up leftover italics and what not.
 		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
-		
 		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
 			! This block emulates the old PrintPrompt call. ### make activity before/after?
 			! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* go in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
@@ -1225,10 +1224,11 @@ Test cases:
 - Change the prompt for YesOrNo, or for the main game
 - Keystroke-only game -- char input rather than line input
 - Keystroke-only game that calls YesOrNo for a single line input
-- A game with a timer interrupt (preserves player's partial input)
+- A game with a timer interrupt (prints output but preserves player's partial input)
 - A game with a timer that increases the score (so we see status window updates without interrupting editing)
 - A timer-only game
 - Hyperlinks only
 - Hyperlinks or text input (links used to construct actions) (links do not preserve player's partial input)
 - Hyperlinks that create synthetic text input
+- A game that changes input modes inside AwaitInput
 
