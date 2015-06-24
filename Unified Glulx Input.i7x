@@ -11,13 +11,31 @@ Text-input-mode is a kind of value. The text-input-modes are no-input, char-inpu
 
 A glk-window is a kind of object.
 A glk-window has a text-input-mode called the input-request.
-A glk-window can be hyperlink-input.
+A glk-window has a text called the preload-input-text.
+A glk-window can be hyperlink-input-request.
 Include (-
 	with current_input_request (+ no-input +), ! of type text-input-mode
 -) when defining a glk-window.
 
 The story-window is a glk-window. The input-request of the story-window is line-input.
 The status-window is a glk-window.
+
+
+Section - Setting Up Input
+
+[This rulebook sets up the input requests for parser input (the command contexts, not the yes-or-no or final questions). It is called at the top of the ParserInput loop.]
+The setting up input rules are an input-context based rulebook.
+
+To clear all input requests for (W - glk-window) (this is all-input-request-clearing):
+	now the input-request of W is no-input;
+	now the preload-input-text of W is "";
+	now W is not hyperlink-input-request.
+
+First setting up input rule (this is the initial clear input requests rule):
+	clear all input requests for the story-window.
+
+Setting up input rule (this is the standard parser input line request rule):
+	now the input-request of the story-window is line-input.
 
 
 Section - Prompt Displaying
@@ -63,55 +81,81 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
-[ AwaitInput incontext a_event a_buffer a_table    done;
+[ AwaitInput incontext a_event a_buffer a_table    done runonprompt wanttextinput;
 	a_event-->0 = evtype_None;
-	
-	! ### probably we put prompt-and-status inside the loop
-	
-	! This block emulates the old PrintPrompt call. ### make activity before/after?
-	! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* go in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
-	RunTimeProblemShow();
-	ClearRTP();
-	style roman;
-	! In the old-fashioned YesOrNo sequence, we want to print the prompt after the caller's printed question, with no line break. In all other cases, we ensure a line break.
-	if (incontext ~= (+ yes-no question context +) ) {
-		EnsureBreakBeforePrompt();
+	if (a_buffer) {
+		a_buffer-->0 = 0;
 	}
-	FollowRulebook((+ prompt displaying rules +), incontext, true);
-	ClearBoxedText();
-	ClearParagraphing(14);
+	if (a_table) {
+		a_table-->0 = 0;
+	}
 	
-	! ### test or command-stream input
+	! In the old-fashioned YesOrNo sequence, we want to print the prompt after the caller's printed question, with no line break. In all other cases, we ensure a line break before the prompt.
+	runonprompt = (incontext == (+ yes-no question context +) );
 	
-	! ### really we should be able to continue line/char input here -- skip prompt
-	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
-		glk_cancel_line_event(gg_mainwin, gg_event);
-		print "(DEBUG) cancel line input mode^";
-	}
-	else if ( (+ story-window +).current_input_request == (+ char-input +) ) {
-		glk_cancel_char_event(gg_mainwin);
-		print "(DEBUG) cancel char input mode^";
-	}
-	(+ story-window +).current_input_request = (+ no-input +);
-	
-	if (GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) ) == (+ line-input +)) {
-		!print "(DEBUG) req line input mode^";
-		!### permit preload
-		glk_request_line_event(gg_mainwin, a_buffer+WORDSIZE, INPUT_BUFFER_LEN-WORDSIZE, 0);
-		(+ story-window +).current_input_request = (+ line-input +);
-	}
-	else if (GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) ) == (+ char-input +)) {
-		!print "(DEBUG) req char input mode^";
-		glk_request_char_event(gg_mainwin);
-		(+ story-window +).current_input_request = (+ line-input +);
-	}
-
-	!### we should call this before any blocking input. in minor cases (a rejected keystroke) we could skip it, but that's probably too much work.
-	sline1 = score; sline2 = turns;
-	if (location ~= nothing && parent(player) ~= nothing) DrawStatusLine();
+	! When this function begins, the window is not awaiting any input (except perhaps timer input).
 	
 	done = false;
 	while (~~done) {
+	
+		! If we're not already awaiting input, print the prompt. We also take care of other beginning-of-turn business, like showing RTPs and quote-boxes and cleaning up leftover italics and what not.
+		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
+		
+		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
+			! This block emulates the old PrintPrompt call. ### make activity before/after?
+			! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* go in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
+			RunTimeProblemShow();
+			ClearRTP();
+			
+			style roman;
+			if (~~runonprompt) {
+				EnsureBreakBeforePrompt();
+			}
+			runonprompt = false;
+			
+			FollowRulebook((+ prompt displaying rules +), incontext, true);
+			
+			ClearBoxedText();  ! this really *displays* a pending quotation
+			ClearParagraphing(14);
+		}
+	
+		! Redraw the status line.
+		! (This currently assumes that the status line never accepts text input.)
+		sline1 = score; sline2 = turns;
+		if (location ~= nothing && parent(player) ~= nothing) DrawStatusLine();
+	
+		! ### test or command-stream input? if so, grab it rather than requesting new input. Jump to right after the glk_select.
+		
+		! Adjust the Glk input requests to match what the game wants. This may involve setting or cancelling requests.
+		wanttextinput = GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) );
+		if (wanttextinput == (+ line-input +) && a_buffer == 0) {
+			print "(BUG) AwaitInput: called with a line input request but no buffer argument";
+			wanttextinput = (+ no-input +);
+		}
+	
+		if ( (+ story-window +).current_input_request == (+ line-input +) && wanttextinput ~= (+ line-input +) ) {
+			glk_cancel_line_event(gg_mainwin, gg_event);
+			(+ story-window +).current_input_request = (+ no-input +);
+			print "(DEBUG) cancel line input mode^"; !###
+		}
+		if ( (+ story-window +).current_input_request == (+ char-input +) && wanttextinput ~= (+ char-input +) ) {
+			glk_cancel_char_event(gg_mainwin);
+			(+ story-window +).current_input_request = (+ no-input +);
+			print "(DEBUG) cancel char input mode^"; !###
+		}
+	
+		if ( (+ story-window +).current_input_request ~= (+ line-input +) && wanttextinput == (+ line-input +)) {
+			!print "(DEBUG) req line input mode^";
+			!### permit preload via preload-input-text
+			glk_request_line_event(gg_mainwin, a_buffer+WORDSIZE, INPUT_BUFFER_LEN-WORDSIZE, 0);
+			(+ story-window +).current_input_request = (+ line-input +);
+		}
+		if ( (+ story-window +).current_input_request ~= (+ char-input +) && wanttextinput == (+ char-input +)) {
+			!print "(DEBUG) req char input mode^";
+			glk_request_char_event(gg_mainwin);
+			(+ story-window +).current_input_request = (+ line-input +);
+		}
+
 		! We always use gg_event as a short-term event buffer (as does the rest of the library). The a_event argument refers to a separate buffer which the caller provides to return an event in.
 		glk_select(gg_event);
 		!### rulebook
@@ -122,15 +166,33 @@ Include (-
 				if (gg_event-->1 == gg_mainwin) {
 					(+ story-window +).current_input_request = (+ no-input +); ! complete
 					a_buffer-->0 = gg_event-->2;
-					VM_Tokenise(a_buffer, a_table);
+					if (a_table) {
+						VM_Tokenise(a_buffer, a_table);
+					}
 					!### write to command stream if open
 					done = true;
 				}
 		}
+		
+		! End of loop. If done is set, we exit.
+	}
+
+	! Cancel any remaining input requests.
+	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
+		glk_cancel_line_event(gg_mainwin, gg_event);
+		(+ story-window +).current_input_request = (+ no-input +);
+		print "(DEBUG) cancel line input mode^"; !###
+	}
+	if ( (+ story-window +).current_input_request == (+ char-input +) ) {
+		glk_cancel_char_event(gg_mainwin);
+		(+ story-window +).current_input_request = (+ no-input +);
+		print "(DEBUG) cancel char input mode^"; !###
 	}
 	
-	!### we should call this after every player input which is accepted
+	! We can close any quote box that was displayed during the input loop.
 	quotewin_close_if_open();
+
+	! When this function exits, the window is (once again) not awaiting any input (except perhaps timer input).
 ];
 
 [ quotewin_close_if_open;
@@ -155,11 +217,12 @@ Include (-
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
-		!### but not if input is still in progress?
 		Memcpy(oops_workspace, a_buffer, 64);
 		
-		!### set keyboard-input? Customizably!
-		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +), (+ line-input +) );
+		! Set up the input requests. (Normally just line input, but the game can customize this.)
+		FollowRulebook((+ setting up input rules +), incontext, true);
+		
+		! The input deed itself.
 		AwaitInput(incontext, a_event, a_buffer, a_table);
 
 		!### parse a_event via rulebook -- accept, reject, synthetic text line, or synthetic action
@@ -181,10 +244,12 @@ Include (-
 			continue;
 		}
 		
-		! Unless the opening word was OOPS, return
-		! Conveniently, a_table-->1 is the first word on both the Z-machine and Glulx
+		! Check whether the opening word is OOPS or UNDO
+		w = 0;
+		if (nw) {
+			w = a_table-->1;
+		}
 		
-		w = a_table-->1;
 		if (w == OOPS1__WD or OOPS2__WD or OOPS3__WD) {
 			if (oops_from == 0) { PARSER_COMMAND_INTERNAL_RM('A'); new_line; continue; }
 			if (nw == 1) { PARSER_COMMAND_INTERNAL_RM('B'); new_line; continue; }
@@ -248,6 +313,8 @@ Include (-
 			IMMEDIATELY_UNDO_RM('E'); new_line;
 			continue;
 		}
+		
+		! Neither OOPS nor UNDO; we're done.
 		return;
 	}
 ];
@@ -259,13 +326,16 @@ Section - Yes-No Questions
 
 Include (-
 
+! YesOrNo routines. These block and await line input.
+! Unlike in ParserInput, the input format cannot be customized. These routines are inherently about getting a typed response.
+
 [ YesOrNo i j;
 	for (::) {
-		!### set keyboard-input? Customizably?
+		((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
+		
 		AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
-		
-		!### parse result via rulebook -- accept, reject, synthetic text line, or synthetic action
-		
+				
 		j = parse-->0;
 		if (j) { ! at least one word entered
 			i = parse-->1;
@@ -280,11 +350,11 @@ Include (-
 [ YesOrNoPrompt i j incontext;
 	incontext = (+ extended yes-no question context +);
 	for (::) {
-		!### set keyboard-input? Customizably?
+		((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
+		
 		AwaitInput(incontext, inputevent, buffer, parse);
-		
-		!### parse inputevent via rulebook -- accept, reject, synthetic text line, or synthetic action
-		
+				
 		j = parse-->0;
 		if (j) { ! at least one word entered
 			i = parse-->1;
@@ -1003,7 +1073,7 @@ Default: request line input only.
 
 Default: print ">" or one of the yes-no/final prompts.
 
-"Handling input": Called in the AwaitInput loop after glk_select. Decide whether to accept event, reject it, or rewrite and accept it (as a different event).
+"Handling input": Called in the AwaitInput loop after glk_select. Decide whether to accept event, reject it, or rewrite and accept it (as a different event). Can also change input requests.
 
 Default: arrange->status line; text/mouse/hyperlink->accept.
 
@@ -1035,9 +1105,10 @@ Test cases:
 - Change the prompt for YesOrNo, or for the main game
 - Keystroke-only game -- char input rather than line input
 - Keystroke-only game that calls YesOrNo for a single line input
-- A game with a timer interrupt
+- A game with a timer interrupt (preserves player's partial input)
 - A game with a timer that increases the score (so we see status window updates without interrupting editing)
 - A timer-only game
 - Hyperlinks only
-- Hyperlinks or text input
+- Hyperlinks or text input (links used to construct actions) (links do not preserve player's partial input)
 - Hyperlinks that create synthetic text input
+
