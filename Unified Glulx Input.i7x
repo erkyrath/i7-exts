@@ -131,10 +131,12 @@ Include (-
 		! If test input is pending, grab it rather than requesting new input.
 		#Ifdef DEBUG; #Iftrue ({-value:NUMBER_CREATED(test_scenario)} > 0);
 		res = CheckTestInput(gg_event, a_buffer);
-		if (res) {
+		if (res && gg_event-->0) {
 			jump GotEvent;
 		}
 		#Endif; #Endif;
+		
+		! ### check command-stream input the same way!
 		
 		! Adjust the Glk input requests to match what the game wants. This may involve setting or cancelling requests.
 		wanttextinput = GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) );
@@ -1030,7 +1032,7 @@ Global test_sp = 0;
 ];
 
 ! CheckTestInput: If a test input is pending, this fills out the event and buffer structure and returns true. Otherwise it returns false.
-! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this function will currently only generate events of that type.
+! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this function currently only generates events of that type.
 
 [ CheckTestInput a_event a_buffer    p i j l spaced ch;
 	if (test_sp == 0) {
@@ -1038,6 +1040,8 @@ Global test_sp = 0;
 		return false;
 	}
 
+	a_event-->0 = evtype_None;
+	
 	p = test_stack-->(test_sp-4);
 	i = test_stack-->(test_sp-3);
 	l = test_stack-->(test_sp-1);
