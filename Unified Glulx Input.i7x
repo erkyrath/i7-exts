@@ -85,7 +85,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
-[ AwaitInput incontext a_event a_buffer a_table    done runonprompt wanttextinput;
+[ AwaitInput incontext a_event a_buffer a_table    done runonprompt wanttextinput res;
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
 		a_buffer-->0 = 0;
@@ -128,7 +128,13 @@ Include (-
 		sline1 = score; sline2 = turns;
 		if (location ~= nothing && parent(player) ~= nothing) DrawStatusLine();
 	
-		! ### test or command-stream input? if so, grab it rather than requesting new input. Jump to right after the glk_select.
+		! If test input is pending, grab it rather than requesting new input.
+		#Ifdef DEBUG; #Iftrue ({-value:NUMBER_CREATED(test_scenario)} > 0);
+		res = CheckTestInput(gg_event, a_buffer);
+		if (res) {
+			jump GotEvent;
+		}
+		#Endif; #Endif;
 		
 		! Adjust the Glk input requests to match what the game wants. This may involve setting or cancelling requests.
 		wanttextinput = GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) );
@@ -162,6 +168,8 @@ Include (-
 
 		! We always use gg_event as a short-term event buffer (as does the rest of the library). The a_event argument refers to a separate buffer which the caller provides to return an event in.
 		glk_select(gg_event);
+		.GotEvent;
+		
 		!### rulebook
 		switch (gg_event-->0) {
 			evtype_Arrange:
@@ -973,12 +981,109 @@ Include (-
 
 -) instead of "Noun Domain" in "Parser.i6t".
 
-[### temporary]
+
 Include (-
-!### temp shim, called from Tests.i6t
-[ VM_ReadKeyboard a_buffer a_parse;
-];
+! KeyboardPrimitive no longer exists.
 -) instead of "Keyboard Primitive" in "Parser.i6t".
+
+
+Include (-
+
+#Iftrue ({-value:NUMBER_CREATED(test_scenario)} > 0);
+
+[ TestScriptSub;
+	switch(special_word) {
+{-call:PL::Parsing::TestScripts::compile_switch}
+	default:
+		print ">--> The following tests are available:^";
+{-call:PL::Parsing::TestScripts::compile_printout}
+	}
+];
+
+#ifdef TARGET_GLULX;
+Constant TEST_STACK_SIZE = 128;
+#ifnot;
+Constant TEST_STACK_SIZE = 48;
+#endif;
+
+Array test_stack --> TEST_STACK_SIZE;
+Global test_sp = 0;
+[ TestStart T R l k;
+	if (test_sp >= TEST_STACK_SIZE) ">--> Testing too many levels deep";
+	test_stack-->test_sp = T;
+	test_stack-->(test_sp+1) = 0;
+	test_stack-->(test_sp+3) = l;
+	test_sp = test_sp + 4;
+	if ((R-->0) && (R-->0 ~= real_location)) {
+	     print "(first moving to ", (name) R-->0, ")^";
+	     PlayerTo(R-->0, 1);
+	}
+	k=1;
+	while (R-->k) {
+	    if (R-->k notin player) {
+	        print "(first acquiring ", (the) R-->k, ")^";
+	        move R-->k to player;
+	    }
+	    k++;
+	}
+	print "(Testing.)^"; say__p = 1;
+];
+
+! CheckTestInput: If a test input is pending, this fills out the event and buffer structure and returns true. Otherwise it returns false.
+! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this function will currently only generate events of that type.
+
+[ CheckTestInput a_event a_buffer    p i j l spaced ch;
+	if (test_sp == 0) {
+		test_stack-->2 = 1;
+		return false;
+	}
+
+	p = test_stack-->(test_sp-4);
+	i = test_stack-->(test_sp-3);
+	l = test_stack-->(test_sp-1);
+	print "[";
+	print test_stack-->2;
+	print "] ";
+	test_stack-->2 = test_stack-->2 + 1;
+	style bold;
+	while ((i < l) && (p->i ~= '/')) {
+		ch = p->i;
+		if (spaced || (ch ~= ' ')) {
+			if ((p->i == '[') && (p->(i+1) == '/') && (p->(i+2) == ']')) {
+				ch = '/'; i = i+2;
+			}
+			a_buffer->(j+WORDSIZE) = ch;
+			print (char) ch;
+			i++; j++;
+			spaced = true;
+		} else i++;
+	}
+	style roman;
+	print "^";
+	
+	! Fill out the event structure.
+	a_event-->0 = evtype_LineInput;
+	a_event-->1 = gg_mainwin;
+	a_event-->2 = j;
+	! (We don't have to tokenize; AwaitInput will handle that.)
+	
+	if (p->i == '/') i++;
+	if (i >= l) {
+		test_sp = test_sp - 4;
+	} else test_stack-->(test_sp-3) = i;
+	
+	return true;
+];
+
+#IFNOT;
+
+[ TestScriptSub;
+	">--> No test scripts exist for this game.";
+];
+
+#ENDIF;
+
+-) instead of "Test Command" in "Tests.i6t".
 
 
 Unified Glulx Input ends here.
