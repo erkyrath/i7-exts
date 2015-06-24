@@ -1,5 +1,7 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
+Chapter - Types and Rulebooks
+
 Section - Basic Types
 
 Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context.
@@ -71,6 +73,8 @@ Array inputevent --> 4;
 Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
+
+Chapter - Our Core Routines
 
 Section - AwaitInput
 
@@ -322,6 +326,8 @@ Include (-
 -) instead of "Reading the Command" in "Parser.i6t".
 
 
+Chapter - High-Level Input Routines
+
 Section - Yes-No Questions
 
 Include (-
@@ -406,7 +412,12 @@ Include (-
 -) instead of "Read The Final Answer Rule" in "OrderOfPlay.i6t".
 
 
-Section - Parser Code Replacements
+Section - Wait For A Key
+
+[###?]
+
+
+Chapter - Parser Code Replacements
 
 [Replacements for the parser code that used to call Keyboard(). It now calls ParserInput() with a slightly different calling convention. Only the bits of code around the ParserInput() calls has changed.]
 
