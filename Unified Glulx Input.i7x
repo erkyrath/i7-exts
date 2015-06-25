@@ -74,12 +74,20 @@ Section - Handling Input
 The handling input rules are an input-context based rulebook.
 
 To decide what g-event is the current input event: (- InputContextEvType() -).
+To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
 
 Include (-
 [ InputContextEvType;
 	if (~~handling_input_context-->0)
 		return evtype_None;
 	return (handling_input_context-->0)-->0;
+];
+[ InputContextEvTypeIs typ;
+	if (~~handling_input_context-->0)
+		return false;
+	if ((handling_input_context-->0)-->0 == typ)
+		return true;
+	return false;
 ];
 -).
 
@@ -89,11 +97,11 @@ To reject the/-- input event: (- RulebookFails(); rtrue; -).
 
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
-Handling input rule when the current input event is arrange-event (this is the standard redraw status line on arrange rule):
+Handling input rule when handling arrange-event (this is the standard redraw status line on arrange rule):
 	redraw the status line;
 	reject input event.
 
-Handling input rule when the current input event is line-event (this is the standard accept line input rule):
+Handling input rule when handling line-event (this is the standard accept line input rule):
 	accept input event.
 
 
