@@ -130,8 +130,8 @@ Include (-
 	
 		! If test input is pending, grab it rather than requesting new input.
 		#Ifdef DEBUG; #Iftrue ({-value:NUMBER_CREATED(test_scenario)} > 0);
-		res = CheckTestInput(gg_event, a_buffer);
-		if (res && gg_event-->0) {
+		res = CheckTestInput(a_event, a_buffer);
+		if (res && a_event-->0) {
 			jump GotEvent;
 		}
 		#Endif; #Endif;
@@ -172,18 +172,20 @@ Include (-
 			(+ story-window +).current_input_request = (+ char-input +);
 		}
 
-		! We always use gg_event as a short-term event buffer (as does the rest of the library). The a_event argument refers to a separate buffer which the caller provides to return an event in.
-		glk_select(gg_event);
+		glk_select(a_event);
 		.GotEvent;
 		
 		!### rulebook
-		switch (gg_event-->0) {
+		switch (a_event-->0) {
 			evtype_Arrange:
 				DrawStatusLine();
+			evtype_CharInput:
+				(+ story-window +).current_input_request = (+ no-input +); ! complete
+				print "Keystroke!^";
 			evtype_LineInput:
-				if (gg_event-->1 == gg_mainwin) {
+				if (a_event-->1 == gg_mainwin) {
 					(+ story-window +).current_input_request = (+ no-input +); ! complete
-					a_buffer-->0 = gg_event-->2;
+					a_buffer-->0 = a_event-->2;
 					if (a_table) {
 						VM_Tokenise(a_buffer, a_table);
 					}
@@ -194,7 +196,7 @@ Include (-
 		
 		! End of loop. If done is set, we exit.
 	}
-
+	
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
@@ -1214,6 +1216,7 @@ Default: no change.
 A rejection here is an undo point (unfortunately). Same goes for text input that is rejected later by the parser.
 
 Principles:
+- This extension needs to be in charge of all Glk input requests for the story window. Don't try to set or cancel requests except through these APIs. (See the "setting up input" rulebook.)
 - Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
 - In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
 - The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
