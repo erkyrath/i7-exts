@@ -85,7 +85,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
-[ AwaitInput incontext a_event a_buffer a_table    done runonprompt wanttextinput res;
+[ AwaitInput incontext a_event a_buffer a_table    done runonprompt wanttextinput res val len;
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
 		a_buffer-->0 = 0;
@@ -104,6 +104,7 @@ Include (-
 	
 		! If we're not already awaiting input, print the prompt. We also take care of other beginning-of-turn business, like showing RTPs and quote-boxes and cleaning up leftover italics and what not.
 		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
+		!### what about input events when there's no text input at all? E.g. a hyperlink-only game. We should only re-print the prompt if the event printed output, but this may be hard to check. Might need a phrase to signal "I printed stuff".
 		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
 			! This block emulates the old PrintPrompt call. ### make activity before/after?
 			! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* go in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
@@ -157,8 +158,12 @@ Include (-
 	
 		if ( (+ story-window +).current_input_request ~= (+ line-input +) && wanttextinput == (+ line-input +)) {
 			!print "(DEBUG) req line input mode^";
-			!### permit preload via preload-input-text
-			glk_request_line_event(gg_mainwin, a_buffer+WORDSIZE, INPUT_BUFFER_LEN-WORDSIZE, 0);
+			len = 0;
+			val = GProperty(OBJECT_TY, (+ story-window +), (+ preload-input-text +) );
+			if (~~TEXT_TY_Empty(val)) {
+				len = VM_PrintToBuffer(a_buffer, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, val);
+			}
+			glk_request_line_event(gg_mainwin, a_buffer+WORDSIZE, INPUT_BUFFER_LEN-WORDSIZE, len);
 			(+ story-window +).current_input_request = (+ line-input +);
 		}
 		if ( (+ story-window +).current_input_request ~= (+ char-input +) && wanttextinput == (+ char-input +)) {
