@@ -169,7 +169,7 @@ Include (-
 		if ( (+ story-window +).current_input_request ~= (+ char-input +) && wanttextinput == (+ char-input +)) {
 			!print "(DEBUG) req char input mode^";
 			glk_request_char_event(gg_mainwin);
-			(+ story-window +).current_input_request = (+ line-input +);
+			(+ story-window +).current_input_request = (+ char-input +);
 		}
 
 		! We always use gg_event as a short-term event buffer (as does the rest of the library). The a_event argument refers to a separate buffer which the caller provides to return an event in.
