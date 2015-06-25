@@ -73,8 +73,9 @@ Section - Handling Input
 
 The handling input rules are an input-context based rulebook.
 
-To decide what g-event is the current input event: (- InputContextEvType() -).
+To decide what g-event is the current input event type: (- InputContextEvType() -).
 To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
+To decide what Unicode character is the current input event character: (- InputContextEvChar() -).
 
 Include (-
 [ InputContextEvType;
@@ -88,6 +89,13 @@ Include (-
 	if ((handling_input_context-->0)-->0 == typ)
 		return true;
 	return false;
+];
+[ InputContextEvChar;
+	if (~~handling_input_context-->0)
+		return 0;
+	if ((handling_input_context-->0)-->0 ~= evtype_CharInput)
+		return 0;
+	return (handling_input_context-->0)-->2;
 ];
 -).
 
@@ -221,7 +229,7 @@ Include (-
 		}
 		if ( (+ story-window +).current_input_request ~= (+ char-input +) && wanttextinput == (+ char-input +)) {
 			!print "(DEBUG) req char input mode^";
-			glk_request_char_event(gg_mainwin);
+			glk_request_char_event_uni(gg_mainwin);
 			(+ story-window +).current_input_request = (+ char-input +);
 		}
 
