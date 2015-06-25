@@ -22,6 +22,11 @@ Include (-
 The story-window is a glk-window. The input-request of the story-window is line-input.
 The status-window is a glk-window.
 
+[These values match up to evtype_Timer, evtype_CharInput, etc because they are defined in the same order.]
+A g-event is a kind of value. The g-events are timer-event, char-event, line-event, mouse-event, arrange-event, redraw-event, sound-notify-event, and hyperlink-event.
+
+To decide which g-event is null-event: (- 0 -)
+
 
 Section - Setting Up Input
 
@@ -64,6 +69,34 @@ Last prompt displaying rule for an input-context (this is the default prompt rul
 	instead say the command prompt.
 
 
+Section - Handling Input
+
+The handling input rules are an input-context based rulebook.
+
+To decide what g-event is the current input event: (- InputContextEvType() -).
+
+Include (-
+[ InputContextEvType;
+	if (~~handling_input_context-->0)
+		return evtype_None;
+	return (handling_input_context-->0)-->0;
+];
+-).
+
+[Handy synonyms for "rule succeeds" and "rule fails".]
+To accept the/-- input event: (- RulebookSucceeds(); rtrue; -).
+To reject the/-- input event: (- RulebookFails(); rtrue; -).
+
+To update/redraw the/-- status line: (- DrawStatusLine(); -).
+
+Handling input rule when the current input event is arrange-event (this is the standard redraw status line on arrange rule):
+	redraw the status line;
+	reject input event.
+
+Handling input rule when the current input event is line-event (this is the standard accept line input rule):
+	accept input event.
+
+
 Section - A Few Globals
 
 [These event structures are now used in parallel with the buffer and parse arrays. For example, we'll call ParserInput(context, inputevent, buffer, parse) or ParserInput(context, inputevent2, buffer2, parse2).]
@@ -73,6 +106,12 @@ Array inputevent --> 4;
 Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
+[Globals used within the handling input rulebook. (I'd like to make these rulebook variables, but that turns out to be awkward. You can't easily write I6 helper functions that work on rulebook variables. Well, it's not like handling input ever has to be called recursively.]
+
+Include (-
+! Array contains: a_event, a_buffer, a_table
+Array handling_input_context --> 3;
+-) after "Variables and Arrays" in "Glulx.i6t";
 
 Chapter - Our Core Routines
 
@@ -85,7 +124,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (If the caller is not interested in line input, the latter two arguments are ignored.)
 
-[ AwaitInput incontext a_event a_buffer a_table    done runonprompt wanttextinput res val len;
+[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput res val len;
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
 		a_buffer-->0 = 0;
@@ -99,8 +138,14 @@ Include (-
 	
 	! When this function begins, the window is not awaiting any input (except perhaps timer input).
 	
-	done = false;
-	while (~~done) {
+	if (handling_input_context-->0 ~= 0) {
+		print "(BUG) AwaitInput called recursively!^";
+	}
+	handling_input_context-->0 = a_event;
+	handling_input_context-->1 = a_buffer;
+	handling_input_context-->2 = a_table;
+	
+	while (true) {
 	
 		! If we're not already awaiting input, print the prompt. We also take care of other beginning-of-turn business, like showing RTPs and quote-boxes and cleaning up leftover italics and what not.
 		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
@@ -175,28 +220,35 @@ Include (-
 		glk_select(a_event);
 		.GotEvent;
 		
-		!### rulebook
 		switch (a_event-->0) {
-			evtype_Arrange:
-				DrawStatusLine();
 			evtype_CharInput:
-				(+ story-window +).current_input_request = (+ no-input +); ! complete
-				print "Keystroke!^";
+				if (a_event-->1 == gg_mainwin) {
+					(+ story-window +).current_input_request = (+ no-input +); ! request complete
+				}
 			evtype_LineInput:
 				if (a_event-->1 == gg_mainwin) {
-					(+ story-window +).current_input_request = (+ no-input +); ! complete
+					(+ story-window +).current_input_request = (+ no-input +); ! request complete
 					a_buffer-->0 = a_event-->2;
 					if (a_table) {
 						VM_Tokenise(a_buffer, a_table);
 					}
 					!### write to command stream if open
-					done = true;
 				}
 		}
-		
-		! End of loop. If done is set, we exit.
+		FollowRulebook((+ handling input rules +), incontext, true);
+		if (RulebookFailed()) {
+			continue;
+		}
+		if (RulebookSucceeded()) {
+			break;
+		}
+		! End of loop.
 	}
 	
+	handling_input_context-->0 = 0;
+	handling_input_context-->1 = 0;
+	handling_input_context-->2 = 0;
+
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
