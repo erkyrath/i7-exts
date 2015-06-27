@@ -151,6 +151,8 @@ Section - Handling Input
 
 The handling input rules are an input-context based rulebook.
 
+[Some phrases for use in the handling input rulebook. Do not try to use them anywhere else!]
+
 To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
 To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
 To decide what Unicode character is the/-- current input event char/character: (- InputContextEvChar() -).
@@ -407,6 +409,9 @@ Include (-
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
 		Memcpy(oops_workspace, a_buffer, 64);
+		
+		! Clear the player's-command snippet.
+		players_command = 100;
 		
 		! Set up the input requests. (Normally just line input, but the game can customize this.)
 		FollowRulebook((+ setting up input rules +), incontext, true);
@@ -1389,6 +1394,7 @@ Principles:
 - Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
 - In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
 - The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
+- The player's command (snippet) is not available during "handling input".
 
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
