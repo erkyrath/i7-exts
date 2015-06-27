@@ -1,5 +1,7 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
+[### This extension is a work in progress.]
+
 Chapter - Types and Rulebooks
 
 Section - Basic Types
