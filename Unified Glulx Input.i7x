@@ -2,7 +2,7 @@ Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### This extension is a work in progress.]
 
-Chapter - Types and Rulebooks
+Chapter - Constants and Variables
 
 Section - Basic Types
 
@@ -28,6 +28,23 @@ The status-window is a glk-window.
 A g-event is a kind of value. The g-events are timer-event, char-event, line-event, mouse-event, arrange-event, redraw-event, sound-notify-event, and hyperlink-event.
 
 To decide which g-event is null-event: (- 0 -)
+
+
+Section - A Few Globals
+
+[These event structures are now used in parallel with the buffer and parse arrays. For example, we'll call ParserInput(context, inputevent, buffer, parse) or ParserInput(context, inputevent2, buffer2, parse2).]
+
+Include (-
+Array inputevent --> 4;
+Array inputevent2 --> 4;
+-) after "Variables and Arrays" in "Glulx.i6t";
+
+[Globals used within the handling input rulebook. (I'd like to make these rulebook variables, but that turns out to be awkward. You can't easily write I6 helper functions that work on rulebook variables. Well, it's not like handling input ever has to be called recursively.]
+
+Include (-
+! Array contains: a_event, a_buffer, a_table
+Array handling_input_context --> 3;
+-) after "Variables and Arrays" in "Glulx.i6t";
 
 
 Section - Glk Special Keycodes
@@ -105,6 +122,8 @@ Include (-
 
 -).
 
+
+Chapter - New Rulebooks
 
 Section - Setting Up Input
 
@@ -208,6 +227,8 @@ To reject the/-- input event: (- RulebookFails(); rtrue; -).
 
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
+[Standard rules:]
+
 Handling input rule when handling arrange-event (this is the standard redraw status line on arrange rule):
 	redraw the status line;
 	reject input event.
@@ -216,21 +237,12 @@ Handling input rule when handling line-event (this is the standard accept line i
 	accept input event.
 
 
-Section - A Few Globals
+Section - Accepting a Command
 
-[These event structures are now used in parallel with the buffer and parse arrays. For example, we'll call ParserInput(context, inputevent, buffer, parse) or ParserInput(context, inputevent2, buffer2, parse2).]
+The accepting a command rules are an input-context based rulebook.
 
-Include (-
-Array inputevent --> 4;
-Array inputevent2 --> 4;
--) after "Variables and Arrays" in "Glulx.i6t";
+[This rulebook is empty by default.]
 
-[Globals used within the handling input rulebook. (I'd like to make these rulebook variables, but that turns out to be awkward. You can't easily write I6 helper functions that work on rulebook variables. Well, it's not like handling input ever has to be called recursively.]
-
-Include (-
-! Array contains: a_event, a_buffer, a_table
-Array handling_input_context --> 3;
--) after "Variables and Arrays" in "Glulx.i6t";
 
 Chapter - Our Core Routines
 
@@ -1394,7 +1406,7 @@ Principles:
 - Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
 - In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
 - The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
-- The player's command (snippet) is not available during "handling input".
+- The player's command (snippet) is not available during "handling input". Line input is tokenized, but the WordCount/WordAddres/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
 
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
