@@ -1407,3 +1407,31 @@ Test cases:
 - Hyperlinks that create synthetic text input
 - A game that changes input modes inside AwaitInput
 
+Example: * Changing the Prompt - Changing the command prompt in various contexts.
+
+The old "command prompt" global variable still works, but we'd like a more rule-based approach. Here we use "What now?" for the command prompt (both primary and disambiguation) and "Answer now!" for the final question.
+
+We also use an extended form of the "player consents" phrase, in which we supply the prompt question to use.
+
+	*: "Changing the Prompt"
+	
+	Include Unified Glulx Input by Andrew Plotkin.
+
+	Prompt displaying rule for a command input-context:
+		instead say "What now? ".
+
+	Prompt displaying rule for the final question context:
+		instead say "Answer now! ".
+
+	The Kitchen is a room. "You are in a kitchen."
+	The Outdoors is outside from the Kitchen.
+
+	Check going outside:
+		if the player consents asking "Outdoors is scary. Are you sure?" and "That was a yes/no question.":
+			instead end the story finally;
+		else:
+			instead say "You fail to overcome your agoraphobia.";
+
+	Test me with "out / maybe / no / out / yes".
+
+
