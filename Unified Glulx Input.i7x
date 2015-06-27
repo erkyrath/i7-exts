@@ -28,6 +28,82 @@ A g-event is a kind of value. The g-events are timer-event, char-event, line-eve
 To decide which g-event is null-event: (- 0 -)
 
 
+Section - Glk Special Keycodes
+
+[These are not true Unicode characters, but character input events can contain them, so we need definitions. Do not try to print these values using the usual I7 say phrase! The phrase "say extended C" will print both normal and special Unicode values.]
+
+To decide which Unicode character is special keycode left: (- keycode_Left -).
+To decide which Unicode character is special keycode right: (- keycode_Right -).
+To decide which Unicode character is special keycode up: (- keycode_Up -).
+To decide which Unicode character is special keycode down: (- keycode_Down -).
+To decide which Unicode character is special keycode return: (- keycode_Return -).
+To decide which Unicode character is special keycode delete: (- keycode_Delete -).
+To decide which Unicode character is special keycode escape: (- keycode_Escape -).
+To decide which Unicode character is special keycode tab: (- keycode_Tab -).
+To decide which Unicode character is special keycode pageup: (- keycode_PageUp -).
+To decide which Unicode character is special keycode pagedown: (- keycode_PageDown -).
+To decide which Unicode character is special keycode home: (- keycode_Home -).
+To decide which Unicode character is special keycode end: (- keycode_End -).
+To decide which Unicode character is special keycode func1: (- keycode_Func1 -).
+To decide which Unicode character is special keycode func2: (- keycode_Func2 -).
+To decide which Unicode character is special keycode func3: (- keycode_Func3 -).
+To decide which Unicode character is special keycode func4: (- keycode_Func4 -).
+To decide which Unicode character is special keycode func5: (- keycode_Func5 -).
+To decide which Unicode character is special keycode func6: (- keycode_Func6 -).
+To decide which Unicode character is special keycode func7: (- keycode_Func7 -).
+To decide which Unicode character is special keycode func8: (- keycode_Func8 -).
+To decide which Unicode character is special keycode func9: (- keycode_Func9 -).
+To decide which Unicode character is special keycode func10: (- keycode_Func10 -).
+To decide which Unicode character is special keycode func11: (- keycode_Func11 -).
+To decide which Unicode character is special keycode func12: (- keycode_Func12 -).
+
+Definition: a Unicode character is a special keycode if I6 routine "UnicodeCharIsSpecial" says so (it is a control key like tab, escape, or arrow keys).
+To say extended (C - Unicode character): (- PrintUnicodeSpecialName({C}); -).
+
+Include (-
+[ UnicodeCharIsSpecial ch;
+	if (ch < 0 && ch >= -keycode_MAXVAL)
+		rtrue;
+	rfalse;
+];
+
+[ PrintUnicodeSpecialName ch;
+	if (ch >= 0 && ch < $110000) {
+		@streamunichar ch;
+		return;
+	}
+	switch (ch) {
+		keycode_Left: print "left";
+		keycode_Right: print "right";
+		keycode_Up: print "up";
+		keycode_Down: print "down";
+		keycode_Return: print "return";
+		keycode_Delete: print "delete";
+		keycode_Escape: print "escape";
+		keycode_Tab: print "tab";
+		keycode_PageUp: print "pageup";
+		keycode_PageDown: print "pagedown";
+		keycode_Home: print "home";
+		keycode_End: print "end";
+		keycode_Func1: print "func1";
+		keycode_Func2: print "func2";
+		keycode_Func3: print "func3";
+		keycode_Func4: print "func4";
+		keycode_Func5: print "func5";
+		keycode_Func6: print "func6";
+		keycode_Func7: print "func7";
+		keycode_Func8: print "func8";
+		keycode_Func9: print "func9";
+		keycode_Func10: print "func10";
+		keycode_Func11: print "func11";
+		keycode_Func12: print "func12";
+		default: print "unknown";
+	}
+];
+
+-).
+
+
 Section - Setting Up Input
 
 [This rulebook sets up the input requests for parser input (the command contexts, not the yes-or-no or final questions). It is called at the top of the ParserInput loop.]
