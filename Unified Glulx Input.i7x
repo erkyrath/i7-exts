@@ -75,10 +75,10 @@ The handling input rules are an input-context based rulebook.
 
 To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
 To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
-To decide what Unicode character is the/-- current input event character: (- InputContextEvChar() -).
+To decide what Unicode character is the/-- current input event char/character: (- InputContextEvChar() -).
 
-To replace the/-- current input event with line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
-To replace the/-- current input event with char (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
+To replace the/-- current input event with the/-- line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
+To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
 
 Include (-
 [ InputContextEvType;
