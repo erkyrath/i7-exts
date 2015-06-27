@@ -1435,3 +1435,84 @@ We also use an extended form of the "player consents" phrase, in which we supply
 	Test me with "out / maybe / no / out / yes".
 
 
+Example: * Keystroke Input - Controlling the game with single keystrokes.
+
+In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach; see the next example for a tidier model.)
+
+	*: "Keystroke Input"
+
+	Include Unified Glulx Input by Andrew Plotkin.
+	Include Unicode Character Names by Graham Nelson.
+
+	The Kitchen is a room. "You are in a kitchen. An open trap door beckons you downward."
+
+	Aboveground is a region. The Kitchen is in Aboveground.
+
+	Maze10 is a room. "You are in a maze of twisty passages, basically all alike."
+	Maze20 is a room. "You are in a maze of twisty passages, all pretty much alike."
+	Maze01 is a room. "You are in a maze of twisty passages, all basically alike."
+	Maze11 is a room. "You are in a maze of twisty passages, all kind of alike."
+	Maze21 is a room. "You are in a maze of twisty passages, more or less all alike."
+	Maze02 is a room. "You are in a maze of twisty passages, pretty much all alike."
+	Maze12 is a room. "You are in a maze of twisty passages, all alike."
+	Maze22 is a room. "You are in a maze of twisty passages, all more or less alike."
+	Maze32 is a room. "You are in a maze of twisty passages, all sort of alike."
+	Maze03 is a room. "You are in a maze of twisty passages, kind of all alike."
+	Maze13 is a room. "You are in a maze of twisty passages, all quite alike."
+	Maze23 is a room. "You are in a maze of twisty passages, quite all alike."
+	Maze33 is a room. "You are in a maze of twisty passages, sort of all alike."
+
+	Maze12 is below the Kitchen.
+	Maze10 is west of Maze20. 
+	Maze10 is north of Maze11. Maze20 is north of Maze21.
+	Maze01 is west of Maze11. Maze11 is west of Maze21.
+	Maze01 is north of Maze02. Maze11 is north of Maze12.
+	Maze02 is west of Maze12. Maze12 is west of Maze22. Maze22 is west of Maze32.
+	Maze12 is north of Maze13. Maze22 is north of Maze23. Maze32 is north of Maze33.
+	Maze03 is west of Maze13. Maze23 is west of Maze33.
+
+	Rule for printing the name of a room (called R) when R is not in Aboveground:
+		say "Maze".
+
+	Check going down from the Kitchen:
+		say "(Down here, single-keystroke commands rule. Use the arrow keys or NSEW to move around; U or escape to quit.)";
+		continue the action.
+
+	Check going up when the location is not in Aboveground:
+		say "You fumble your way back to the light.";
+		now the player is in the Kitchen;
+		stop the action.
+
+	Prompt displaying rule when the location is not in Aboveground:
+		instead say "==>".
+
+	Setting up input rule when the location is not in Aboveground:
+		now the input-request of the story-window is char-input;
+		rule succeeds.
+
+	Handling input rule when the location is not in Aboveground and handling char-event:
+		let C be the current input event character;
+		if C is special keycode left or C is Unicode Latin small letter w or C is Unicode Latin capital letter W:
+			say "GO WEST[line break]";
+			replace the current input event with the line "go west";
+			rule succeeds;
+		if C is special keycode right or C is Unicode Latin small letter e or C is Unicode Latin capital letter E:
+			say "GO EAST[line break]";
+			replace the current input event with the line "go east";
+			rule succeeds;
+		if C is special keycode up or C is Unicode Latin small letter n or C is Unicode Latin capital letter N:
+			say "GO NORTH[line break]";
+			replace the current input event with the line "go north";
+			rule succeeds;
+		if C is special keycode down or C is Unicode Latin small letter s or C is Unicode Latin capital letter S:
+			say "GO SOUTH[line break]";
+			replace the current input event with the line "go south";
+			rule succeeds;
+		if C is special keycode escape or C is Unicode Latin small letter u or C is Unicode Latin capital letter U:
+			say "GO UP[line break]";
+			replace the current input event with the line "go up";
+			rule succeeds;
+		say " ('[extended C]')";
+		reject the input event.
+
+
