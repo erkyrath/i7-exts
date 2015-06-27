@@ -73,9 +73,12 @@ Section - Handling Input
 
 The handling input rules are an input-context based rulebook.
 
-To decide what g-event is the current input event type: (- InputContextEvType() -).
+To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
 To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
-To decide what Unicode character is the current input event character: (- InputContextEvChar() -).
+To decide what Unicode character is the/-- current input event character: (- InputContextEvChar() -).
+
+To replace the/-- current input event with line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
+To replace the/-- current input event with char (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
 
 Include (-
 [ InputContextEvType;
@@ -96,6 +99,26 @@ Include (-
 	if ((handling_input_context-->0)-->0 ~= evtype_CharInput)
 		return 0;
 	return (handling_input_context-->0)-->2;
+];
+[ InputContextSetEvent typ arg    ev len;
+	if (~~handling_input_context-->0)
+		return;
+	ev = handling_input_context-->0;
+	ev-->0 = typ;
+	switch (typ) {
+		evtype_CharInput:
+			ev-->1 = gg_mainwin;
+			ev-->2 = arg;
+		evtype_LineInput:
+			if (~~handling_input_context-->1)
+				return; ! No text buffer!
+			ev-->1 = gg_mainwin;
+			len = VM_PrintToBuffer(handling_input_context-->1, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
+			ev-->2 = len;
+			if (handling_input_context-->2) {
+				VM_Tokenise(handling_input_context-->1, handling_input_context-->2);
+			}
+	}
 ];
 -).
 
