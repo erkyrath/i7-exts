@@ -153,6 +153,8 @@ The repeat yes-no prompt is a text that varies.
 
 [The default prompt rules are a bit complicated because we want to keep supporting the old prompt customization tools, which date from across Inform's history. For example, the default prompt rule displays the old "command prompt" global variable, which defaults to ">".]
 
+Last prompt displaying rule for the keystroke-wait context (this is the keystroke-wait prompt rule):
+	instead say "" (A).
 Last prompt displaying rule for the yes-no question context (this is the yes-no question prompt rule):
 	instead say ">" (A).
 Last prompt displaying rule for the extended yes-no question context (this is the extended yes-no question prompt rule):
@@ -234,6 +236,9 @@ Handling input rule when handling arrange-event (this is the standard redraw sta
 	reject input event.
 
 Handling input rule when handling line-event (this is the standard accept line input rule):
+	accept input event.
+
+Handling input rule for the keystroke-wait context when handling char-event (this is the standard accept keystroke input rule):
 	accept input event.
 
 
@@ -623,9 +628,17 @@ To decide what Unicode character is the/-- key waited for: (- InputKeystroke() -
 To wait for any key: (- InputKeysUntilAny(); -).
 To wait for the/-- SPACE key: (- InputKeysUntilSpace(); -).
 
+[None of the above phrases print a prompt. The prompt displaying rulebook has a rule which prints nothing for the keystroke-wait context. You can override this rule, or simply print your own prompt before calling the phrase.]
+
 Include (-
 
 [ InputKeystroke;
+	((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+	WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ char-input +) );
+	
+	AwaitInput( (+ keystroke-wait context +), inputevent, 0, 0);
+
+	return inputevent-->2;			
 ];
 
 ! Wait for space or Enter.
