@@ -179,16 +179,19 @@ The handling input rules are an input-context based rulebook.
 To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
 To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
 To decide what Unicode character is the/-- current input event char/character: (- InputContextEvChar() -).
+To decide what number is the/-- current input event line word count: (- InputContextEvLineWordCount() -).
 
 To replace the/-- current input event with the/-- line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
 
 Include (-
+
 [ InputContextEvType;
 	if (~~handling_input_context-->0)
 		return evtype_None;
 	return (handling_input_context-->0)-->0;
 ];
+
 [ InputContextEvTypeIs typ;
 	if (~~handling_input_context-->0)
 		return false;
@@ -196,6 +199,7 @@ Include (-
 		return true;
 	return false;
 ];
+
 [ InputContextEvChar;
 	if (~~handling_input_context-->0)
 		return 0;
@@ -203,6 +207,17 @@ Include (-
 		return 0;
 	return (handling_input_context-->0)-->2;
 ];
+
+[ InputContextEvLineWordCount;
+	if (~~handling_input_context-->0)
+		return 0;
+	if ((handling_input_context-->0)-->0 ~= evtype_LineInput)
+		return 0;
+	if (~~handling_input_context-->2)
+		return 0;
+	return (handling_input_context-->2)-->0;
+];
+
 [ InputContextSetEvent typ arg    ev len;
 	if (~~handling_input_context-->0)
 		return;
@@ -423,16 +438,13 @@ Include (-
 ! ParserInput: block and await acceptable input.
 ! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
 ! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
-! In this function, unlike AwaitInput, a_event and a_buffer must both be set. They may be either buffer/table (primary context) or buffer2/table2 (disambiguation context).
+! In this function, unlike in AwaitInput, a_event and a_buffer must both be set. They may be either buffer/table (primary context) or buffer2/table2 (disambiguation context).
 
 [ ParserInput  incontext a_event a_buffer a_table    evtyp nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
 		Memcpy(oops_workspace, a_buffer, 64);
-		
-		! Clear the player's-command snippet.
-		players_command = 100;
 		
 		! Set up the input requests. (Normally just line input, but the game can customize this.)
 		FollowRulebook((+ setting up input rules +), incontext, true);
@@ -454,7 +466,7 @@ Include (-
 		! If the line was blank, get a fresh line.
 		if (evtyp == evtype_LineInput && nw == 0) {
 			@push etype; etype = BLANKLINE_PE;
-			players_command = 100;
+			! The old Keyboard routine cleared players_command here (to 100). I'm not sure why. If we're on buffer2/table2, the players_command snippet doesn't apply at all.
 			BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
 			if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
 				PARSER_ERROR_INTERNAL_RM('X', noun); new_line;
@@ -1467,7 +1479,7 @@ Principles:
 - Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
 - In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
 - The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
-- The player's command (snippet) is not available during "handling input". Line input is tokenized, but the WordCount/WordAddres/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
+- The player's command (snippet) is not available during "handling input" or "accepting a command". Line input is tokenized, but the WordCount/WordAddress/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
 
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
