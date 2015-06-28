@@ -263,6 +263,7 @@ Include (-
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (The latter two arguments are optional; if not supplied then line input cannot be accepted. If a_buffer is supplied but a_table is not, then line input will be accepted but not tokenized.)
 
 [ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput res val len;
+	! Clear our argument arrays (if present).
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
 		a_buffer-->0 = 0;
