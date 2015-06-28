@@ -1268,11 +1268,16 @@ Global test_sp = 0;
 ];
 
 ! CheckTestInput: If a test input is pending, this fills out the event and buffer structure and returns true. Otherwise it returns false.
-! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this function currently only generates events of that type.
+! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this function currently only returns events of that type.
+! Note that a_buffer may be 0. If so, we cannot return a line input event, so we do nothing. (We could return other event types if we had them.)
 
 [ CheckTestInput a_event a_buffer    p i j l spaced ch;
 	if (test_sp == 0) {
 		test_stack-->2 = 1;
+		return false;
+	}
+	
+	if (~~a_buffer) {
 		return false;
 	}
 
