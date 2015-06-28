@@ -704,6 +704,7 @@ Include (-
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
+		num_words = 0; players_command = 100;
 		ParserInput( (+ primary context +), inputevent, buffer, parse);
 		num_words = WordCount(); players_command = 100 + num_words;
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
