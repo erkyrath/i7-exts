@@ -6,7 +6,7 @@ Chapter - Constants and Variables
 
 Section - Basic Types
 
-Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context.
+Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context, keystroke-wait context.
 
 Definition: an input-context is command if it is primary context or it is disambiguation context.
 Definition: an input-context is yes-no if it is yes-no question context or it is extended yes-no question context or it is repeat yes-no question context.
@@ -616,7 +616,38 @@ Include (-
 
 Section - Wait For A Key
 
-[###?]
+[Block and wait for a key to be struck. The return value will be a Unicode character or one of the Glk special keycodes.]
+To decide what Unicode character is the/-- key waited for: (- InputKeystroke() -).
+
+[These phrases follow the definitions in Basic Screen Effects.]
+To wait for any key: (- InputKeysUntilAny(); -).
+To wait for the/-- SPACE key: (- InputKeysUntilSpace(); -).
+
+Include (-
+
+[ InputKeystroke;
+];
+
+! Wait for space or Enter.
+[ InputKeysUntilSpace ch;
+	while (true) {
+		ch = InputKeystroke();
+		if (ch == ' ' || ch == keycode_Return)
+			return;
+	}
+];
+
+! Wait for a safe (non-navigating) key. The user might press Down/PgDn or use the mouse scroll wheel to scroll a page of text, so we will ignore those.
+[ InputKeysUntilAny ch;
+	while (true) {
+		ch = InputKeystroke();
+		if (ch == keycode_Up or keycode_Down or keycode_PageUp or keycode_PageDown or keycode_Home or keycode_End)
+			continue;
+		return;
+	}
+];
+
+-).
 
 
 Chapter - Parser Code Replacements
