@@ -41,7 +41,7 @@ Array inputevent --> 4;
 Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
-[Globals used within the handling input rulebook. (I'd like to make these rulebook variables, but that turns out to be awkward. You can't easily write I6 helper functions that work on rulebook variables. Well, it's not like handling input ever has to be called recursively.]
+[Globals used within the accepting input rulebook. (I'd like to make these rulebook variables, but that turns out to be awkward. You can't easily write I6 helper functions that work on rulebook variables. Well, it's not like accepting input ever has to be called recursively.]
 
 Include (-
 ! Array contains: a_event, a_buffer, a_table
@@ -170,11 +170,11 @@ Last prompt displaying rule for an input-context (this is the default prompt rul
 	instead say the command prompt.
 
 
-Section - Handling Input
+Section - Accepting Input
 
-The handling input rules are an input-context based rulebook.
+The accepting input rules are an input-context based rulebook.
 
-[Some phrases for use in the handling input rulebook. Do not try to use them anywhere else!]
+[Some phrases for use in the accepting input rulebook. Do not try to use them anywhere else!]
 
 To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
 To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
@@ -248,14 +248,14 @@ To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
 [Standard rules:]
 
-Handling input rule when handling arrange-event (this is the standard redraw status line on arrange rule):
+Accepting input rule when handling arrange-event (this is the standard redraw status line on arrange rule):
 	redraw the status line;
 	reject input event.
 
-Handling input rule when handling line-event (this is the standard accept line input rule):
+Accepting input rule when handling line-event (this is the standard accept line input rule):
 	accept input event.
 
-Handling input rule for the keystroke-wait context when handling char-event (this is the standard accept keystroke input rule):
+Accepting input rule for the keystroke-wait context when handling char-event (this is the standard accept keystroke input rule):
 	accept input event.
 
 
@@ -389,7 +389,7 @@ Include (-
 					!### write to command stream if open
 				}
 		}
-		FollowRulebook((+ handling input rules +), incontext, true);
+		FollowRulebook((+ accepting input rules +), incontext, true);
 		if (RulebookFailed()) {
 			continue;
 		}
@@ -1459,7 +1459,7 @@ Default: request line input only.
 
 Default: print ">" or one of the yes-no/final prompts.
 
-"Handling input": Called in the AwaitInput loop after glk_select. Decide whether to accept event, reject it, or rewrite and accept it (as a different event). Can also change input requests.
+"Accepting input": Called in the AwaitInput loop after glk_select. Decide whether to accept event, reject it, or rewrite and accept it (as a different event). Can also change input requests.
 
 Default: arrange->status line; text/mouse/hyperlink->accept.
 
@@ -1478,9 +1478,9 @@ A rejection here is an undo point (unfortunately). Same goes for text input that
 Principles:
 - This extension needs to be in charge of all Glk input requests for the story window. Don't try to set or cancel requests except through these APIs. (See the "setting up input" rulebook.)
 - Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
-- In "handling input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
-- The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "handling input" tells it to keep looping. (Either or both may be unneeded.)
-- The player's command (snippet) is not available during "handling input" or "accepting a command". Line input is tokenized, but the WordCount/WordAddress/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
+- In "accepting input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
+- The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "accepting input" tells it to keep looping. (Either or both may be unneeded.)
+- The player's command (snippet) is not available during "accepting input" or "accepting a command". Line input is tokenized, but the WordCount/WordAddress/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
 
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
@@ -1584,7 +1584,7 @@ In this example, the underworld uses a different input mechanism: single keystro
 		now the input-request of the story-window is char-input;
 		rule succeeds.
 
-	Handling input rule when the location is not in Aboveground and handling char-event:
+	Accepting input rule when the location is not in Aboveground and handling char-event:
 		let C be the current input event character;
 		if C is special keycode left or C is Unicode Latin small letter w or C is Unicode Latin capital letter W:
 			say "GO WEST[line break]";
