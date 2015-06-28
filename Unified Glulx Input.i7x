@@ -259,9 +259,9 @@ Accepting input rule for the keystroke-wait context when handling char-event (th
 	accept input event.
 
 
-Section - Accepting a Command
+Section - Handling Input
 
-The accepting a command rules are an input-context based rulebook.
+The handling input rules are an input-context based rulebook.
 
 [This rulebook is empty by default.]
 
@@ -1469,7 +1469,7 @@ Not used for yes-no/final question input. (These are assumed to be pure text. If
 
 This will need global vars for the event/buffer/parse arrays. (Or rulebook vars?)
 
-"Accepting a command": Called after ParserInput. Can reject input event, rewrite it, accept it as-is, or accept it as a particular action (bypassing the parser).
+"Handling input": Called after ParserInput. Can reject input event, rewrite it, accept it as-is, or accept it as a particular action (bypassing the parser).
 
 Default: no change.
 
@@ -1477,10 +1477,10 @@ A rejection here is an undo point (unfortunately). Same goes for text input that
 
 Principles:
 - This extension needs to be in charge of all Glk input requests for the story window. Don't try to set or cancel requests except through these APIs. (See the "setting up input" rulebook.)
-- Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "accepting a command" (or later).
+- Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "handling input" (or later).
 - In "accepting input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
 - The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "accepting input" tells it to keep looping. (Either or both may be unneeded.)
-- The player's command (snippet) is not available during "accepting input" or "accepting a command". Line input is tokenized, but the WordCount/WordAddress/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
+- The player's command (snippet) is not available during "accepting input" or "handling input". Line input is tokenized, but the WordCount/WordAddress/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
 
 Questions:
 - Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
