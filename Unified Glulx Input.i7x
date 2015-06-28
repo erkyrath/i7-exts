@@ -6,6 +6,8 @@ Chapter - Constants and Variables
 
 Section - Basic Types
 
+Use pass blank input lines translates as (- Constant PASS_BLANK_INPUT_LINES; -). 
+
 Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context, keystroke-wait context.
 
 Definition: an input-context is command if it is primary context or it is disambiguation context.
@@ -420,8 +422,9 @@ Include (-
 ! ParserInput: block and await acceptable input.
 ! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
 ! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
+! In this function, unlike AwaitInput, a_event and a_buffer must both be set. They may be either buffer/table (primary context) or buffer2/table2 (disambiguation context).
 
-[ ParserInput  incontext a_event a_buffer a_table    nw i w w2 x1 x2;
+[ ParserInput  incontext a_event a_buffer a_table    evtyp nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
@@ -436,14 +439,19 @@ Include (-
 		! The input deed itself.
 		AwaitInput(incontext, a_event, a_buffer, a_table);
 
-		!### parse a_event via rulebook -- accept, reject, synthetic text line, or synthetic action
+		! We have an input event now, but it could be any type. If it's line input, it's been tokenized.
 		
-		! Set nw to the number of words
-		nw = a_table-->0;
+		evtyp = a_event-->0;
+		nw = 0;
 		
-		! If the line was blank, get a fresh line
-		! ### customizable? how does this interact with undo/oopsage?
-		if (nw == 0) {
+		if (evtyp == evtype_LineInput) {
+			! Set nw to the number of words
+			nw = a_table-->0;
+		}
+		
+		#ifndef PASS_BLANK_INPUT_LINES;
+		! If the line was blank, get a fresh line.
+		if (evtyp == evtype_LineInput && nw == 0) {
 			@push etype; etype = BLANKLINE_PE;
 			players_command = 100;
 			BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
@@ -454,12 +462,15 @@ Include (-
 			@pull etype;
 			continue;
 		}
+		#endif; ! PASS_BLANK_INPUT_LINES;
 		
-		! Check whether the opening word is OOPS or UNDO
+		! If this is line input, fetch the opening word.
 		w = 0;
-		if (nw) {
+		if (evtyp == evtype_LineInput && nw > 0) {
 			w = a_table-->1;
 		}
+		
+		! Oops handling
 		
 		if (w == OOPS1__WD or OOPS2__WD or OOPS3__WD) {
 			if (oops_from == 0) { PARSER_COMMAND_INTERNAL_RM('A'); new_line; continue; }
