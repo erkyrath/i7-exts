@@ -713,6 +713,7 @@ Include (-
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
     	.ReParserInput;
 		num_words = 0; players_command = 100;
+		!### handling_input_context! (rename...)
 		ParserInput( (+ primary context +), inputevent, buffer, parse);
 		FollowRulebook((+ handling input rules +), (+ primary context +), true);
 		if (RulebookFailed()) {
@@ -724,13 +725,32 @@ Include (-
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
 
   .ReParse;
+  
+	! ### if there is a generated action, we're done!
+	
+	num_words = 0; players_command = 100;
+	if (inputevent-->0 == evtype_LineInput) {
+		num_words = WordCount(); players_command = 100 + num_words;
+	}
+	
+	if (num_words == 0) {
+		! Either this was a blank line or it was not line input at all. Reject it.
+		! (Blank line input could reach this point if the PASS_BLANK_INPUT_LINES option is set.)
+		@push etype; etype = BLANKLINE_PE;
+		BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
+		if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
+			PARSER_ERROR_INTERNAL_RM('X'); new_line;
+		}
+		EndActivity(PRINTING_A_PARSER_ERROR_ACT);
+		@pull etype;
+		jump ReType;
+	}
 
     parser_inflection = name;
 
     ! Initially assume the command is aimed at the player, and the verb
     ! is the first word
 
-    num_words = WordCount(); players_command = 100 + num_words;
     wn = 1; inferred_go = false;
 
     #Ifdef LanguageToInformese;
