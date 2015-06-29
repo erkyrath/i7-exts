@@ -260,6 +260,8 @@ Accepting input rule when handling line-event (this is the standard accept line 
 Accepting input rule for the keystroke-wait context when handling char-event (this is the standard accept keystroke input rule):
 	accept input event.
 
+[### default to accepting any event if it's been requested? That would simplify life.]
+
 
 Section - Handling Input
 
