@@ -435,10 +435,11 @@ Section - ParserInput
 
 Include (-
 
-! ParserInput: block and await acceptable input.
-! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
+! ParserInput: block and await acceptable input. Returns an event in a_event; tokenized line data will be in a_buffer and a_table.
+! This is a wrapper around AwaitInput which adds "OOPS" and "UNDO" support -- features appropriate for the main parser input loop. It also permits the game to customize what kinds of input are accepted for that loop.
+! This is called from Parser Letter A (primary command input) and NounDomain (disambig inputs).
 ! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
-! In this function, unlike in AwaitInput, a_event and a_buffer must both be set. They may be either buffer/table (primary context) or buffer2/table2 (disambiguation context).
+! In this function, unlike in AwaitInput, a_buffer and a_table are both mandatory. They may be either buffer/table (primary context) or buffer2/table2 (disambiguation context).
 
 [ ParserInput  incontext a_event a_buffer a_table    evtyp nw i w w2 x1 x2;
 	! Repeat loop until an acceptable input arrives.
@@ -469,7 +470,7 @@ Include (-
 			! The old Keyboard routine cleared players_command here (to 100). I'm not sure why. If we're on buffer2/table2, the players_command snippet doesn't apply at all.
 			BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
 			if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
-				PARSER_ERROR_INTERNAL_RM('X', noun); new_line;
+				PARSER_ERROR_INTERNAL_RM('X'); new_line;
 			}
 			EndActivity(PRINTING_A_PARSER_ERROR_ACT);
 			@pull etype;
@@ -1293,7 +1294,7 @@ Global test_sp = 0;
 ];
 
 ! CheckTestInput: If a test input is pending, this fills out the event and buffer structure and returns true. Otherwise it returns false.
-! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this function currently only returns events of that type.
+! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this code only returns events of that type.
 ! Note that a_buffer may be 0. If so, we cannot return a line input event, so we do nothing. (We could return other event types if we had them.)
 
 [ CheckTestInput a_event a_buffer    p i j l spaced ch;
