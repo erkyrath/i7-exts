@@ -694,6 +694,8 @@ Include (-
 
 Chapter - Parser Code Replacements
 
+Section - Parser__parse
+
 [Replacements for the parser code that used to call Keyboard(). It now calls ParserInput() with a slightly different calling convention. Only the bits of code around the ParserInput() calls has changed.]
 
 Include (-
@@ -855,6 +857,9 @@ Include (-
     else usual_grammar_after = 0;
 
 -) instead of "Parser Letter A" in "Parser.i6t".
+
+
+Section - NounDomain
 
 Include (-
 
@@ -1248,7 +1253,8 @@ Include (-
     for (: i<INPUT_BUFFER_LEN : i++) buffer->i = ' ';
     #Endif; ! TARGET_ZCODE
 
-    return REPARSE_CODE;
+	jump RECONSTRUCT_INPUT; ! fix c.f. Mantis 1694
+    !return REPARSE_CODE;
 
 ]; ! end of NounDomain
 
@@ -1261,6 +1267,8 @@ Include (-
 ! KeyboardPrimitive no longer exists.
 -) instead of "Keyboard Primitive" in "Parser.i6t".
 
+
+Section - Test Input
 
 Include (-
 
