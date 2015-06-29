@@ -174,6 +174,12 @@ Section - Accepting Input
 
 The accepting input rules are an input-context based rulebook.
 
+[Called in AwaitEvent. On success (acceptance), AwaitEvent returns the event. On failure (rejection), AwaitEvent continues waiting.]
+
+[Handy synonyms for "rule succeeds" and "rule fails".]
+To accept the/-- input event: (- RulebookSucceeds(); rtrue; -).
+To reject the/-- input event: (- RulebookFails(); rtrue; -).
+
 [Some phrases for use in the accepting input rulebook. Do not try to use them anywhere else!]
 
 To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
@@ -240,10 +246,6 @@ Include (-
 ];
 -).
 
-[Handy synonyms for "rule succeeds" and "rule fails".]
-To accept the/-- input event: (- RulebookSucceeds(); rtrue; -).
-To reject the/-- input event: (- RulebookFails(); rtrue; -).
-
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
 [Standard rules:]
@@ -263,7 +265,9 @@ Section - Handling Input
 
 The handling input rules are an input-context based rulebook.
 
-[This rulebook is empty by default.]
+[Called after (not within) any invocation of ParserInput. If a specific action is generated, that action is performed. On failure: no action is parsed or performed.]
+
+[This rulebook is empty by default. On no result, the parser proceeds with its normal behavior: line input is parsed, other input is rejected with "I beg your pardon?"]
 
 
 Chapter - Our Core Routines
@@ -705,9 +709,16 @@ Include (-
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
+    	.ReParserInput;
 		num_words = 0; players_command = 100;
 		ParserInput( (+ primary context +), inputevent, buffer, parse);
-		num_words = WordCount(); players_command = 100 + num_words;
+		FollowRulebook((+ handling input rules +), (+ primary context +), true);
+		if (RulebookFailed()) {
+			jump ReParserInput;
+		}
+		if (inputevent-->0 == evtype_LineInput) {
+			num_words = WordCount(); players_command = 100 + num_words;
+		}
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
 
   .ReParse;
@@ -1488,7 +1499,7 @@ Questions:
 - Always run in no-echo mode? Should probably make this a global variable; certain tricks are only possible in no-echo mode.
 - HandleGlkEvent? Entirely replaced by the AwaitInput rulebook.
 - ParseToken__: Still worrying.
-- The reading-a-command activity? This only applies to complete valid commands (not disambiguations). (Except that's not consistent -- the after runs for some disambig prompts, but not all; the before applies only to primary prompts.)
+- The reading-a-command activity? This is outside handling-input. For disambiguation, handling-input applies to each player input; reading-a-command applies to the completed line. (Also, reading-a-command has access to snippets.)
 
 Test cases:
 - Change the prompt for YesOrNo, or for the main game
