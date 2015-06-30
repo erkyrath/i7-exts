@@ -42,7 +42,7 @@ Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
 
-Section - Rulebook Data
+Section - Input Rulebook Data
 
 [Globals used within the accepting input and handling input rulebooks. (Logically, these could be rulebook variables, but that turns out to be awkward. In several ways.)]
 
@@ -81,6 +81,8 @@ To decide what number is the/-- current input event line word count: (- InputRDa
 
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
+
+To handle the/-- current input event as (act - stored action): (- InputRDataParseAction({-by-reference:act}); RulebookSucceeds(); rtrue; -);
 
 Include (-
 
@@ -136,6 +138,15 @@ Include (-
 			}
 	}
 ];
+
+!### stub routine -- this only sets the action-name right now.
+[ InputRDataParseAction stora;
+	parser_results-->ACTION_PRES = BlkValueRead(stora, STORA_ACTION_F);
+	parser_results-->NO_INPS_PRES = 0;
+	parser_results-->INP1_PRES = 0;
+	parser_results-->INP2_PRES = 0;
+];
+
 -).
 
 
@@ -733,11 +744,15 @@ Include (-
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
+		if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
+			print "(BUG) Reading-a-command called recursively!^";
+		}
     	.ReParserInput;
 		num_words = 0; players_command = 100;
-		!### input_rulebook_data! (rename...)
 		ParserInput( (+ primary context +), inputevent, buffer, parse);
+    	InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
 		FollowRulebook((+ handling input rules +), (+ primary context +), true);
+		InputRDataFinal();
 		if (RulebookFailed()) {
 			jump ReParserInput;
 		}
@@ -748,7 +763,11 @@ Include (-
 
   .ReParse;
   
-	! ### if there is a generated action, we're done!
+	if (parser_results-->ACTION_PRES ~= 0) {
+		! The rulebook gave us an explicit action.
+		!### what other globals do we have to set up?
+		rtrue;
+	}
 	
 	num_words = 0; players_command = 100;
 	if (inputevent-->0 == evtype_LineInput) {
