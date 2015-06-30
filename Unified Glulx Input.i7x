@@ -809,7 +809,6 @@ Include (-
   
 	if (parser_results-->ACTION_PRES ~= 0) {
 		! The rulebook gave us an explicit action.
-		!### what other globals do we have to set up?
 		rtrue;
 	}
 	
@@ -1625,6 +1624,7 @@ Test cases:
 - Hyperlinks or text input (links used to construct actions) (links do not preserve player's partial input)
 - Hyperlinks that create synthetic text input
 - A game that changes input modes inside AwaitInput
+- A modal routine which asks for a number (digits or English).
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
 
