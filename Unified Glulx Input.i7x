@@ -41,13 +41,21 @@ Array inputevent --> 4;
 Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
-[Globals used within the accepting input rulebook. (I'd like to make these rulebook variables, but that turns out to be awkward. You can't easily write I6 helper functions that work on rulebook variables. Well, it's not like accepting input ever has to be called recursively.]
+
+Section - Rulebook Data
+
+[Globals used within the accepting input and handling input rulebooks. (Logically, these could be rulebook variables, but that turns out to be awkward. In several ways.)]
 
 Include (-
 ! Array contains: a_event, a_buffer, a_table
-Constant INPUT_RULEBOOK_SIZE 3;
+Constant INPUT_RULEBOOK_SIZE 4;
+Constant IRDAT_RB_CURRENT 0;
+Constant IRDAT_EVENT 1;
+Constant IRDAT_BUFFER 2;
+Constant IRDAT_TABLE 3;
 Array input_rulebook_data --> INPUT_RULEBOOK_SIZE;
 -) after "Variables and Arrays" in "Glulx.i6t";
+
 
 
 Section - Glk Special Keycodes
@@ -194,54 +202,54 @@ To replace the/-- current input event with the/-- char/character (C - Unicode ch
 Include (-
 
 [ InputContextEvType;
-	if (~~input_rulebook_data-->0)
+	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return evtype_None;
-	return (input_rulebook_data-->0)-->0;
+	return (input_rulebook_data-->IRDAT_EVENT)-->0;
 ];
 
 [ InputContextEvTypeIs typ;
-	if (~~input_rulebook_data-->0)
+	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return false;
-	if ((input_rulebook_data-->0)-->0 == typ)
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 == typ)
 		return true;
 	return false;
 ];
 
 [ InputContextEvChar;
-	if (~~input_rulebook_data-->0)
+	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return 0;
-	if ((input_rulebook_data-->0)-->0 ~= evtype_CharInput)
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_CharInput)
 		return 0;
-	return (input_rulebook_data-->0)-->2;
+	return (input_rulebook_data-->IRDAT_EVENT)-->2;
 ];
 
 [ InputContextEvLineWordCount;
-	if (~~input_rulebook_data-->0)
+	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return 0;
-	if ((input_rulebook_data-->0)-->0 ~= evtype_LineInput)
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
 		return 0;
-	if (~~input_rulebook_data-->2)
+	if (~~input_rulebook_data-->IRDAT_TABLE)
 		return 0;
-	return (input_rulebook_data-->2)-->0;
+	return (input_rulebook_data-->IRDAT_TABLE)-->0;
 ];
 
 [ InputContextSetEvent typ arg    ev len;
-	if (~~input_rulebook_data-->0)
+	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
-	ev = input_rulebook_data-->0;
+	ev = input_rulebook_data-->IRDAT_EVENT;
 	ev-->0 = typ;
 	switch (typ) {
 		evtype_CharInput:
 			ev-->1 = gg_mainwin;
 			ev-->2 = arg;
 		evtype_LineInput:
-			if (~~input_rulebook_data-->1)
+			if (~~input_rulebook_data-->IRDAT_BUFFER)
 				return; ! No text buffer!
 			ev-->1 = gg_mainwin;
-			len = VM_PrintToBuffer(input_rulebook_data-->1, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
+			len = VM_PrintToBuffer(input_rulebook_data-->IRDAT_BUFFER, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
 			ev-->2 = len;
-			if (input_rulebook_data-->2) {
-				VM_Tokenise(input_rulebook_data-->1, input_rulebook_data-->2);
+			if (input_rulebook_data-->IRDAT_TABLE) {
+				VM_Tokenise(input_rulebook_data-->IRDAT_BUFFER, input_rulebook_data-->IRDAT_TABLE);
 			}
 	}
 ];
@@ -299,12 +307,12 @@ Include (-
 	
 	! When this function begins, the window is not awaiting any input (except perhaps timer input).
 	
-	if (input_rulebook_data-->0 ~= 0) {
+	if (input_rulebook_data-->IRDAT_EVENT ~= 0) {
 		print "(BUG) AwaitInput called recursively!^";
 	}
-	input_rulebook_data-->0 = a_event;
-	input_rulebook_data-->1 = a_buffer;
-	input_rulebook_data-->2 = a_table;
+	input_rulebook_data-->IRDAT_EVENT = a_event;
+	input_rulebook_data-->IRDAT_BUFFER = a_buffer;
+	input_rulebook_data-->IRDAT_TABLE = a_table;
 	
 	while (true) {
 	
@@ -406,9 +414,9 @@ Include (-
 		! End of loop.
 	}
 	
-	input_rulebook_data-->0 = 0;
-	input_rulebook_data-->1 = 0;
-	input_rulebook_data-->2 = 0;
+	input_rulebook_data-->IRDAT_EVENT = 0;
+	input_rulebook_data-->IRDAT_BUFFER = 0;
+	input_rulebook_data-->IRDAT_TABLE = 0;
 
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
