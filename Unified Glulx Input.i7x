@@ -74,23 +74,23 @@ Include (-
 
 [Some phrases for use in the accepting input and handling input rulebooks. Do not try to use them anywhere else!]
 
-To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
-To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
-To decide what Unicode character is the/-- current input event char/character: (- InputContextEvChar() -).
-To decide what number is the/-- current input event line word count: (- InputContextEvLineWordCount() -).
+To decide what g-event is the/-- current input event type: (- InputRDataEvType() -).
+To decide whether handling (E - g-event): (- InputRDataEvTypeIs({E}) -).
+To decide what Unicode character is the/-- current input event char/character: (- InputRDataEvChar() -).
+To decide what number is the/-- current input event line word count: (- InputRDataEvLineWordCount() -).
 
-To replace the/-- current input event with the/-- line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
-To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
+To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
+To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
 
 Include (-
 
-[ InputContextEvType;
+[ InputRDataEvType;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return evtype_None;
 	return (input_rulebook_data-->IRDAT_EVENT)-->0;
 ];
 
-[ InputContextEvTypeIs typ;
+[ InputRDataEvTypeIs typ;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return false;
 	if ((input_rulebook_data-->IRDAT_EVENT)-->0 == typ)
@@ -98,7 +98,7 @@ Include (-
 	return false;
 ];
 
-[ InputContextEvChar;
+[ InputRDataEvChar;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return 0;
 	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_CharInput)
@@ -106,7 +106,7 @@ Include (-
 	return (input_rulebook_data-->IRDAT_EVENT)-->2;
 ];
 
-[ InputContextEvLineWordCount;
+[ InputRDataEvLineWordCount;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return 0;
 	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
@@ -116,7 +116,7 @@ Include (-
 	return (input_rulebook_data-->IRDAT_TABLE)-->0;
 ];
 
-[ InputContextSetEvent typ arg    ev len;
+[ InputRDataSetEvent typ arg    ev len;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
 	ev = input_rulebook_data-->IRDAT_EVENT;
