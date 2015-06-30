@@ -149,6 +149,17 @@ Include (-
 
 -).
 
+[### Notes for InputRDataParseAction...
+NO_INPS_PRES really is the number of nonzero entries starting with INP1_PRES. Nothing nouns are unlisted. Numbers/KOVs are always listed as 1, with the value in parsed_number. 0 means a multiple object (avoid!).
+
+We must also set actor and parsed_number. Not act_requester or multiflag, they're worked out in GENERATE_ACTION_R.
+
+Stored actions are six fields: acname, noun, second, actor, reqflag, text. (Reqflag is true if "asking actor to try...") (Text is zero when creating a stored action from code.) The noun/second values are not 1-ified here.
+
+Type-check noun and second by testing (ActionData-->(at+AD_NOUN_KOV) == OBJECT_TY), and ditto for AD_SECOND_KOV. Where at=FindAction(action).
+
+
+]
 
 
 Section - Glk Special Keycodes
