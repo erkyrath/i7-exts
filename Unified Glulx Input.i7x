@@ -82,7 +82,7 @@ To decide what number is the/-- current input event line word count: (- InputRDa
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
 
-To handle the/-- current input event as (act - stored action): (- InputRDataParseAction({-by-reference:act}); RulebookSucceeds(); rtrue; -);
+To handle the/-- current input event as (act - stored action): (- InputRDataParseAction({-by-reference:act}); -);
 
 Include (-
 
