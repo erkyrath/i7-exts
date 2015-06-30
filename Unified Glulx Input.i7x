@@ -140,11 +140,49 @@ Include (-
 ];
 
 !### stub routine -- this only sets the action-name right now.
-[ InputRDataParseAction stora;
-	parser_results-->ACTION_PRES = BlkValueRead(stora, STORA_ACTION_F);
-	parser_results-->NO_INPS_PRES = 0;
+[ InputRDataParseAction stora   acname at acmask count val;
+	acname = BlkValueRead(stora, STORA_ACTION_F);
+	at = FindAction(acname);
+	if (~~at)
+		print_ret "InputRDataParseAction: cannot find action ", (SayActionName) acname, ".";
+	if (BlkValueRead(stora, STORA_REQUEST_F)) {
+		val = BlkValueRead(stora, STORA_ACTOR_F);
+		print_ret "InputRDataParseAction: cannot set up an ~asking ", (name) val, " to try ", (SayActionName) acname, "~ action. Did you mean ~", (name) val, " ", (SayActionName) acname, "~?";
+	}
+	
+	acmask = ActionData-->(at+AD_REQUIREMENTS);
+	
+	actor = BlkValueRead(stora, STORA_ACTOR_F);
+	parser_results-->ACTION_PRES = acname;
+	count = 0;
 	parser_results-->INP1_PRES = 0;
 	parser_results-->INP2_PRES = 0;
+	
+	val = BlkValueRead(stora, STORA_NOUN_F);
+	if (acmask & NEED_NOUN_ABIT) {
+		if (ActionData-->(at+AD_NOUN_KOV) == OBJECT_TY) {
+			parser_results-->(INP1_PRES+count) = val;
+		}
+		else {
+			parser_results-->(INP1_PRES+count) = 1;
+			parsed_number = val;
+		}
+		count++;
+	}
+
+	val = BlkValueRead(stora, STORA_SECOND_F);
+	if (acmask & NEED_SECOND_ABIT) {
+		if (ActionData-->(at+AD_SECOND_KOV) == OBJECT_TY) {
+			parser_results-->(INP1_PRES+count) = val;
+		}
+		else {
+			parser_results-->(INP1_PRES+count) = 1;
+			parsed_number = val;
+		}
+		count++;
+	}
+
+	parser_results-->NO_INPS_PRES = count;
 ];
 
 -).
