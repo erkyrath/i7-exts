@@ -139,8 +139,10 @@ Include (-
 	}
 ];
 
-! InputRDataParseAction: Parse out a stored action into parser_results form.
-! This is messy, and the parser doesn't normally do anything like it. 
+! InputRDataParseAction: Parse out a stored action into parser_results form. We also set parsed_number and actor. I don't think we have to set up anything else. (Note that this will be immediately followed by calls to TreatParserResults and GENERATE_ACTION_R.)
+! I had to stare at a lot of parser code to work out this transformation. Action data doesn't normally flow this way (from stored action into parser_results). I hope I covered all the necessary cases.
+! In the interests of sanity, we don't try to handle actions which include text (topics). These are really only useful when parsing player-typed commands, and the whole point of this routine is to bypass textual input.
+! We also don't handle multiple-object actions. Stored actions can't store those.
 [ InputRDataParseAction stora   acname at acmask req count val;
 	acname = BlkValueRead(stora, STORA_ACTION_F);
 	at = FindAction(acname);
@@ -191,18 +193,6 @@ Include (-
 ];
 
 -).
-
-[### Notes for InputRDataParseAction...
-NO_INPS_PRES really is the number of nonzero entries starting with INP1_PRES. Nothing nouns are unlisted. Numbers/KOVs are always listed as 1, with the value in parsed_number. 0 means a multiple object (avoid!).
-
-We must also set actor and parsed_number. Not act_requester or multiflag, they're worked out in GENERATE_ACTION_R.
-
-Stored actions are six fields: acname, noun, second, actor, reqflag, text. (Reqflag is true if "asking actor to try...") (Text is zero when creating a stored action from code.) The noun/second values are not 1-ified here.
-
-Type-check noun and second by testing (ActionData-->(at+AD_NOUN_KOV) == OBJECT_TY), and ditto for AD_SECOND_KOV. Where at=FindAction(action).
-
-
-]
 
 
 Section - Glk Special Keycodes
