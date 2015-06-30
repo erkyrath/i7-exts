@@ -139,16 +139,21 @@ Include (-
 	}
 ];
 
-!### stub routine -- this only sets the action-name right now.
-[ InputRDataParseAction stora   acname at acmask count val;
+! InputRDataParseAction: Parse out a stored action into parser_results form.
+! This is messy, and the parser doesn't normally do anything like it. 
+[ InputRDataParseAction stora   acname at acmask req count val;
 	acname = BlkValueRead(stora, STORA_ACTION_F);
 	at = FindAction(acname);
 	if (~~at)
 		print_ret "InputRDataParseAction: cannot find action ", (SayActionName) acname, ".";
-	if (BlkValueRead(stora, STORA_REQUEST_F)) {
+		
+	req = BlkValueRead(stora, STORA_REQUEST_F);
+	if (req == 1) {
 		val = BlkValueRead(stora, STORA_ACTOR_F);
 		print_ret "InputRDataParseAction: cannot set up an ~asking ", (name) val, " to try ", (SayActionName) acname, "~ action. Did you mean ~", (name) val, " ", (SayActionName) acname, "~?";
 	}
+	if (req)
+		print_ret "InputRDataParseAction: cannot set up an action (", (SayActionName) acname, ") which involves a topic.";
 	
 	acmask = ActionData-->(at+AD_REQUIREMENTS);
 	
