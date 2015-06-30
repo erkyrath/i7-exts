@@ -45,7 +45,8 @@ Array inputevent2 --> 4;
 
 Include (-
 ! Array contains: a_event, a_buffer, a_table
-Array handling_input_context --> 3;
+Constant INPUT_RULEBOOK_SIZE 3;
+Array input_rulebook_data --> INPUT_RULEBOOK_SIZE;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
 
@@ -193,54 +194,54 @@ To replace the/-- current input event with the/-- char/character (C - Unicode ch
 Include (-
 
 [ InputContextEvType;
-	if (~~handling_input_context-->0)
+	if (~~input_rulebook_data-->0)
 		return evtype_None;
-	return (handling_input_context-->0)-->0;
+	return (input_rulebook_data-->0)-->0;
 ];
 
 [ InputContextEvTypeIs typ;
-	if (~~handling_input_context-->0)
+	if (~~input_rulebook_data-->0)
 		return false;
-	if ((handling_input_context-->0)-->0 == typ)
+	if ((input_rulebook_data-->0)-->0 == typ)
 		return true;
 	return false;
 ];
 
 [ InputContextEvChar;
-	if (~~handling_input_context-->0)
+	if (~~input_rulebook_data-->0)
 		return 0;
-	if ((handling_input_context-->0)-->0 ~= evtype_CharInput)
+	if ((input_rulebook_data-->0)-->0 ~= evtype_CharInput)
 		return 0;
-	return (handling_input_context-->0)-->2;
+	return (input_rulebook_data-->0)-->2;
 ];
 
 [ InputContextEvLineWordCount;
-	if (~~handling_input_context-->0)
+	if (~~input_rulebook_data-->0)
 		return 0;
-	if ((handling_input_context-->0)-->0 ~= evtype_LineInput)
+	if ((input_rulebook_data-->0)-->0 ~= evtype_LineInput)
 		return 0;
-	if (~~handling_input_context-->2)
+	if (~~input_rulebook_data-->2)
 		return 0;
-	return (handling_input_context-->2)-->0;
+	return (input_rulebook_data-->2)-->0;
 ];
 
 [ InputContextSetEvent typ arg    ev len;
-	if (~~handling_input_context-->0)
+	if (~~input_rulebook_data-->0)
 		return;
-	ev = handling_input_context-->0;
+	ev = input_rulebook_data-->0;
 	ev-->0 = typ;
 	switch (typ) {
 		evtype_CharInput:
 			ev-->1 = gg_mainwin;
 			ev-->2 = arg;
 		evtype_LineInput:
-			if (~~handling_input_context-->1)
+			if (~~input_rulebook_data-->1)
 				return; ! No text buffer!
 			ev-->1 = gg_mainwin;
-			len = VM_PrintToBuffer(handling_input_context-->1, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
+			len = VM_PrintToBuffer(input_rulebook_data-->1, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
 			ev-->2 = len;
-			if (handling_input_context-->2) {
-				VM_Tokenise(handling_input_context-->1, handling_input_context-->2);
+			if (input_rulebook_data-->2) {
+				VM_Tokenise(input_rulebook_data-->1, input_rulebook_data-->2);
 			}
 	}
 ];
@@ -298,12 +299,12 @@ Include (-
 	
 	! When this function begins, the window is not awaiting any input (except perhaps timer input).
 	
-	if (handling_input_context-->0 ~= 0) {
+	if (input_rulebook_data-->0 ~= 0) {
 		print "(BUG) AwaitInput called recursively!^";
 	}
-	handling_input_context-->0 = a_event;
-	handling_input_context-->1 = a_buffer;
-	handling_input_context-->2 = a_table;
+	input_rulebook_data-->0 = a_event;
+	input_rulebook_data-->1 = a_buffer;
+	input_rulebook_data-->2 = a_table;
 	
 	while (true) {
 	
@@ -405,9 +406,9 @@ Include (-
 		! End of loop.
 	}
 	
-	handling_input_context-->0 = 0;
-	handling_input_context-->1 = 0;
-	handling_input_context-->2 = 0;
+	input_rulebook_data-->0 = 0;
+	input_rulebook_data-->1 = 0;
+	input_rulebook_data-->2 = 0;
 
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
@@ -715,7 +716,7 @@ Include (-
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
     	.ReParserInput;
 		num_words = 0; players_command = 100;
-		!### handling_input_context! (rename...)
+		!### input_rulebook_data! (rename...)
 		ParserInput( (+ primary context +), inputevent, buffer, parse);
 		FollowRulebook((+ handling input rules +), (+ primary context +), true);
 		if (RulebookFailed()) {
