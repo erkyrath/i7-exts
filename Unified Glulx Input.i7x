@@ -48,11 +48,12 @@ Section - Input Rulebook Data
 
 Include (-
 ! Array contains: a_event, a_buffer, a_table
-Constant INPUT_RULEBOOK_SIZE 4;
+Constant INPUT_RULEBOOK_SIZE 5;
 Constant IRDAT_RB_CURRENT 0;
 Constant IRDAT_EVENT 1;
 Constant IRDAT_BUFFER 2;
 Constant IRDAT_TABLE 3;
+Constant IRDAT_WROTE_ACTION 4;
 Array input_rulebook_data --> INPUT_RULEBOOK_SIZE;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
@@ -62,6 +63,7 @@ Include (-
 	input_rulebook_data-->IRDAT_EVENT = a_event;
 	input_rulebook_data-->IRDAT_BUFFER = a_buffer;
 	input_rulebook_data-->IRDAT_TABLE = a_table;
+	input_rulebook_data-->IRDAT_WROTE_ACTION = false;
 ];
 
 [ InputRDataFinal;
@@ -69,6 +71,7 @@ Include (-
 	input_rulebook_data-->IRDAT_EVENT = 0;
 	input_rulebook_data-->IRDAT_BUFFER = 0;
 	input_rulebook_data-->IRDAT_TABLE = 0;
+	input_rulebook_data-->IRDAT_WROTE_ACTION = false;
 ];
 -).
 
@@ -157,14 +160,14 @@ Include (-
 	if (req)
 		print_ret "InputRDataParseAction: cannot set up an action (", (SayActionName) acname, ") which involves a topic.";
 	
-	acmask = ActionData-->(at+AD_REQUIREMENTS);
-	
+	input_rulebook_data-->IRDAT_WROTE_ACTION = true;
 	actor = BlkValueRead(stora, STORA_ACTOR_F);
 	parser_results-->ACTION_PRES = acname;
 	count = 0;
 	parser_results-->INP1_PRES = 0;
 	parser_results-->INP2_PRES = 0;
 	
+	acmask = ActionData-->(at+AD_REQUIREMENTS);
 	val = BlkValueRead(stora, STORA_NOUN_F);
 	if (acmask & NEED_NOUN_ABIT) {
 		if (ActionData-->(at+AD_NOUN_KOV) == OBJECT_TY) {
@@ -787,6 +790,7 @@ Include (-
 
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
+	k = 0; ! flag for whether an explicit action was generated
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
     	.ReParserInput;
 		num_words = 0; players_command = 100;
@@ -796,6 +800,7 @@ Include (-
 		}
 		InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
 		FollowRulebook((+ handling input rules +), (+ primary context +), true);
+		k = input_rulebook_data-->IRDAT_WROTE_ACTION;
 		InputRDataFinal();
 		if (RulebookFailed()) {
 			jump ReParserInput;
@@ -807,7 +812,7 @@ Include (-
 
   .ReParse;
   
-	if (parser_results-->ACTION_PRES ~= 0) {
+	if (k && parser_results-->ACTION_PRES ~= 0) {
 		! The rulebook gave us an explicit action.
 		rtrue;
 	}
