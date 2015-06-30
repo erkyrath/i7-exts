@@ -973,7 +973,7 @@ Section - NounDomain
 Include (-
 
 [ NounDomain domain1 domain2 context dont_ask
-	first_word i j k l answer_words marker;
+	first_word i j k l answer_words marker expact;
     #Ifdef DEBUG;
     if (parser_trace >= 4) {
         print "   [NounDomain called at word ", wn, "^";
@@ -1132,8 +1132,40 @@ Include (-
     #Ifdef TARGET_ZCODE;
     for (i=2 : i<INPUT_BUFFER_LEN : i++) buffer2->i = ' ';
     #Endif; ! TARGET_ZCODE
+    
+    .ReParserInput;
     ParserInput( (+ disambiguation context +), inputevent2, buffer2, parse2);
-    #Ifdef TARGET_ZCODE; answer_words = parse2->1; #ifnot; answer_words = parse2-->0; #endif;
+    
+	if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
+		print "(BUG) NounDomain called recursively!^";
+	}
+	InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
+	FollowRulebook((+ handling input rules +), (+ disambiguation context +), true);
+	expact = input_rulebook_data-->IRDAT_WROTE_ACTION;
+	InputRDataFinal();
+	if (RulebookFailed()) {
+		jump ReParserInput;
+	}
+	
+	if (expact && parser_results-->ACTION_PRES ~= 0) {
+		! The rulebook gave us an explicit action.
+		! ### Or jump RECONSTRUCT_INPUT? Check whether after-reading-command runs in this path.
+		print "### explicit action trumps disambig: ", (SayActionName) parser_results-->ACTION_PRES, "^";
+		return REPARSE_CODE;
+	}
+	
+	answer_words = 0;
+	if (inputevent2-->0 == evtype_LineInput) {
+		#Ifdef TARGET_ZCODE; answer_words = parse2->1; #ifnot; answer_words = parse2-->0; #endif;
+	}
+	
+	if (~~answer_words) {
+		! Either this was a blank line or it was not line input at all. Reject it.
+		! (Blank line input could reach this point if the PASS_BLANK_INPUT_LINES option is set.)
+		!### beg-your-pardon error!
+		print "### no words.^";
+		jump ReParserInput;
+	}
 
     ! Conveniently, parse2-->1 is the first word in both ZCODE and GLULX.
     first_word = (parse2-->1);
