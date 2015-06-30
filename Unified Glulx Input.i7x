@@ -56,6 +56,88 @@ Constant IRDAT_TABLE 3;
 Array input_rulebook_data --> INPUT_RULEBOOK_SIZE;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
+Include (-
+[ InputRDataInit rb a_event a_buffer a_table;
+	input_rulebook_data-->IRDAT_RB_CURRENT = rb;
+	input_rulebook_data-->IRDAT_EVENT = a_event;
+	input_rulebook_data-->IRDAT_BUFFER = a_buffer;
+	input_rulebook_data-->IRDAT_TABLE = a_table;
+];
+
+[ InputRDataFinal;
+	input_rulebook_data-->IRDAT_RB_CURRENT = 0;
+	input_rulebook_data-->IRDAT_EVENT = 0;
+	input_rulebook_data-->IRDAT_BUFFER = 0;
+	input_rulebook_data-->IRDAT_TABLE = 0;
+];
+-).
+
+[Some phrases for use in the accepting input and handling input rulebooks. Do not try to use them anywhere else!]
+
+To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
+To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
+To decide what Unicode character is the/-- current input event char/character: (- InputContextEvChar() -).
+To decide what number is the/-- current input event line word count: (- InputContextEvLineWordCount() -).
+
+To replace the/-- current input event with the/-- line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
+To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
+
+Include (-
+
+[ InputContextEvType;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return evtype_None;
+	return (input_rulebook_data-->IRDAT_EVENT)-->0;
+];
+
+[ InputContextEvTypeIs typ;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return false;
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 == typ)
+		return true;
+	return false;
+];
+
+[ InputContextEvChar;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return 0;
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_CharInput)
+		return 0;
+	return (input_rulebook_data-->IRDAT_EVENT)-->2;
+];
+
+[ InputContextEvLineWordCount;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return 0;
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
+		return 0;
+	if (~~input_rulebook_data-->IRDAT_TABLE)
+		return 0;
+	return (input_rulebook_data-->IRDAT_TABLE)-->0;
+];
+
+[ InputContextSetEvent typ arg    ev len;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return;
+	ev = input_rulebook_data-->IRDAT_EVENT;
+	ev-->0 = typ;
+	switch (typ) {
+		evtype_CharInput:
+			ev-->1 = gg_mainwin;
+			ev-->2 = arg;
+		evtype_LineInput:
+			if (~~input_rulebook_data-->IRDAT_BUFFER)
+				return; ! No text buffer!
+			ev-->1 = gg_mainwin;
+			len = VM_PrintToBuffer(input_rulebook_data-->IRDAT_BUFFER, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
+			ev-->2 = len;
+			if (input_rulebook_data-->IRDAT_TABLE) {
+				VM_Tokenise(input_rulebook_data-->IRDAT_BUFFER, input_rulebook_data-->IRDAT_TABLE);
+			}
+	}
+];
+-).
+
 
 
 Section - Glk Special Keycodes
@@ -189,72 +271,6 @@ The accepting input rules are an input-context based rulebook.
 To accept the/-- input event: (- RulebookSucceeds(); rtrue; -).
 To reject the/-- input event: (- RulebookFails(); rtrue; -).
 
-[Some phrases for use in the accepting input rulebook. Do not try to use them anywhere else!]
-
-To decide what g-event is the/-- current input event type: (- InputContextEvType() -).
-To decide whether handling (E - g-event): (- InputContextEvTypeIs({E}) -).
-To decide what Unicode character is the/-- current input event char/character: (- InputContextEvChar() -).
-To decide what number is the/-- current input event line word count: (- InputContextEvLineWordCount() -).
-
-To replace the/-- current input event with the/-- line (T - text): (- InputContextSetEvent(evtype_LineInput, {T}); -).
-To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputContextSetEvent(evtype_CharInput, {C}); -).
-
-Include (-
-
-[ InputContextEvType;
-	if (~~input_rulebook_data-->IRDAT_EVENT)
-		return evtype_None;
-	return (input_rulebook_data-->IRDAT_EVENT)-->0;
-];
-
-[ InputContextEvTypeIs typ;
-	if (~~input_rulebook_data-->IRDAT_EVENT)
-		return false;
-	if ((input_rulebook_data-->IRDAT_EVENT)-->0 == typ)
-		return true;
-	return false;
-];
-
-[ InputContextEvChar;
-	if (~~input_rulebook_data-->IRDAT_EVENT)
-		return 0;
-	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_CharInput)
-		return 0;
-	return (input_rulebook_data-->IRDAT_EVENT)-->2;
-];
-
-[ InputContextEvLineWordCount;
-	if (~~input_rulebook_data-->IRDAT_EVENT)
-		return 0;
-	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
-		return 0;
-	if (~~input_rulebook_data-->IRDAT_TABLE)
-		return 0;
-	return (input_rulebook_data-->IRDAT_TABLE)-->0;
-];
-
-[ InputContextSetEvent typ arg    ev len;
-	if (~~input_rulebook_data-->IRDAT_EVENT)
-		return;
-	ev = input_rulebook_data-->IRDAT_EVENT;
-	ev-->0 = typ;
-	switch (typ) {
-		evtype_CharInput:
-			ev-->1 = gg_mainwin;
-			ev-->2 = arg;
-		evtype_LineInput:
-			if (~~input_rulebook_data-->IRDAT_BUFFER)
-				return; ! No text buffer!
-			ev-->1 = gg_mainwin;
-			len = VM_PrintToBuffer(input_rulebook_data-->IRDAT_BUFFER, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, arg);
-			ev-->2 = len;
-			if (input_rulebook_data-->IRDAT_TABLE) {
-				VM_Tokenise(input_rulebook_data-->IRDAT_BUFFER, input_rulebook_data-->IRDAT_TABLE);
-			}
-	}
-];
--).
-
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
 [Standard rules:]
@@ -307,12 +323,10 @@ Include (-
 	
 	! When this function begins, the window is not awaiting any input (except perhaps timer input).
 	
-	if (input_rulebook_data-->IRDAT_EVENT ~= 0) {
+	if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
 		print "(BUG) AwaitInput called recursively!^";
 	}
-	input_rulebook_data-->IRDAT_EVENT = a_event;
-	input_rulebook_data-->IRDAT_BUFFER = a_buffer;
-	input_rulebook_data-->IRDAT_TABLE = a_table;
+	InputRDataInit( (+ accepting input rules +), a_event, a_buffer, a_table);
 	
 	while (true) {
 	
@@ -389,6 +403,7 @@ Include (-
 		glk_select(a_event);
 		.GotEvent;
 		
+		! Some required bookkeeping before we invoke the rulebook.
 		switch (a_event-->0) {
 			evtype_CharInput:
 				if (a_event-->1 == gg_mainwin) {
@@ -414,9 +429,7 @@ Include (-
 		! End of loop.
 	}
 	
-	input_rulebook_data-->IRDAT_EVENT = 0;
-	input_rulebook_data-->IRDAT_BUFFER = 0;
-	input_rulebook_data-->IRDAT_TABLE = 0;
+	InputRDataFinal();
 
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
