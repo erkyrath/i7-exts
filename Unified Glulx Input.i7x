@@ -265,12 +265,13 @@ Section - Accepting Input
 
 The accepting input rules are an input-context based rulebook.
 
-[Called in AwaitEvent. On success (acceptance), AwaitEvent returns the event. On failure (rejection), AwaitEvent continues waiting.]
+[Called in AwaitEvent. On success (acceptance), AwaitEvent returns the event. On no result or failure (rejection), AwaitEvent continues waiting.]
 
 [Handy synonyms for "rule succeeds" and "rule fails".]
 To accept the/-- input event: (- RulebookSucceeds(); rtrue; -).
 To reject the/-- input event: (- RulebookFails(); rtrue; -).
 
+[Same definition as in Basic Screen Effects.]
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
 [Standard rules:]
@@ -420,9 +421,6 @@ Include (-
 				}
 		}
 		FollowRulebook((+ accepting input rules +), incontext, true);
-		if (RulebookFailed()) {
-			continue;
-		}
 		if (RulebookSucceeded()) {
 			break;
 		}
