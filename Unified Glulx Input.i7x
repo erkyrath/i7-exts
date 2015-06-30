@@ -788,13 +788,13 @@ Include (-
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
-		if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
-			print "(BUG) Reading-a-command called recursively!^";
-		}
     	.ReParserInput;
 		num_words = 0; players_command = 100;
 		ParserInput( (+ primary context +), inputevent, buffer, parse);
-    	InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
+		if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
+			print "(BUG) Reading-a-command called recursively!^";
+		}
+		InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
 		FollowRulebook((+ handling input rules +), (+ primary context +), true);
 		InputRDataFinal();
 		if (RulebookFailed()) {
