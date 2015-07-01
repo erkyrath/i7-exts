@@ -41,6 +41,12 @@ Array inputevent --> 4;
 Array inputevent2 --> 4;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
+[Indicates whether the parser_results has been filled in by ParserInput (and thus we need no text parsing).]
+
+Include (-
+Global parser_results_set;
+-) after "Global Variables" in "Output.i6t";
+
 
 Section - Input Rulebook Data
 
@@ -48,12 +54,11 @@ Section - Input Rulebook Data
 
 Include (-
 ! Array contains: a_event, a_buffer, a_table
-Constant INPUT_RULEBOOK_SIZE 5;
+Constant INPUT_RULEBOOK_SIZE 4;
 Constant IRDAT_RB_CURRENT 0;
 Constant IRDAT_EVENT 1;
 Constant IRDAT_BUFFER 2;
 Constant IRDAT_TABLE 3;
-Constant IRDAT_WROTE_ACTION 4;
 Array input_rulebook_data --> INPUT_RULEBOOK_SIZE;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
@@ -63,7 +68,6 @@ Include (-
 	input_rulebook_data-->IRDAT_EVENT = a_event;
 	input_rulebook_data-->IRDAT_BUFFER = a_buffer;
 	input_rulebook_data-->IRDAT_TABLE = a_table;
-	input_rulebook_data-->IRDAT_WROTE_ACTION = false;
 ];
 
 [ InputRDataFinal;
@@ -71,7 +75,6 @@ Include (-
 	input_rulebook_data-->IRDAT_EVENT = 0;
 	input_rulebook_data-->IRDAT_BUFFER = 0;
 	input_rulebook_data-->IRDAT_TABLE = 0;
-	input_rulebook_data-->IRDAT_WROTE_ACTION = false;
 ];
 -).
 
@@ -142,7 +145,7 @@ Include (-
 	}
 ];
 
-! InputRDataParseAction: Parse out a stored action into parser_results form. We also set parsed_number and actor. I don't think we have to set up anything else. (Note that this will be immediately followed by calls to TreatParserResults and GENERATE_ACTION_R.)
+! InputRDataParseAction: Parse out a stored action into parser_results form. We also set parsed_number, actor, and the parser_results_set flag. I don't think we have to set up anything else. (Note that this will be immediately followed by calls to TreatParserResults and GENERATE_ACTION_R.)
 ! I had to stare at a lot of parser code to work out this transformation. Action data doesn't normally flow this way (from stored action into parser_results). I hope I covered all the necessary cases.
 ! In the interests of sanity, we don't try to handle actions which include text (topics). These are really only useful when parsing player-typed commands, and the whole point of this routine is to bypass textual input.
 ! We also don't handle multiple-object actions. Stored actions can't store those.
@@ -160,7 +163,7 @@ Include (-
 	if (req)
 		print_ret "InputRDataParseAction: cannot set up an action (", (SayActionName) acname, ") which involves a topic.";
 	
-	input_rulebook_data-->IRDAT_WROTE_ACTION = true;
+	parser_results_set = true;
 	actor = BlkValueRead(stora, STORA_ACTOR_F);
 	parser_results-->ACTION_PRES = acname;
 	count = 0;
@@ -779,6 +782,7 @@ Section - Parser__parse
 [Replacements for the parser code that used to call Keyboard(). It now calls ParserInput() with a slightly different calling convention. Only the bits of code around the ParserInput() calls has changed.]
 
 Include (-
+    parser_results_set = false;
 
     if (held_back_mode == 1) {
         held_back_mode = 0;
@@ -790,7 +794,7 @@ Include (-
 
 	cobj_flag = 0;
 	actors_location = ScopeCeiling(player);
-	k = 0; ! flag for whether an explicit action was generated
+	
     BeginActivity(READING_A_COMMAND_ACT); if (ForActivity(READING_A_COMMAND_ACT)==false) {
     	.ReParserInput;
 		num_words = 0; players_command = 100;
@@ -798,9 +802,9 @@ Include (-
 		if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
 			print "(BUG) Reading-a-command called recursively!^";
 		}
+		parser_results_set = false;
 		InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
 		FollowRulebook((+ handling input rules +), (+ primary context +), true);
-		k = input_rulebook_data-->IRDAT_WROTE_ACTION;
 		InputRDataFinal();
 		if (RulebookFailed()) {
 			jump ReParserInput;
@@ -812,7 +816,7 @@ Include (-
 
   .ReParse;
   
-	if (k && parser_results-->ACTION_PRES ~= 0) {
+	if (parser_results_set && parser_results-->ACTION_PRES ~= 0) {
 		! The rulebook gave us an explicit action.
 		rtrue;
 	}
@@ -973,7 +977,7 @@ Section - NounDomain
 Include (-
 
 [ NounDomain domain1 domain2 context dont_ask
-	first_word i j k l answer_words marker expact;
+	first_word i j k l answer_words marker;
     #Ifdef DEBUG;
     if (parser_trace >= 4) {
         print "   [NounDomain called at word ", wn, "^";
@@ -1139,18 +1143,17 @@ Include (-
 	if (input_rulebook_data-->IRDAT_RB_CURRENT ~= 0) {
 		print "(BUG) NounDomain called recursively!^";
 	}
+	parser_results_set = false;
 	InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
 	FollowRulebook((+ handling input rules +), (+ disambiguation context +), true);
-	expact = input_rulebook_data-->IRDAT_WROTE_ACTION;
 	InputRDataFinal();
 	if (RulebookFailed()) {
 		jump ReParserInput;
 	}
 	
-	if (expact && parser_results-->ACTION_PRES ~= 0) {
+	if (parser_results_set && parser_results-->ACTION_PRES ~= 0) {
 		! The rulebook gave us an explicit action.
 		! ### Or jump RECONSTRUCT_INPUT? Check whether after-reading-command runs in this path.
-		print "### explicit action trumps disambig: ", (SayActionName) parser_results-->ACTION_PRES, "^";
 		return REPARSE_CODE;
 	}
 	
