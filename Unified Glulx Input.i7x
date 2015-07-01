@@ -812,6 +812,10 @@ Include (-
 		if (inputevent-->0 == evtype_LineInput) {
 			num_words = WordCount(); players_command = 100 + num_words;
 		}
+		if (parser_results_set && parser_results-->ACTION_PRES ~= 0) {
+			! If we're not parsing, reading a command shouldn't show the input.
+			num_words = 0; players_command = 100;
+		}
     } if (EndActivity(READING_A_COMMAND_ACT)) jump ReType;
 
   .ReParse;
@@ -1152,9 +1156,9 @@ Include (-
 	}
 	
 	if (parser_results_set && parser_results-->ACTION_PRES ~= 0) {
-		! The rulebook gave us an explicit action.
-		! ### Or jump RECONSTRUCT_INPUT? Check whether after-reading-command runs in this path.
-		return REPARSE_CODE;
+		! The rulebook gave us an explicit action. We'll return REPARSE_CODE.
+		num_words = 0; players_command = 100;
+		jump REPARSE_NO_INPUT;
 	}
 	
 	answer_words = 0;
@@ -1257,6 +1261,7 @@ Include (-
     VM_Tokenise(buffer,parse);
     #Endif; ! LanguageToInformese
 	num_words = WordCount(); players_command = 100 + num_words;
+	.REPARSE_NO_INPUT;
     actors_location = ScopeCeiling(player);
 	FollowRulebook(Activity_after_rulebooks-->READING_A_COMMAND_ACT);
 
@@ -1291,9 +1296,9 @@ Include (-
 	}
 	
 	if (parser_results_set && parser_results-->ACTION_PRES ~= 0) {
-		! The rulebook gave us an explicit action.
-		! ### Or jump RECONSTRUCT_INPUT? Check whether after-reading-command runs in this path.
-		return REPARSE_CODE;
+		! The rulebook gave us an explicit action. We'll return REPARSE_CODE.
+		num_words = 0; players_command = 100;
+		jump REPARSE_NO_INPUT;
 	}
 	
 	answer_words = 0;
