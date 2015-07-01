@@ -1459,6 +1459,7 @@ Global test_sp = 0;
 ! CheckTestInput: If a test input is pending, this fills out the event and buffer structure and returns true. Otherwise it returns false.
 ! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this code only returns events of that type.
 ! Note that a_buffer may be 0. If so, we cannot return a line input event, so we do nothing. (We could return other event types if we had them.)
+! (This replaces TestKeyboardPrimitive, but is invoked differently. We no longer call through to VM_ReadKeyboard when no tests are available. We just return false. Also, arguments are event/buffer instead of buffer/table.)
 
 [ CheckTestInput a_event a_buffer    p i j l spaced ch;
 	if (test_sp == 0) {
