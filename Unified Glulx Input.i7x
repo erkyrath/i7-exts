@@ -341,13 +341,13 @@ Accepting input rule when handling arrange-event (this is the standard redraw st
 	redraw the status line;
 	reject input event.
 
-Accepting input rule when handling line-event (this is the standard accept line input rule):
-	accept input event.
-
-Accepting input rule for the keystroke-wait context when handling char-event (this is the standard accept keystroke input rule):
-	accept input event.
-
-[### default to accepting any event if it's been requested? That would simplify life. Also our examples.]
+Last accepting input rule (this is the standard accept all requested input rule):
+	let T be the current input event type;
+	if T is line-event and the input-request of the story-window is line-input:
+		accept input event;
+	if T is char-event and the input-request of the story-window is char-input:
+		accept input event;
+	reject input event.
 
 
 Section - Handling Input
@@ -1822,7 +1822,7 @@ In this example, the underworld uses a different input mechanism: single keystro
 
 Example: ** Keystroke Input 2 - Controlling the game with single keystrokes.
 
-This is nearly the same as the previous example. But now, instead of altering char input events to line input events, we accept char input and handle them directly as going actions.
+This is nearly the same as the previous example. But now, instead of changing char input events to line input events, we handle char events directly as going actions.
 
 The work is now done in the accepting input rulebook. We no longer pretend that we're entering line input, and the parser is entirely bypassed.
 
@@ -1875,9 +1875,6 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 
 	Setting up input rule when the location is not in Aboveground:
 		now the input-request of the story-window is char-input;
-		rule succeeds.
-
-	Accepting input rule when the location is not in Aboveground and handling char-event:
 		rule succeeds.
 
 	Handling input rule when the location is not in Aboveground and handling char-event:
