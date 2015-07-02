@@ -1,6 +1,6 @@
 Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
-[### This extension is a work in progress.]
+[### This extension is a work in progress. You can do some stuff with it now, though!]
 
 Chapter - Constants and Variables
 
@@ -230,7 +230,7 @@ To decide which Unicode character is special keycode func10: (- keycode_Func10 -
 To decide which Unicode character is special keycode func11: (- keycode_Func11 -).
 To decide which Unicode character is special keycode func12: (- keycode_Func12 -).
 
-Definition: a Unicode character is a special keycode if I6 routine "UnicodeCharIsSpecial" says so (it is a control key like tab, escape, or arrow keys).
+Definition: a Unicode character is a special keycode if I6 routine "UnicodeCharIsSpecial" says so (it is a control key like tab, escape, or the arrow keys).
 To say extended (C - Unicode character): (- PrintUnicodeSpecialName({C}); -).
 
 Include (-
