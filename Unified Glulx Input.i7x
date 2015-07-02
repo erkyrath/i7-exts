@@ -517,6 +517,12 @@ Include (-
 
 -) instead of "Keyboard Input" in "Glulx.i6t".
 
+[These phrases provide I7 access to the AwaitInput call.]
+
+To await input in (C - input-context): (- AwaitInput({C}, inputevent, 0, 0); -).
+To await input in (C - input-context) with primary buffer: (- AwaitInput({C}, inputevent, buffer, parse); -).
+To await input in (C - input-context) with secondary buffer: (- AwaitInput({C}, inputevent2, buffer2, parse2); -).
+
 
 Section - ParserInput
 
