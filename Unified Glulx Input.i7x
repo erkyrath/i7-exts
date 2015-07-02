@@ -343,10 +343,13 @@ Accepting input rule when handling arrange-event (this is the standard redraw st
 
 Last accepting input rule (this is the standard accept all requested input rule):
 	let T be the current input event type;
-	if T is line-event and the input-request of the story-window is line-input:
-		accept input event;
-	if T is char-event and the input-request of the story-window is char-input:
-		accept input event;
+	if T is:
+		-- line-event:
+			if the input-request of the story-window is line-input:
+				accept input event;
+		-- char-event:
+			if the input-request of the story-window is char-input:
+				accept input event;
 	reject input event.
 
 
