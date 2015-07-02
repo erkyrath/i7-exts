@@ -1734,7 +1734,7 @@ We also use an extended form of the "player consents" phrase, in which we supply
 	Test me with "out / maybe / no / out / yes".
 
 
-Example: * Keystroke Input - Controlling the game with single keystrokes.
+Example: ** Keystroke Input - Controlling the game with single keystrokes.
 
 In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach; see the next example for a tidier model.)
 
@@ -1811,7 +1811,92 @@ In this example, the underworld uses a different input mechanism: single keystro
 			say "GO UP[line break]";
 			replace the current input event with the line "go up";
 			rule succeeds;
-		say " ('[extended C]' is not a valid key.)";
+		say "('[extended C]' is not a valid key.)";
+		reject the input event.
+
+Example: ** Keystroke Input 2 - Controlling the game with single keystrokes.
+
+This is nearly the same as the previous example. But now, instead of altering char input events to line input events, we accept char input and handle them directly as going actions.
+
+The work is now done in the accepting input rulebook. We no longer pretend that we're entering line input, and the parser is entirely bypassed.
+
+	*: "Keystroke Input 2"
+
+	Include Unified Glulx Input by Andrew Plotkin.
+	Include Unicode Character Names by Graham Nelson.
+
+	The Kitchen is a room. "You are in a kitchen. An open trap door beckons you downward."
+
+	Aboveground is a region. The Kitchen is in Aboveground.
+
+	Maze10 is a room. "You are in a maze of twisty passages, basically all alike."
+	Maze20 is a room. "You are in a maze of twisty passages, all pretty much alike."
+	Maze01 is a room. "You are in a maze of twisty passages, all basically alike."
+	Maze11 is a room. "You are in a maze of twisty passages, all kind of alike."
+	Maze21 is a room. "You are in a maze of twisty passages, more or less all alike."
+	Maze02 is a room. "You are in a maze of twisty passages, pretty much all alike."
+	Maze12 is a room. "You are in a maze of twisty passages, all alike."
+	Maze22 is a room. "You are in a maze of twisty passages, all more or less alike."
+	Maze32 is a room. "You are in a maze of twisty passages, all sort of alike."
+	Maze03 is a room. "You are in a maze of twisty passages, kind of all alike."
+	Maze13 is a room. "You are in a maze of twisty passages, all quite alike."
+	Maze23 is a room. "You are in a maze of twisty passages, quite all alike."
+	Maze33 is a room. "You are in a maze of twisty passages, sort of all alike."
+
+	Maze12 is below the Kitchen.
+	Maze10 is west of Maze20.
+	Maze10 is north of Maze11. Maze20 is north of Maze21.
+	Maze01 is west of Maze11. Maze11 is west of Maze21.
+	Maze01 is north of Maze02. Maze11 is north of Maze12.
+	Maze02 is west of Maze12. Maze12 is west of Maze22. Maze22 is west of Maze32.
+	Maze12 is north of Maze13. Maze22 is north of Maze23. Maze32 is north of Maze33.
+	Maze03 is west of Maze13. Maze23 is west of Maze33.
+
+	Rule for printing the name of a room (called R) when R is not in Aboveground:
+		say "Maze".
+
+	Check going down from the Kitchen:
+		say "(Down here, single-keystroke commands rule. Use the arrow keys or NSEW to move around; U or escape to quit.)";
+		continue the action.
+
+	Check going up when the location is not in Aboveground:
+		say "You fumble your way back to the light.";
+		now the player is in the Kitchen;
+		stop the action.
+
+	Prompt displaying rule when the location is not in Aboveground:
+		instead say "==>".
+
+	Setting up input rule when the location is not in Aboveground:
+		now the input-request of the story-window is char-input;
+		rule succeeds.
+
+	Accepting input rule when the location is not in Aboveground and handling char-event:
+		rule succeeds.
+
+	Handling input rule when the location is not in Aboveground and handling char-event:
+		let C be the current input event character;
+		if C is special keycode left or C is Unicode Latin small letter w or C is Unicode Latin capital letter W:
+			say "(You try going west...)";
+			handle the current input event as the action of going west;
+			rule succeeds;
+		if C is special keycode right or C is Unicode Latin small letter e or C is Unicode Latin capital letter E:
+			say "(You try going east...)";
+			handle the current input event as the action of going east;
+			rule succeeds;
+		if C is special keycode up or C is Unicode Latin small letter n or C is Unicode Latin capital letter N:
+			say "(You try going north...)";
+			handle the current input event as the action of going north;
+			rule succeeds;
+		if C is special keycode down or C is Unicode Latin small letter s or C is Unicode Latin capital letter S:
+			say "(You try going south...)";
+			handle the current input event as the action of going south;
+			rule succeeds;
+		if C is special keycode escape or C is Unicode Latin small letter u or C is Unicode Latin capital letter U:
+			say "(You try going up...)";
+			handle the current input event as the action of going up;
+			rule succeeds;
+		say "('[extended C]' is not a valid key.)";
 		reject the input event.
 
 
