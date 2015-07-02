@@ -1906,3 +1906,71 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 		reject the input event.
 
 
+Example: *** Requesting a Number - A phrase to query the player for a number.
+
+In this example we ask the player for a number. It's very much like "if the player consents..." except that we get back a number rather than a yes-or-no decision.
+
+We'll want a new input-context for this operation, so we invent one: numeric context. Our prompt displaying rule relies on this to give the player a special prompt for the number-typing operation.
+
+The "number waited for" phrase demonstrates doing a low-level input operation. First we must clear all input requests for the story window. (We don't want a request left over from regular command input.) Then we set the input request we want -- line input only. Then we "await input", using our special numeric context.
+
+Then it gets a little bit messy. There's no easy I7 access to the input buffer. We can't use "the player's command" because that's a parser variable. We're doing this behind the parser's back, so no player's command is ever set. Nor can we match against an I7 token like "[number]".
+
+Instead, we rely on an existing I6 function called TryNumber. This returns the parsed number, or -1000 if no number was typed. Loop until we get something valid.
+
+Unfortunately, TryNumber is set up to use the parser's input buffer. That's why the input phrase is
+
+	await input in numeric context with primary buffer;
+
+This winds up stomping on "the player's command"; that snippet will be invalid for the rest of the turn. Too bad! (Really, "if the player consents" has the same bug.)
+
+A better implementation would rely on the secondary buffer. We couldn't use TryNumber, though, so it would be a longer and messier example.
+
+	*: "Requesting a Number"
+
+	Include Unified Glulx Input by Andrew Plotkin.
+
+	The Alley is a room. "You are in that alley from that spy game. A steel door is to the east; next to it is a button and a speaker grille."
+
+	The steel door is scenery in the Alley. The description is "The door is closed and locked."
+
+	Check entering the steel door:
+		instead say "The door isn't open."
+	Check going east in the Alley:
+		instead try entering the steel door.
+	Check going south in the Alley:
+		instead say "You can't quit now."
+
+	The secret number is initially 0.
+
+	The button is scenery in the Alley.
+
+	Check pushing the button:
+		if the secret number is 0:
+			now the secret number is a random number between 100 and 500;
+		say "A crackly voice asks, 'What's the secret number?'";
+		let N be the number waited for;
+		if N is the secret number:
+			say "'Did you say [N]? You're right!' The door pops open and someone on the other side tasers you.";
+			end the story finally;
+		else:
+			say "'Did you say [N]? That's not right. The secret number today is [secret number].'[paragraph break]The door does not open.";
+		stop the action.
+
+	Numeric context is an input-context.
+
+	Prompt displaying rule for numeric context:
+		instead say "==>".
+
+	To decide what number is the number waited for:
+		while 1 is 1:
+			clear all input requests for the story-window;
+			now the input-request of the story-window is line-input;
+			await input in numeric context with primary buffer;
+			let N be the hacky low-level number check;
+			if N is not -1000:
+				decide on N;
+			say "Please enter a number.";
+
+	To decide what number is the hacky low-level number check: (- TryNumber(1) -).
+
