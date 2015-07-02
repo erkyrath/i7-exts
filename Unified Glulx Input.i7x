@@ -26,6 +26,13 @@ Include (-
 The story-window is a glk-window. The input-request of the story-window is line-input.
 The status-window is a glk-window.
 
+The timer-request is a number that varies. The timer-request is 0.
+
+Include (-
+! Milliseconds, or 0 for no timer events.
+Global current_timer_request = 0;
+-) after "Variables and Arrays" in "Glulx.i6t";
+
 [These values match up to evtype_Timer, evtype_CharInput, etc because they are defined in the same order.]
 A g-event is a kind of value. The g-events are timer-event, char-event, line-event, mouse-event, arrange-event, redraw-event, sound-notify-event, and hyperlink-event.
 
@@ -349,6 +356,9 @@ Last accepting input rule (this is the standard accept all requested input rule)
 				accept input event;
 		-- char-event:
 			if the input-request of the story-window is char-input:
+				accept input event;
+		-- timer-event:
+			if the timer-request is not zero:
 				accept input event;
 	reject input event.
 
