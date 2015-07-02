@@ -21,6 +21,7 @@ A glk-window has a text called the preload-input-text.
 A glk-window can be hyperlink-input-request.
 Include (-
 	with current_input_request (+ no-input +), ! of type text-input-mode
+	with current_hyperlink_request false,      ! true or false
 -) when defining a glk-window.
 
 The story-window is a glk-window. The input-request of the story-window is line-input.
@@ -357,9 +358,10 @@ Last accepting input rule (this is the standard accept all requested input rule)
 		-- char-event:
 			if the input-request of the story-window is char-input:
 				accept input event;
-		-- timer-event:
-			if the timer-request is not zero:
+		-- hyperlink-event:
+			if the story-window is hyperlink-input-request:
 				accept input event;
+	[This doesn't cover non-human-generated events like timer events.]
 	reject input event.
 
 
@@ -383,7 +385,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (The latter two arguments are optional; if not supplied then line input cannot be accepted. If a_buffer is supplied but a_table is not, then line input will be accepted but not tokenized.)
 
-[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput res val len;
+[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput wantlinkinput res val len;
 	! Clear our argument arrays (if present).
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
@@ -442,6 +444,7 @@ Include (-
 		! ### check command-stream input the same way!
 		
 		! Adjust the Glk input requests to match what the game wants. This may involve setting or cancelling requests.
+		wantlinkinput = GetEitherOrProperty( (+ story-window +), (+ hyperlink-input-request +) );
 		wanttextinput = GProperty(OBJECT_TY, (+ story-window +), (+ input-request +) );
 		if (wanttextinput == (+ line-input +) && a_buffer == 0) {
 			print "(BUG) AwaitInput: called with a line input request but no buffer argument";
@@ -458,6 +461,11 @@ Include (-
 			(+ story-window +).current_input_request = (+ no-input +);
 			print "(DEBUG) cancel char input mode^"; !###
 		}
+		if ( (+ story-window +).current_hyperlink_request && ~~wantlinkinput) {
+			glk_cancel_hyperlink_event(gg_mainwin);
+			(+ story-window +).current_hyperlink_request = false;
+			print "(DEBUG) cancel hyperlink input mode^"; !###
+		}
 	
 		if ( (+ story-window +).current_input_request ~= (+ line-input +) && wanttextinput == (+ line-input +)) {
 			!print "(DEBUG) req line input mode^";
@@ -473,6 +481,11 @@ Include (-
 			!print "(DEBUG) req char input mode^";
 			glk_request_char_event_uni(gg_mainwin);
 			(+ story-window +).current_input_request = (+ char-input +);
+		}
+		if ((+ story-window +).current_hyperlink_request == false && wantlinkinput) {
+			print "(DEBUG) req hyperlink input mode^";
+			glk_request_hyperlink_event(gg_mainwin);
+			(+ story-window +).current_hyperlink_request = true;
 		}
 
 		glk_select(a_event);
@@ -492,6 +505,10 @@ Include (-
 						VM_Tokenise(a_buffer, a_table);
 					}
 					!### write to command stream if open
+				}
+			evtype_Hyperlink:
+				if (a_event-->1 == gg_mainwin) {
+					(+ story-window +).current_hyperlink_request = false; ! request complete
 				}
 		}
 		FollowRulebook((+ accepting input rules +), incontext, true);
@@ -513,6 +530,11 @@ Include (-
 		glk_cancel_char_event(gg_mainwin);
 		(+ story-window +).current_input_request = (+ no-input +);
 		print "(DEBUG) cancel char input mode^"; !###
+	}
+	if ((+ story-window +).current_hyperlink_request) {
+		glk_cancel_hyperlink_event(gg_mainwin);
+		(+ story-window +).current_hyperlink_request = false;
+		print "(DEBUG) cancel hyperlink input mode^"; !###
 	}
 	
 	! We can close any quote box that was displayed during the input loop.
