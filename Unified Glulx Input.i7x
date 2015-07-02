@@ -553,14 +553,8 @@ Include (-
 		#ifndef PASS_BLANK_INPUT_LINES;
 		! If the line was blank, get a fresh line.
 		if (evtyp == evtype_LineInput && nw == 0) {
-			@push etype; etype = BLANKLINE_PE;
 			! The old Keyboard routine cleared players_command here (to 100). I'm not sure why. If we're on buffer2/table2, the players_command snippet doesn't apply at all.
-			BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
-			if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
-				PARSER_ERROR_INTERNAL_RM('X'); new_line;
-			}
-			EndActivity(PRINTING_A_PARSER_ERROR_ACT);
-			@pull etype;
+			EmptyInputParserError();
 			continue;
 		}
 		#endif; ! PASS_BLANK_INPUT_LINES;
@@ -833,13 +827,7 @@ Include (-
 	if (num_words == 0) {
 		! Either this was a blank line or it was not line input at all. Reject it.
 		! (Blank line input could reach this point if the PASS_BLANK_INPUT_LINES option is set.)
-		@push etype; etype = BLANKLINE_PE;
-		BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
-		if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
-			PARSER_ERROR_INTERNAL_RM('X'); new_line;
-		}
-		EndActivity(PRINTING_A_PARSER_ERROR_ACT);
-		@pull etype;
+		EmptyInputParserError();
 		jump ReType;
 	}
 
@@ -1169,8 +1157,7 @@ Include (-
 	if (~~answer_words) {
 		! Either this was a blank line or it was not line input at all. Reject it.
 		! (Blank line input could reach this point if the PASS_BLANK_INPUT_LINES option is set.)
-		!### beg-your-pardon error!
-		print "### no words.^";
+		EmptyInputParserError();
 		jump ReParserInput;
 	}
 
@@ -1309,8 +1296,7 @@ Include (-
 	if (~~answer_words) {
 		! Either this was a blank line or it was not line input at all. Reject it.
 		! (Blank line input could reach this point if the PASS_BLANK_INPUT_LINES option is set.)
-		!### beg-your-pardon error!
-		print "### no words.^";
+		EmptyInputParserError();
 		jump ReParserInput2;
 	}
 
@@ -1441,6 +1427,23 @@ Include (-
 [ PARSER_CLARIF_INTERNAL_R; ];
 
 -) instead of "Noun Domain" in "Parser.i6t".
+
+
+Include (-
+
+! This prints the "I beg your pardon" parser error. We use this when the player enters a blank line, or a input event which is not text at all (and which is not otherwise handled). There are several points in the code where we check this, so it makes sense to factor out a simple function.
+[ EmptyInputParserError   oldetype;
+	oldetype = etype; etype = BLANKLINE_PE;
+	BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
+	if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
+		PARSER_ERROR_INTERNAL_RM('X'); new_line;
+	}
+	EndActivity(PRINTING_A_PARSER_ERROR_ACT);
+	etype = oldetype;
+];
+
+-) after "Reading the Command" in "Parser.i6t".
+
 
 
 Include (-
