@@ -1,8 +1,9 @@
 Recording Replay by Andrew Plotkin begins here.
 
 [Recording will never become active in release mode.]
-To decide whether recording is active: (- (gg_commandstr) -).
-To decide whether recording is inactive: (- (gg_commandstr==0) -).
+To decide whether the/-- command stream is inactive: (- (gg_commandstr==0) -).
+To decide whether the/-- command stream is recording: (- (gg_commandstr && ~~gg_command_reading) -).
+To decide whether the/-- command stream is replaying: (- (gg_commandstr && gg_command_reading) -).
 
 Volume - not for release
 
@@ -17,7 +18,7 @@ Understand "recording off" as recording-off.
 Understand "replay" as recording-read.
 
 Carry out recording-toggle:
-	if recording is inactive:
+	if command stream is inactive:
 		instead follow the carry out recording-on rulebook;
 	else:
 		instead follow the carry out recording-off rulebook;
@@ -80,7 +81,7 @@ Include (-
 	glk_stream_close(gg_commandstr, 0); ! stream_close
 	gg_commandstr = 0;
 	gg_command_reading = false;
-		return ResponseAndLineBreak(RECORDING_OFF_RM, 'A'); ! Command recording off.
+	return ResponseAndLineBreak(RECORDING_OFF_RM, 'A'); ! Command recording off.
 ];
 
 [ RECORDING_READ_R fref;
