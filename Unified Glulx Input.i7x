@@ -101,6 +101,8 @@ Include (-
 To decide what g-event is the/-- current input event type: (- InputRDataEvType() -).
 To decide whether handling (E - g-event): (- InputRDataEvTypeIs({E}) -).
 To decide what Unicode character is the/-- current input event char/character: (- InputRDataEvChar() -).
+To decide what number is the/-- current input event link/hyperlink number: (- InputRDataEvHyperlink() -).
+To decide what object is the/-- current input event link/hyperlink object: (- ObjectValueIsSafe(InputRDataEvHyperlink()) -).
 To decide what number is the/-- current input event line word count: (- InputRDataEvLineWordCount() -).
 
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
@@ -128,6 +130,14 @@ Include (-
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return 0;
 	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_CharInput)
+		return 0;
+	return (input_rulebook_data-->IRDAT_EVENT)-->2;
+];
+
+[ InputRDataEvHyperlink;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return 0;
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_Hyperlink)
 		return 0;
 	return (input_rulebook_data-->IRDAT_EVENT)-->2;
 ];
@@ -214,6 +224,22 @@ Include (-
 	}
 
 	parser_results-->NO_INPS_PRES = count;
+];
+
+! This returns val unchanged if it's really an object value. If it's anything else (zero, a string, a function, an invalid memory address) the return value will be zero (nothing).
+! (This could be made safer with the I6 6.34 compiler, which allows more introspection into how many objects and classes exist in the game.)
+! (Not currently compatible with Dynamic Objects.)
+[ ObjectValueIsSafe val   limit;
+	if (val < Class)
+		return 0;
+	if (val >= #grammar_table)
+		return 0;
+	@getmemsize limit;
+	if (val > limit - (1 + NUM_ATTR_BYTES + 6*4))
+		return 0;
+	if (val->0 ~= $70)
+		return 0;
+	return val;
 ];
 
 -).
