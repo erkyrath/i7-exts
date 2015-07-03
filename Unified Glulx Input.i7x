@@ -447,7 +447,7 @@ Include (-
 		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
 		!### what about input events when there's no text input at all? E.g. a hyperlink-only game. We should only re-print the prompt if the event printed output, but this may be hard to check. Might need a phrase to signal "I printed stuff".
 		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
-			! This block emulates the old PrintPrompt call. ### make activity before/after?
+			! This block emulates the old PrintPrompt call.
 			! ### How do we show runtime problems for a game with no prompts? Maybe this should *not* go in the before-prompt-printing stage. But then, maybe we're skipping the prompt because keyboard input is already active! In which case we can't print anything. Sigh.
 			RunTimeProblemShow();
 			ClearRTP();
