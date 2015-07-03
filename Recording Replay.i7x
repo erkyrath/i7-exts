@@ -1,4 +1,4 @@
-Recording Replay by Andrew Plotkin begins here.
+Version 1 of Recording Replay (for Glulx only) by Andrew Plotkin begins here.
 
 [Recording will never become active in release mode.]
 To decide whether the/-- command stream is inactive: (- (gg_commandstr==0) -).
