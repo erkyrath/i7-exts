@@ -1663,12 +1663,58 @@ Include (-
 ];
 
 ! RecordingWriteEvent: Write an event to the command stream.
-[ RecordingWriteEvent a_event a_buffer;
+[ RecordingWriteEvent a_event a_buffer   val;
 	if (~~gg_commandstr)
 		return;
 	if (gg_command_reading)
 		return;
-	!###
+	
+	switch (a_event-->0) {
+	
+		evtype_CharInput:
+			glk_put_char_stream(gg_commandstr, '>');
+			RecordingWriteRawString("$char ");
+			val = a_event-->2;
+			if (val == ' ') {
+				RecordingWriteRawString("space");
+			}
+			else if (val < ' ' || UnicodeCharIsSpecial(val)) {
+				RecordingWriteRawFunc(PrintUnicodeSpecialName, val);
+			}
+			else {
+				glk_put_char_stream_uni(gg_commandstr, val);
+			}
+			glk_put_char_stream(gg_commandstr, 10); ! newline
+			
+		evtype_LineInput:
+			glk_put_char_stream(gg_commandstr, '>');
+			glk_put_char_stream(gg_commandstr, ' ');
+			if (a_buffer)
+				glk_put_buffer_stream(gg_commandstr, a_buffer+WORDSIZE, a_buffer-->0);
+			glk_put_char_stream(gg_commandstr, 10); ! newline
+			
+	}
+];
+
+[ RecordingWriteRawString val  oldstr;
+	oldstr = glk_stream_get_current();
+	glk_stream_set_current(gg_commandstr);
+	print (string) val;
+	glk_stream_set_current(oldstr);
+];
+
+[ RecordingWriteRawNumber val  oldstr;
+	oldstr = glk_stream_get_current();
+	glk_stream_set_current(gg_commandstr);
+	print val;
+	glk_stream_set_current(oldstr);
+];
+
+[ RecordingWriteRawFunc func val  oldstr;
+	oldstr = glk_stream_get_current();
+	glk_stream_set_current(gg_commandstr);
+	func(val);
+	glk_stream_set_current(oldstr);
 ];
 
 #ifnot; ! DEBUG
