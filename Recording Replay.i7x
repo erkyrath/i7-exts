@@ -1,8 +1,10 @@
 Recording Replay by Andrew Plotkin begins here.
 
-Volume - not for release
-
+[Recording will never become active in release mode.]
 To decide whether recording is active: (- (gg_commandstr) -).
+To decide whether recording is inactive: (- (gg_commandstr==0) -).
+
+Volume - not for release
 
 Recording-toggle is an action out of world applying to nothing.
 Recording-on is an action out of world applying to nothing.
@@ -15,10 +17,10 @@ Understand "recording off" as recording-off.
 Understand "replay" as recording-read.
 
 Carry out recording-toggle:
-	if recording is active:
-		instead follow the carry out recording-off rulebook;
-	else:
+	if recording is inactive:
 		instead follow the carry out recording-on rulebook;
+	else:
+		instead follow the carry out recording-off rulebook;
 
 The turn on recording rule is listed in the carry out recording-on rulebook.
 The turn off recording rule is listed in the carry out recording-off rulebook.
