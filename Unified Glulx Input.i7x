@@ -1685,7 +1685,7 @@ Include (-
 
 #endif; ! DEBUG
 
--) after "Test Command" in "Tests.i6t".
+-).
 
 Unified Glulx Input ends here.
 
