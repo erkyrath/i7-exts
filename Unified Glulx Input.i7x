@@ -8,26 +8,36 @@ Section - Basic Types
 
 Use pass blank input lines translates as (- Constant PASS_BLANK_INPUT_LINES; -). 
 
+[Input-contexts allow us to organize the rulebooks described in this extension. Every time the game stops to await input, it does so in an input context.]
+
 Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context, keystroke-wait context.
 
 Definition: an input-context is command if it is primary context or it is disambiguation context.
 Definition: an input-context is yes-no if it is yes-no question context or it is extended yes-no question context or it is repeat yes-no question context.
 
-Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
+[We need a proxy object for each Glk window. Currently we just define two. (This extension is not yet compatible with Multiple Windows.)]
 
 A glk-window is a kind of object.
+The story-window is a glk-window.
+The status-window is a glk-window.
+
+[When setting up input (in a particular context), the game indicates which input requests each window should make. These are the input-request and hyperlink-input-request properties.]
+
+Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
 A glk-window has a text-input-mode called the input-request.
 A glk-window has a text called the preload-input-text.
 A glk-window can be hyperlink-input-request.
+
+[Timer input is global -- not attached to any window.]
+
+The timer-request is a number that varies. The timer-request is 0.
+
+[These I6 properties are used internally by the library to track whether specific Glk requests have been made or fulfilled. The game should never touch these.]
+
 Include (-
 	with current_input_request (+ no-input +), ! of type text-input-mode
 	with current_hyperlink_request false,      ! true or false
 -) when defining a glk-window.
-
-The story-window is a glk-window. The input-request of the story-window is line-input.
-The status-window is a glk-window.
-
-The timer-request is a number that varies. The timer-request is 0.
 
 Include (-
 ! Milliseconds, or 0 for no timer events.
@@ -483,7 +493,7 @@ Include (-
 			(+ story-window +).current_input_request = (+ char-input +);
 		}
 		if ((+ story-window +).current_hyperlink_request == false && wantlinkinput) {
-			print "(DEBUG) req hyperlink input mode^";
+			!print "(DEBUG) req hyperlink input mode^";
 			glk_request_hyperlink_event(gg_mainwin);
 			(+ story-window +).current_hyperlink_request = true;
 		}
@@ -492,6 +502,7 @@ Include (-
 		.GotEvent;
 		
 		! Some required bookkeeping before we invoke the rulebook.
+		!### write to command stream if open
 		switch (a_event-->0) {
 			evtype_CharInput:
 				if (a_event-->1 == gg_mainwin) {
@@ -504,7 +515,6 @@ Include (-
 					if (a_table) {
 						VM_Tokenise(a_buffer, a_table);
 					}
-					!### write to command stream if open
 				}
 			evtype_Hyperlink:
 				if (a_event-->1 == gg_mainwin) {
