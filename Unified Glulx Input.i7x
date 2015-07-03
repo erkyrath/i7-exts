@@ -490,17 +490,17 @@ Include (-
 		if ( (+ story-window +).current_input_request == (+ line-input +) && wanttextinput ~= (+ line-input +) ) {
 			glk_cancel_line_event(gg_mainwin, gg_event);
 			(+ story-window +).current_input_request = (+ no-input +);
-			print "(DEBUG) cancel line input mode^"; !###
+			!print "(DEBUG) cancel line input mode^";
 		}
 		if ( (+ story-window +).current_input_request == (+ char-input +) && wanttextinput ~= (+ char-input +) ) {
 			glk_cancel_char_event(gg_mainwin);
 			(+ story-window +).current_input_request = (+ no-input +);
-			print "(DEBUG) cancel char input mode^"; !###
+			!print "(DEBUG) cancel char input mode^";
 		}
 		if ( (+ story-window +).current_hyperlink_request && ~~wantlinkinput) {
 			glk_cancel_hyperlink_event(gg_mainwin);
 			(+ story-window +).current_hyperlink_request = false;
-			print "(DEBUG) cancel hyperlink input mode^"; !###
+			!print "(DEBUG) cancel hyperlink input mode^";
 		}
 	
 		if ( (+ story-window +).current_input_request ~= (+ line-input +) && wanttextinput == (+ line-input +)) {
@@ -560,17 +560,17 @@ Include (-
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
 		(+ story-window +).current_input_request = (+ no-input +);
-		print "(DEBUG) cancel line input mode^"; !###
+		!print "(DEBUG) cancel line input mode^";
 	}
 	if ( (+ story-window +).current_input_request == (+ char-input +) ) {
 		glk_cancel_char_event(gg_mainwin);
 		(+ story-window +).current_input_request = (+ no-input +);
-		print "(DEBUG) cancel char input mode^"; !###
+		!print "(DEBUG) cancel char input mode^";
 	}
 	if ((+ story-window +).current_hyperlink_request) {
 		glk_cancel_hyperlink_event(gg_mainwin);
 		(+ story-window +).current_hyperlink_request = false;
-		print "(DEBUG) cancel hyperlink input mode^"; !###
+		!print "(DEBUG) cancel hyperlink input mode^";
 	}
 	
 	! We can close any quote box that was displayed during the input loop.
