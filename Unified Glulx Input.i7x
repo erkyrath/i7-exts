@@ -477,7 +477,12 @@ Include (-
 		}
 		#Endif; #Endif;
 		
-		! ### check command-stream input the same way!
+		if (gg_commandstr && gg_command_reading) {
+			res = RecordingReadEvent(a_event, a_buffer);
+			if (res && a_event-->0) {
+				jump GotEvent;
+			}
+		}
 		
 		! Adjust the Glk input requests to match what the game wants. This may involve setting or cancelling requests.
 		wantlinkinput = GetEitherOrProperty( (+ story-window +), (+ hyperlink-input-request +) );
@@ -528,7 +533,6 @@ Include (-
 		.GotEvent;
 		
 		! Some required bookkeeping before we invoke the rulebook.
-		!### write to command stream if open
 		switch (a_event-->0) {
 			evtype_CharInput:
 				if (a_event-->1 == gg_mainwin) {
@@ -547,6 +551,8 @@ Include (-
 					(+ story-window +).current_hyperlink_request = false; ! request complete
 				}
 		}
+		if (gg_commandstr && ~~gg_command_reading)
+			RecordingWriteEvent(a_event, a_buffer);
 		FollowRulebook((+ accepting input rules +), incontext, true);
 		if (RulebookSucceeded()) {
 			break;
@@ -1639,6 +1645,47 @@ Global test_sp = 0;
 
 -) instead of "Test Command" in "Tests.i6t".
 
+Section - Command Stream Input
+
+Include (-
+
+#ifdef DEBUG;
+
+! RecordingReadEvent: If a line of input is pending from the command stream, this fills out the event and buffer structure and returns true. Otherwise it returns false.
+! If the command stream ends, this closes it.
+[ RecordingReadEvent a_event a_buffer;
+	if (~~gg_commandstr)
+		rfalse;
+	if (~~gg_command_reading)
+		rfalse;
+	!###
+	rfalse;
+];
+
+! RecordingWriteEvent: Write an event to the command stream.
+[ RecordingWriteEvent a_event a_buffer;
+	if (~~gg_commandstr)
+		return;
+	if (gg_command_reading)
+		return;
+	!###
+];
+
+#ifnot; ! DEBUG
+
+! Stubs which do nothing in release mode.
+
+[ RecordingReadEvent a_event a_buffer;
+	rfalse;
+];
+
+[ RecordingWriteEvent a_event a_buffer;
+	rfalse;
+];
+
+#endif; ! DEBUG
+
+-) after "Test Command" in "Tests.i6t".
 
 Unified Glulx Input ends here.
 
