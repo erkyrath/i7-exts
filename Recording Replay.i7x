@@ -32,14 +32,14 @@ The turn on recording rule translates into I6 as "RECORDING_ON_R" with
 
 The turn off recording rule translates into I6 as "RECORDING_OFF_R" with
 	"[bracket]Command recording off.[close bracket]" (A),
-	"[bracket]Command recording already off.[close bracket]" (B).
+	"[bracket]Command recording already off.[close bracket]" (B),
+	"[bracket]Command replay complete.[close bracket]" (C).
 
 The start replaying recording rule translates into I6 as "RECORDING_READ_R" with
 	"[bracket]Replaying commands.[close bracket]" (A),
 	"[bracket]Commands are already replaying.[close bracket]" (B),
 	"[bracket]Command replay failed. Command recording is on.[close bracket]" (C),
-	"[bracket]Command replay failed.[close bracket]" (D),
-	"[bracket]Command replay complete.[close bracket]" (E).
+	"[bracket]Command replay failed.[close bracket]" (D).
 
 
 Include (-
@@ -73,7 +73,7 @@ Include (-
 	if (gg_commandstr == 0)
 		return ResponseAndLineBreak(RECORDING_OFF_RM, 'B'); ! Command recording already off.
 	if (gg_command_reading)
-		return ResponseAndLineBreak(RECORDING_READ_RM, 'E'); ! Command replay complete.
+		return ResponseAndLineBreak(RECORDING_OFF_RM, 'C'); ! Command replay complete.
 
 	glk_stream_close(gg_commandstr, 0); ! stream_close
 	gg_commandstr = 0;
