@@ -10,7 +10,7 @@ Use pass blank input lines translates as (- Constant PASS_BLANK_INPUT_LINES; -).
 
 [Input-contexts allow us to organize the rulebooks described in this extension. Every time the game stops to await input, it does so in an input context.]
 
-Input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context, keystroke-wait context.
+An input-context is a kind of value. The input-contexts are primary context, disambiguation context, yes-no question context, extended yes-no question context, repeat yes-no question context, final question context, keystroke-wait context.
 
 Definition: an input-context is command if it is primary context or it is disambiguation context.
 Definition: an input-context is yes-no if it is yes-no question context or it is extended yes-no question context or it is repeat yes-no question context.
@@ -23,7 +23,7 @@ The status-window is a glk-window.
 
 [When setting up input (in a particular context), the game indicates which input requests each window should make. These are the input-request and hyperlink-input-request properties.]
 
-Text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
+A text-input-mode is a kind of value. The text-input-modes are no-input, char-input, line-input.
 A glk-window has a text-input-mode called the input-request.
 A glk-window has a text called the preload-input-text.
 A glk-window can be hyperlink-input-request.
