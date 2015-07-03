@@ -1,0 +1,130 @@
+
+* Old plan
+
+Keyboard: high-level (called only from parser, three spots)
+- loop until nonblank:
+- save oops_workspace
+- prompt
+- status line
+- KeyboardPrimitive
+- do oops substitution
+- handle undo, save undo
+
+KeyboardPrimitive: thin wrapper around VM_ReadKeyboard (called from Keyboard, YesOrNo, READ_FINAL_ANSWER_R) (always with a status line)
+- divert to TestKeyboardPrimitive if there's a "test me"
+- VM_ReadKeyboard
+
+VM_ReadKeyboard: low-level (called only from KeyboardPrimitive)
+- grab command-stream entry if available
+- glk_request_line_event
+- loop until line input:
+-   glk_select
+-   HandleGlkEvent on events (can break or continue loop)
+-   also status line on arrange events
+- write to transcript stream
+- VM_Tokenise
+- close quote window if open
+
+VM_KeyDelay: low-level (but called from extensions)
+- glk_request_char_event, glk_request_timer_events
+- loop until line input:
+-   glk_select
+-   HandleGlkEvent on events (can break or continue loop)
+-   fails to status line on arrange events!
+- cancel both event types
+
+* New plan
+
+ParserInput: same call context. (Except the return value changes. It now returns an input event representation, of which the buffer/parse is just one part.) (We should add a third array argument for nontextual input.) (And rename it to ParserInput!)
+- loop until nonblank: (make this optional?)
+- save oops_workspace (if line input is not in progress!)
+- set up line input request (ditto!)
+- AwaitInput
+- do oops substitution (ditto!)
+- handle undo, save undo (ditto?)
+- return result of AwaitInput
+
+VM_KeyDelay: now a high-level call, parallel to Parser__parse use of ParserInput. (Rename...)
+- set up char input request 
+- AwaitInput
+- (AwaitInput's rulebook should handle status line, stop on key or timer.)
+- return key or timer info
+
+AwaitInput: the low-level routine. Callers set up request variables. Leaves input requested only actually if in progress, so we only need "real" cancels, not bureaucratic cancels. (I.e.: we minimize request/cancel calls.)
+- display prompt (if beginning line input) (must be context-sensitive!)
+- check command-stream entry if available
+- check test status if available (TestKeyboardPrimitive should return flag!)
+- status line
+- loop:
+-   glk_select
+-   dispatch events via rulebook.
+-   the rulebook can continue the loop; stop the loop; fill out line buffer and stop the loop. (That last may involving cancelling input-in-progress, or not.)
+-   (by default, arrange event refreshes the status line and continues loop)
+- write event to transcript stream
+- VM_Tokenise (if line input)
+- close quote window if open
+- return event info
+
+Now, when Parser__parse calls ParserInput, it may discover a non-textbuffer result. It should fill out parser_results (via rulebook) and immediately return. Skip over all again/buffering and similar textual hackery. If the rulebook doesn't decide on a result, we have a "parser error"; complain and jump to ReType.
+
+The secondary ParserInput calls (in NounDomain) cause messiness. They should certainly cause NounDomain to return REPARSE_CODE (the "treat as new command" case). Some NounDomain calls are in Parser__parse and loop straight back to Reparse, which is fine; that leads to the rulebook-and-return code path. Others are in ParseToken__. Those worry me.
+
+YesOrNo will set up line input request and call AwaitInput. It should reject all non-textbuffer results. Stay in the loop until "yes" or "no" is typed. (Special case: run the rulebook, accept saying-yes/saying-no actions as an answer? Rulebook will have to be context-sensitive.) (If you call YesOrNo when line input is already in progress, it gets interrupted.)
+
+READ_FINAL_ANSWER_R is similar to YesOrNo, except it only accepts textbuffer input. (But this textbuffer may result from the glk_select rulebook.)
+
+* Planning
+
+We have four customization rulebooks, looks like. They're all input-context based.
+
+"Setting up input": Called at the top of the ParserInput loop. Apply whichever input flags you want to the windows.
+
+Default: request line input only.
+
+"Prompt displaying": Called in AwaitInput (in the loop?) when input is about to begin.
+
+Default: print ">" or one of the yes-no/final prompts.
+
+"Accepting input": Called in the AwaitInput loop after glk_select. Decide whether to accept event, reject it, or rewrite and accept it (as a different event). Can also change input requests.
+
+Default: arrange->status line; text/mouse/hyperlink->accept.
+
+Rejecting input here is not an undo point.
+
+Not used for yes-no/final question input. (These are assumed to be pure text. If you want to change that, write new input routines that call AwaitInput differently.)
+
+This will need global vars for the event/buffer/parse arrays. (Or rulebook vars?)
+
+"Handling input": Called after ParserInput. Can reject input event, rewrite it, accept it as-is, or accept it as a particular action (bypassing the parser).
+
+Default: no change.
+
+A rejection here is an undo point (unfortunately). Same goes for text input that is rejected later by the parser.
+
+Principles:
+- This extension needs to be in charge of all Glk input requests for the story window. Don't try to set or cancel requests except through these APIs. (See the "setting up input" rulebook.)
+- Once ParserInput returns, the story window is no longer awaiting input. This means it's safe to print stuff in "handling input" (or later).
+- In "accepting input", the window may still be awaiting input. Rules here must cancel input before printing, if appropriate. We will provide phrases for this (and variations like input-rewriting) (this is where it's useful to turn off echo-mode).
+- The AwaitInput loop will re-set input requests and re-print the prompt, as needed, if "accepting input" tells it to keep looping. (Either or both may be unneeded.)
+- The player's command (snippet) is not available during "accepting input" or "handling input". Line input is tokenized, but the WordCount/WordAddress/WordLength functions do not apply (because we're not necessarily using the buffer/parse arrays!) so you have to do low-level access. (Or we could provide conditional access...)
+
+Questions:
+- Handle/save undo on non-textbuffer input? The rule should be that we only save undo if the player *could* request undo. (Otherwise they'll be trapped in a move.)
+- Always run in no-echo mode? Should probably make this a global variable; certain tricks are only possible in no-echo mode.
+- HandleGlkEvent? Entirely replaced by the AwaitInput rulebook.
+- ParseToken__: Still worrying.
+- The reading-a-command activity? This is outside handling-input. For disambiguation, handling-input applies to each player input; reading-a-command applies to the completed line. (Also, reading-a-command has access to snippets.)
+
+Test cases:
+- Change the prompt for YesOrNo, or for the main game
+- Keystroke-only game -- char input rather than line input
+- Keystroke-only game that calls YesOrNo for a single line input
+- A game with a timer interrupt (prints output but preserves player's partial input)
+- A game with a timer that increases the score (so we see status window updates without interrupting editing)
+- A timer-only game
+- Hyperlinks only
+- Hyperlinks or text input (links used to construct actions) (links do not preserve player's partial input)
+- Hyperlinks that create synthetic text input
+- A game that changes input modes inside AwaitInput
+- A modal routine which asks for a number (digits or English).
+- A hyperlink-based final question replacement
