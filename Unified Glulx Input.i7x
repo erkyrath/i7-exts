@@ -762,10 +762,13 @@ Section - The Final Question
 
 Include (-
 
+! Unlike in ParserInput, the input format cannot be customized. These routines are inherently about getting a typed response.
+
 [ READ_FINAL_ANSWER_R;
-	!### set keyboard-input? Customizably?
+	((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+	WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
+		
 	AwaitInput( (+ final question context +), inputevent, buffer, parse);
-	!### parse how? rulebook?
 	
 	players_command = 100 + WordCount();
 	num_words = WordCount();
