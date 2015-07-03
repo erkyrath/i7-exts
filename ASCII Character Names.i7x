@@ -1,5 +1,7 @@
 Version 1 of ASCII Character Names by Andrew Plotkin begins here.
 
+Use authorial modesty.
+
 space translates into Unicode as 32.
 exclamation mark translates into Unicode as 33.
 quotation mark translates into Unicode as 34.

@@ -1,5 +1,7 @@
 Version 1 of Recording Replay (for Glulx only) by Andrew Plotkin begins here.
 
+Use authorial modesty.
+
 [Recording will never become active in release mode.]
 To decide whether the/-- command stream is inactive: (- (gg_commandstr==0) -).
 To decide whether the/-- command stream is recording: (- (gg_commandstr && ~~gg_command_reading) -).
