@@ -762,7 +762,7 @@ Section - The Final Question
 
 Include (-
 
-! Unlike in ParserInput, the input format cannot be customized. These routines are inherently about getting a typed response.
+! Unlike in ParserInput, the input format cannot be customized. The "standard respond to final question rule" is looking for a typed response, so we must supply one.
 
 [ READ_FINAL_ANSWER_R;
 	((+ all-input-request-clearing +)-->1)( (+ story-window +) );
@@ -1759,6 +1759,7 @@ Test cases:
 - Hyperlinks that create synthetic text input
 - A game that changes input modes inside AwaitInput
 - A modal routine which asks for a number (digits or English).
+- A hyperlink-based final question replacement
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
 
