@@ -1672,8 +1672,7 @@ Include (-
 	switch (a_event-->0) {
 	
 		evtype_CharInput:
-			glk_put_char_stream(gg_commandstr, '>');
-			RecordingWriteRawString("$char ");
+			RecordingWriteRawString(">$char ");
 			val = a_event-->2;
 			if (val == ' ') {
 				RecordingWriteRawString("space");
@@ -1691,6 +1690,11 @@ Include (-
 			glk_put_char_stream(gg_commandstr, ' ');
 			if (a_buffer)
 				glk_put_buffer_stream(gg_commandstr, a_buffer+WORDSIZE, a_buffer-->0);
+			glk_put_char_stream(gg_commandstr, 10); ! newline
+			
+		evtype_Hyperlink:
+			RecordingWriteRawString(">$link ");
+			RecordingWriteRawNumber(a_event-->2);
 			glk_put_char_stream(gg_commandstr, 10); ! newline
 			
 	}
