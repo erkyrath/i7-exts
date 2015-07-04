@@ -503,6 +503,7 @@ Include (-
 		}
 		#Endif; #Endif;
 		
+		! If replay-stream input is pending, grab that.
 		if (gg_commandstr && gg_command_reading) {
 			res = RecordingReadEvent(a_event, a_buffer);
 			if (res && a_event-->0) {
@@ -529,8 +530,8 @@ Include (-
 			!print "(DEBUG) cancel char input mode^";
 		}
 		if ( (+ story-window +).current_hyperlink_request && ~~wantlinkinput) {
-			!### check gestalt
-			glk_cancel_hyperlink_event(gg_mainwin);
+			if (glk_gestalt(gestalt_Hyperlinks, 0))
+				glk_cancel_hyperlink_event(gg_mainwin);
 			(+ story-window +).current_hyperlink_request = false;
 			!print "(DEBUG) cancel hyperlink input mode^";
 		}
@@ -551,10 +552,11 @@ Include (-
 			(+ story-window +).current_input_request = (+ char-input +);
 		}
 		if ((+ story-window +).current_hyperlink_request == false && wantlinkinput) {
-			!### check gestalt
-			!print "(DEBUG) req hyperlink input mode^";
-			glk_request_hyperlink_event(gg_mainwin);
-			(+ story-window +).current_hyperlink_request = true;
+			if (glk_gestalt(gestalt_Hyperlinks, 0)) {
+				!print "(DEBUG) req hyperlink input mode^";
+				glk_request_hyperlink_event(gg_mainwin);
+				(+ story-window +).current_hyperlink_request = true;
+			}
 		}
 
 		glk_select(a_event);
@@ -602,8 +604,8 @@ Include (-
 		!print "(DEBUG) cancel char input mode^";
 	}
 	if ((+ story-window +).current_hyperlink_request) {
-		!### check gestalt
-		glk_cancel_hyperlink_event(gg_mainwin);
+		if (glk_gestalt(gestalt_Hyperlinks, 0))
+			glk_cancel_hyperlink_event(gg_mainwin);
 		(+ story-window +).current_hyperlink_request = false;
 		!print "(DEBUG) cancel hyperlink input mode^";
 	}
@@ -2131,8 +2133,8 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 
 	The lightning is a memory. The description is "One can never remember lightning properly."
 
-	To say hyperlink (O - object): (- glk_set_hyperlink({O}); -).
-	To say /hyperlink: (- glk_set_hyperlink(0); -).
+	To say hyperlink (O - object): (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink({O}); } -).
+	To say /hyperlink: (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink(0); } -).
 
 	Rule for printing the name of something (called O):
 		say "[hyperlink O][printed name of O][/hyperlink]";
