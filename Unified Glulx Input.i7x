@@ -1833,6 +1833,43 @@ This version of UGI is only concerned with one window, the "story-window". You c
 
 There is also a "status-window" object, but it is not yet functional. Future versions of UGI will support this. Future versions will also integrate with the Multiple Windows extension to support multi-window games.
 
+Chapter: High-level tasks
+
+These phrases can be used with no deeper knowledge of UGI.
+
+Section: Yes-no questions
+
+	if the player consents: ...
+
+This works just as it always has (WWI 11.5); it waits for the player to type "yes" or "no". You are expected to print the question first.
+
+	if the player consents asking (T1 - text): ...
+	if the player consents asking (T1 - text) and (T2 - text): ...
+
+Similar, except UGI uses your text as the prompt (through the magic of the prompt displaying rulebook). T1 should be the initial question; T2 is a followup if the player fails to answer. If you don't supply T2, it defaults to "Please answer yes or no."
+
+Section: Waiting for a key
+
+These phrases are copied from the Basic Screen Effects extension; they have been updated here to work with UGI.
+
+	wait for any key
+	wait for the SPACE key
+
+By default no prompt is printed. You can print your own beforehand, or write a prompt displaying rule:
+
+	Prompt displaying rule for keystroke-wait context:
+		say ">>>";
+
+If you want to wait for a key and pay attention to the value:
+
+	let C be the key waited for
+	
+The result will be a Unicode character. (Include the Unicode Character Names extension for a complete list, or my ASCII Character Names extension for the basic ones.) The result may also be a special value representing a control key:
+
+	special keycode left, special keycode right, special keycode up, special keycode down, special keycode return, special keycode delete, special keycode escape, special keycode tab, special keycode pageup, special keycode pagedown, special keycode home, special keycode end, special keycode func1, ... special keycode func12
+
+(These are not part of the Unicode spec, but I7 represents them as Unicode character values.)
+
 Chapter: The four rulebooks
 
 We've talked about the four rulebooks, and now it's time to introduce them:
@@ -1842,6 +1879,7 @@ We've talked about the four rulebooks, and now it's time to introduce them:
 	accepting input rules - accept, reject, or alter individual input events
 	handling input rules - convert an input event into an action
 
+####
 
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
