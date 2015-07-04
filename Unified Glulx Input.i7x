@@ -1805,7 +1805,7 @@ We distinguish these situations with a value called an "input-context". The rule
 	final question context
 	keystroke-wait context
 
-These are more finely divided than you usually need to bother with. For example, the game might be waiting for a normal command (primary context) or for a disambiguation reply (disambiguation context). In most games these will appear the same. So you can handle them together:
+These are more finely divided than you usually need to bother with. For example, the game might be waiting for a normal command (primary context) or for a disambiguation reply (disambiguation context). In most games these will appear the same. So you can handle them together. For example:
 
 	Prompt displaying rule for a command input-context:
 		instead say ">>>";
@@ -1832,6 +1832,16 @@ Section: Glk-windows: what window is awaiting input?
 This version of UGI is only concerned with one window, the "story-window". You can set various properties of the story-window object to customize its behavior.
 
 There is also a "status-window" object, but it is not yet functional. Future versions of UGI will support this. Future versions will also integrate with the Multiple Windows extension to support multi-window games.
+
+Chapter: The four rulebooks
+
+We've talked about the four rulebooks, and now it's time to introduce them:
+
+	setting up input rules - decide what kinds of input are desired
+	prompt displaying rules - display a prompt such as ">"
+	accepting input rules - accept, reject, or alter individual input events
+	handling input rules - convert an input event into an action
+
 
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
