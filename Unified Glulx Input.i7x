@@ -486,7 +486,7 @@ Include (-
 			
 			FollowRulebook((+ prompt displaying rules +), incontext, true);
 			
-			ClearBoxedText();  ! this really *displays* a pending quotation
+			ClearBoxedText();  ! this *displays* a pending quotation
 			ClearParagraphing(14);
 		}
 	
@@ -1544,28 +1544,6 @@ Include (-
 -) instead of "Noun Domain" in "Parser.i6t".
 
 
-Include (-
-
-! This prints the "I beg your pardon" parser error. We use this when the player enters a blank line, or a input event which is not text at all (and which is not otherwise handled). There are several points in the code where we check this, so it makes sense to factor out a simple function.
-[ EmptyInputParserError   oldetype;
-	oldetype = etype; etype = BLANKLINE_PE;
-	BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
-	if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
-		PARSER_ERROR_INTERNAL_RM('X'); new_line;
-	}
-	EndActivity(PRINTING_A_PARSER_ERROR_ACT);
-	etype = oldetype;
-];
-
--) after "Reading the Command" in "Parser.i6t".
-
-
-
-Include (-
-! KeyboardPrimitive no longer exists.
--) instead of "Keyboard Primitive" in "Parser.i6t".
-
-
 Section - Test Input
 
 Include (-
@@ -1766,6 +1744,33 @@ Include (-
 
 -).
 
+
+Section - Miscellaneous
+
+Include (-
+
+! This prints the "I beg your pardon" parser error. We use this when the player enters a blank line, or a input event which is not text at all (and which is not otherwise handled). There are several points in the code where we check this, so it makes sense to factor out a simple function.
+[ EmptyInputParserError   oldetype;
+	oldetype = etype; etype = BLANKLINE_PE;
+	BeginActivity(PRINTING_A_PARSER_ERROR_ACT);
+	if (ForActivity(PRINTING_A_PARSER_ERROR_ACT) == false) {
+		PARSER_ERROR_INTERNAL_RM('X'); new_line;
+	}
+	EndActivity(PRINTING_A_PARSER_ERROR_ACT);
+	etype = oldetype;
+];
+
+-) after "Reading the Command" in "Parser.i6t".
+
+Include (-
+! KeyboardPrimitive no longer exists.
+-) instead of "Keyboard Primitive" in "Parser.i6t".
+
+Include (-
+! PrintPrompt no longer exists.
+-) instead of "Prompt" in "Printing.i6t".
+
+
 Unified Glulx Input ends here.
 
 ---- DOCUMENTATION ----
@@ -1894,10 +1899,13 @@ Section: Prompt displaying rules
 Section: Accepting input rules
 
 ####
+### least used
+### the event-peering phrases
 
 Section: Handling input rules
 
 ####
+### accept as action
 
 Chapter: ### low-level invocations
 
