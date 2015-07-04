@@ -1868,11 +1868,11 @@ The result will be a Unicode character. (Include the Unicode Character Names ext
 
 	special keycode left, special keycode right, special keycode up, special keycode down, special keycode return, special keycode delete, special keycode escape, special keycode tab, special keycode pageup, special keycode pagedown, special keycode home, special keycode end, special keycode func1, ... special keycode func12
 
-These are not part of the Unicode spec, but I7 represents them as Unicode character values. Don't try to print them or insert them into normal texts -- they have no normal printed representation. If you need to print a special character, use this phrase:
+These are not part of the Unicode spec, but I7 represents them as Unicode character values. (They are outside the official Unicode range of $0 to $10FFFF.) Don't try to print them or insert them into normal texts -- they have no normal printed representation. If you need to print a special character, use this phrase:
 
 	say extended (C - Unicode character)
 
-This will print special characters as "left", "right", and so on. Normal Unicode characters will be printed as themselves.
+This will print special characters as "left", "right", and so on. Normal Unicode characters will be printed directly.
 
 Chapter: The four rulebooks
 
