@@ -173,6 +173,31 @@ Include (-
 	}
 ];
 
+! InputRDataParseAction: Tell AwaitInput to interrupt char/line input, so that text can be printed. If there is no char/line input going on, this does nothing. (So it's safe to call it more than once.)
+! This is just a temporary interruption. If AwaitInput continues, it will re-request input according to the setting-up-input rulebook.
+! This may only be called from the accepting-input rulebook. 
+[ InputRDataInterruptInput winproxy   win;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return;
+		
+	if (winproxy == (+ story-window +) )
+		win = gg_mainwin;
+	else if (winproxy == (+ status-window +) )
+		win = gg_statuswin;
+	else
+		return;
+	
+	if (winproxy.current_input_request == (+ line-input +) ) {
+		glk_cancel_line_event(win, gg_event);
+		winproxy.current_input_request = (+ no-input +);
+	}
+	else if (winproxy.current_input_request == (+ char-input +) ) {
+		glk_cancel_char_event(win);
+		winproxy.current_input_request = (+ no-input +);
+	}
+];
+
+
 ! InputRDataParseAction: Parse out a stored action into parser_results form. We also set parsed_number, actor, and the parser_results_set flag. I don't think we have to set up anything else. (Note that this will be immediately followed by calls to TreatParserResults and GENERATE_ACTION_R.)
 ! I had to stare at a lot of parser code to work out this transformation. Action data doesn't normally flow this way (from stored action into parser_results). I hope I covered all the necessary cases.
 ! In the interests of sanity, we don't try to handle actions which include text (topics). These are really only useful when parsing player-typed commands, and the whole point of this routine is to bypass textual input.
@@ -378,6 +403,8 @@ To reject the/-- input event: (- RulebookFails(); rtrue; -).
 
 [Same definition as in Basic Screen Effects.]
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
+
+To interrupt text input for (W - glk-window): (- InputRDataInterruptInput({W}); -).
 
 [Standard rules:]
 
