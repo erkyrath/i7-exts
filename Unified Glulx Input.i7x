@@ -1790,18 +1790,49 @@ The Glulx Entry Points extension does this already, but that exposes all the mes
 
 Chapter: Basic concepts
 
+Section: Input-contexts: why are we awaiting input?
+
 A game can stop and await input for many reasons. It can be waiting for a command, or for a yes-or-no answer (an "if the player consents..." test). It can be waiting for the player to hit any key to continue.
 
 In Unified Glulx Input, all of these inputs invoke the same mechanism. The mechanism can be customized to behave in different ways -- printing different prompts, waiting for different sorts of input. But it's always the same mechanism underneath.
 
 You customize it by writing rules. The extension has four rulebooks which cover various aspects of the problem. The default rules cover the normal input situations of an IF game -- the ones mentioned above. Of course, you can modify these or add more.
 
-We distinguish these situations with a value called an input-context. The rulebooks we mentioned are input-context based rulebooks. The UGI extension comes with seven:
+We distinguish these situations with a value called an "input-context". The rulebooks we mentioned are input-context based rulebooks. The UGI extension comes with seven:
 
 	primary context, disambiguation context (the command input-contexts)
 	yes-no question context, extended yes-no question context, repeat yes-no question context (the yes-no input-contexts)
 	final question context
 	keystroke-wait context
+
+These are more finely divided than you usually need to bother with. For example, the game might be waiting for a normal command (primary context) or for a disambiguation reply (disambiguation context). In most games these will appear the same. So you can handle them together:
+
+	Prompt displaying rule for a command input-context:
+		instead say ">>>";
+
+This rule changes the command prompt for both primary and disambiguation inputs.
+
+Section: G-events: what kind of input are we awaiting?
+
+Most IF input comes as lines of text. But a game can also accept keystroke input, as in a "hit any key" prompt or a menu controlled with arrow keys.
+
+Glulx currently supports eight types of input, described as "g-event" values:
+
+	char-event - a keystroke
+	line-event - a line of text
+	hyperlink-event - selection of a hyperlink
+	timer-event - event repeated at fixed intervals
+	mouse-event - a mouse click
+	arrange-event - window sizes have changed
+	redraw-event - graphics windows need redrawing
+	sound-notify-event - sound finished playing
+
+Section: Glk-windows: what window is awaiting input?
+
+This version of UGI is only concerned with one window, the "story-window". You can set various properties of the story-window object to customize its behavior.
+
+There is also a "status-window" object, but it is not yet functional. Future versions of UGI will support this. Future versions will also integrate with the Multiple Windows extension to support multi-window games.
+
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
 
