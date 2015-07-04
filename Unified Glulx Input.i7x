@@ -1879,15 +1879,31 @@ Chapter: The four rulebooks
 We've talked about the four rulebooks, and now it's time to introduce them:
 
 	setting up input rules - decide what kinds of input are desired
-	prompt displaying rules - display a prompt such as ">"
+	prompt displaying rules - display a prompt, traditionally ">"
 	accepting input rules - accept, reject, or alter individual input events
 	handling input rules - convert an input event into an action
 
+Section: Setting up input rules
+
 ####
 
-### what about the reading a command activity?
+Section: Prompt displaying rules
 
-### under the hood -- parser changes
+####
+
+Section: Accepting input rules
+
+####
+
+Section: Handling input rules
+
+####
+
+Chapter: ### low-level invocations
+
+Chapter: ### what about the reading a command activity?
+
+Chapter: ### under the hood -- parser changes
 
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
@@ -2079,6 +2095,51 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 			rule succeeds;
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
+
+
+Example: ** A Study In Memoriam - A pure-hyperlink game.
+
+Here we drop text input entirely. (Dropping the standard parser input line request rule accomplishes this.) Instead we set up input to be hyperlink-based. Hyperlink events are translated into the examining action, which happily works for both on-stage objects and off-stage memories.
+
+	*: "A Study In Memoriam"
+
+	Include Unified Glulx Input by Andrew Plotkin.
+
+	The Study is a room. "You are in your cluttered study."
+
+	The messy desk is a supporter in the Study. The description is "You found this battered antique in a battered [antique shop] in Chapel Hill. As you recall, it was sitting behind [a microscope]."
+
+	A fossil is on the desk. The description is "Some species of [ammonite]."
+
+	A copper fulgurite is on the desk. The description is "It's a chunk of melted copper that you picked up from the base of a telephone pole. It's not really fulgurite, minerallogically speaking. But it [italic type]was[roman type] formed by [lightning]!"
+
+	A memory is a kind of thing.
+
+	The ammonite is a memory. The description is "You've dreamed of drifting through antediluvian seas, the master of all you survey... Then the bony fishes come. The damned bony fishes."
+
+	The microscope is a memory. The printed name is "defunct electron microscope". The description is "Yes, you once discovered an electron microsope in [an antique shop]. It was a console device, like a kitchen counter with switches all over the top and vacuum pumps hanging out underneath. You wonder if anyone ever purchased it."
+
+	The antique shop is a memory. The description is "You discovered a mad antique shop on a years-ago trip to North Carolina. The prize of its collection was [a microscope], though you doubt anyone else would think of it that way. You bought [hyperlink desk]an old desk[/hyperlink] instead; the very one in this room."
+
+	The lightning is a memory. The description is "One can never remember lightning properly."
+
+	To say hyperlink (O - object): (- glk_set_hyperlink({O}); -).
+	To say /hyperlink: (- glk_set_hyperlink(0); -).
+
+	Rule for printing the name of something (called O):
+		say "[hyperlink O][printed name of O][/hyperlink]";
+
+	The standard parser input line request rule does nothing.
+
+	Setting up input rule:
+		now the story-window is hyperlink-input-request.
+
+	Handling input rule for a command input-context when handling hyperlink-event:
+		let O be current input event hyperlink object;
+		if O is nothing:
+			reject the input event;
+		handle the current input event as the action of examining O;
+		rule succeeds.	
 
 
 Example: *** Requesting a Number - A phrase to query the player for a number.
