@@ -503,6 +503,7 @@ Include (-
 			!print "(DEBUG) cancel char input mode^";
 		}
 		if ( (+ story-window +).current_hyperlink_request && ~~wantlinkinput) {
+			!### check gestalt
 			glk_cancel_hyperlink_event(gg_mainwin);
 			(+ story-window +).current_hyperlink_request = false;
 			!print "(DEBUG) cancel hyperlink input mode^";
@@ -524,6 +525,7 @@ Include (-
 			(+ story-window +).current_input_request = (+ char-input +);
 		}
 		if ((+ story-window +).current_hyperlink_request == false && wantlinkinput) {
+			!### check gestalt
 			!print "(DEBUG) req hyperlink input mode^";
 			glk_request_hyperlink_event(gg_mainwin);
 			(+ story-window +).current_hyperlink_request = true;
@@ -574,6 +576,7 @@ Include (-
 		!print "(DEBUG) cancel char input mode^";
 	}
 	if ((+ story-window +).current_hyperlink_request) {
+		!### check gestalt
 		glk_cancel_hyperlink_event(gg_mainwin);
 		(+ story-window +).current_hyperlink_request = false;
 		!print "(DEBUG) cancel hyperlink input mode^";
