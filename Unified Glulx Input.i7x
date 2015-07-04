@@ -197,7 +197,6 @@ Include (-
 	}
 ];
 
-
 ! InputRDataParseAction: Parse out a stored action into parser_results form. We also set parsed_number, actor, and the parser_results_set flag. I don't think we have to set up anything else. (Note that this will be immediately followed by calls to TreatParserResults and GENERATE_ACTION_R.)
 ! I had to stare at a lot of parser code to work out this transformation. Action data doesn't normally flow this way (from stored action into parser_results). I hope I covered all the necessary cases.
 ! In the interests of sanity, we don't try to handle actions which include text (topics). These are really only useful when parsing player-typed commands, and the whole point of this routine is to bypass textual input.
@@ -1783,6 +1782,26 @@ The parser will invoke a rulebook/activity to convert new event types directly i
 
 The first draft will be concerned only with the story window. I will extend it to status window input later. Eventually it will have to be compatible with the Multiple Windows extension, but I don't know whether that means adapting this extension to that one or vice versa. (Probably both.)
 
+----
+
+Unified Glulx Input is an attempt to tidy up all the messy I6 APIs that you need to customize your game's input system. 
+
+The Glulx Entry Points extension does this already, but that exposes all the mess -- you have to understand how Glk works to use to correctly. Unified Glulx Input tries to offer you a simple model which handles common cases easily.
+
+Chapter: Basic concepts
+
+A game can stop and await input for many reasons. It can be waiting for a command, or for a yes-or-no answer (an "if the player consents..." test). It can be waiting for the player to hit any key to continue.
+
+In Unified Glulx Input, all of these inputs invoke the same mechanism. The mechanism can be customized to behave in different ways -- printing different prompts, waiting for different sorts of input. But it's always the same mechanism underneath.
+
+You customize it by writing rules. The extension has four rulebooks which cover various aspects of the problem. The default rules cover the normal input situations of an IF game -- the ones mentioned above. Of course, you can modify these or add more.
+
+We distinguish these situations with a value called an input-context. The rulebooks we mentioned are input-context based rulebooks. The UGI extension comes with seven:
+
+	primary context, disambiguation context (the command input-contexts)
+	yes-no question context, extended yes-no question context, repeat yes-no question context (the yes-no input-contexts)
+	final question context
+	keystroke-wait context
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
 
