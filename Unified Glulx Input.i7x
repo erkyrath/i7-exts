@@ -1885,6 +1885,10 @@ We've talked about the four rulebooks, and now it's time to introduce them:
 
 ####
 
+### what about the reading a command activity?
+
+### under the hood -- parser changes
+
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
 
