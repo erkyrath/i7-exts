@@ -1799,7 +1799,9 @@ Include (-
 
 Include (-
 
+! Copy an I6 buffer (containing bytes) into an I7 text variable. This is basically a simplified version of TEXT_TY_CastPrimitive; we know the length in advance, which makes it all much easier.
 [ TEXT_CopyFromByteArray txt buf len    ubuf ix;
+	! TEXT_TY_Cast does this before casting from a snippet.
 	TEXT_TY_Transmute(txt);
 
 	ubuf = VM_AllocateMemory((len+1) * WORDSIZE);
@@ -1808,6 +1810,7 @@ Include (-
 		ubuf-->ix = buf->ix;
 	}
 	ubuf-->len = 0;
+	! I don't know if the terminal null is necessary, but TEXT_TY_CastPrimitive adds one. Magic chickens away!
 	
 	BlkValueMassCopyFromArray(txt, ubuf, 4, len+1);
 	
