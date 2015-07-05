@@ -1972,11 +1972,17 @@ To customize this, set the input-request, hyperlink-input-request, and mouse-inp
 
 The input-request property can be char-input, line-input, or no-input. (These are mutually exclusive.) You can set hyperlink-input-request and mouse-input-request independently.
 
-(Note that mouse-input-request does not apply to the story-window -- buffer windows have no fixed coordinates -- so it cannot currently be used at all. There is a status-window object, but UGI does not yet support input requests for it.)
+(Note that mouse-input-request does not apply to the story-window -- buffer windows have no fixed coordinates -- so it cannot currently be used. There is a status-window object, but UGI does not yet support input requests for it.)
 
 Section: Prompt displaying rules
 
-####
+This rulebook displays a prompt before input. It applies to all input requests.
+
+The default for keystroke input is no prompt. For yes-no input it is ">", unless you've specified prompts by invoking the "player consents asking..." phrase. For the final question, the prompt is "> [run paragraph on]" (as defined by the old print the final prompt rule).
+
+For other cases, including all command contexts, the prompt is ">". You can customize this by changing the old command prompt global variable, or by writing a rule:
+
+	Prompt displaying rule for a command input-context: ...
 
 Section: Accepting input rules
 
