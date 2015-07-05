@@ -1259,7 +1259,7 @@ Include (-
 		print "(BUG) NounDomain called recursively!^";
 	}
 	parser_results_set = false;
-	InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
+	InputRDataInit( (+ handling input rules +), inputevent2, buffer2, parse2);
 	FollowRulebook((+ handling input rules +), (+ disambiguation context +), true);
 	InputRDataFinal();
 	if (RulebookFailed()) {
@@ -1398,7 +1398,7 @@ Include (-
 		print "(BUG) NounDomain called recursively!^";
 	}
 	parser_results_set = false;
-	InputRDataInit( (+ handling input rules +), inputevent, buffer, parse);
+	InputRDataInit( (+ handling input rules +), inputevent2, buffer2, parse2);
 	FollowRulebook((+ handling input rules +), (+ disambiguation context +), true);
 	InputRDataFinal();
 	if (RulebookFailed()) {
