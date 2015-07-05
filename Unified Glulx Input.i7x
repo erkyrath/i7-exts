@@ -109,6 +109,9 @@ To say the/-- current input event line text: (- InputRDataEvLinePrint(); -).
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
 
+To save interrupted input of (W - glk-window) (this is interrupted-input-saving):
+	now the preload-input-text of W is the substituted form of "[current input event line text]".
+
 To handle the/-- current input event as (act - stored action): (- InputRDataParseAction({-by-reference:act}); -);
 
 Include (-
@@ -202,14 +205,14 @@ Include (-
 	if (winproxy.current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(win, gg_event);
 		if (input_rulebook_data-->IRDAT_BUFFER && options) {
-			! Preserve the interrupted input in the so-named global variable.
+			! Preserve the interrupted input.
 			if (gg_event-->2 == 0) {
 				! Zero-length, so we assign the empty string.
-				BlkValueCopy( (+ interrupted input +), EMPTY_TEXT_VALUE);
+				BlkValueCopy(GProperty(OBJECT_TY, winproxy, (+ preload-input-text +) ), EMPTY_TEXT_VALUE);
 			}
 			else {
 				(input_rulebook_data-->IRDAT_BUFFER)-->0 = gg_event-->2;
-				((+ interrupted-input-saving +)-->1)();
+				((+ interrupted-input-saving +)-->1)(winproxy);
 			}
 		}
 		winproxy.current_input_request = (+ no-input +);
@@ -388,17 +391,6 @@ First setting up input rule (this is the initial clear input requests rule):
 
 Setting up input rule (this is the standard parser input line request rule):
 	now the input-request of the story-window is line-input.
-
-The interrupted input is initially "".
-
-To save interrupted input (this is interrupted-input-saving):
-	now interrupted input is the substituted form of "[current input event line text]".
-
-Last setting up input rule (this is the standard parser preload input rule):
-	if the input-request of the story-window is line-input:
-		if the interrupted input is not empty:
-			now the preload-input-text of the story-window is the interrupted input;
-			now the interrupted input is "".
 
 
 Section - Prompt Displaying
@@ -585,6 +577,7 @@ Include (-
 			val = GProperty(OBJECT_TY, (+ story-window +), (+ preload-input-text +) );
 			if (~~TEXT_TY_Empty(val)) {
 				len = VM_PrintToBuffer(a_buffer, INPUT_BUFFER_LEN-WORDSIZE, TEXT_TY_Say, val);
+				BlkValueCopy(val, EMPTY_TEXT_VALUE);
 			}
 			glk_request_line_event(gg_mainwin, a_buffer+WORDSIZE, INPUT_BUFFER_LEN-WORDSIZE, len);
 			(+ story-window +).current_input_request = (+ line-input +);
