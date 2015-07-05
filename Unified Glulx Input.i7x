@@ -173,7 +173,7 @@ Include (-
 	}
 ];
 
-! InputRDataParseAction: Tell AwaitInput to interrupt char/line input, so that text can be printed. If there is no char/line input going on, this does nothing. (So it's safe to call it more than once.)
+! InputRDataInterruptInput: Tell AwaitInput to interrupt char/line input, so that text can be printed. If there is no char/line input going on, this does nothing. (So it's safe to call it more than once.)
 ! This is just a temporary interruption. If AwaitInput continues, it will re-request input according to the setting-up-input rulebook.
 ! This may only be called from the accepting-input rulebook. 
 [ InputRDataInterruptInput winproxy   win;
@@ -202,6 +202,9 @@ Include (-
 ! In the interests of sanity, we don't try to handle actions which include text (topics). These are really only useful when parsing player-typed commands, and the whole point of this routine is to bypass textual input.
 ! We also don't handle multiple-object actions. Stored actions can't store those.
 [ InputRDataParseAction stora   acname at acmask req count val;
+	if (input_rulebook_data-->IRDAT_RB_CURRENT ~= (+ handling input rules +) )
+		return;
+
 	acname = BlkValueRead(stora, STORA_ACTION_F);
 	at = FindAction(acname);
 	if (~~at)
