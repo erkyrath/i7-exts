@@ -186,6 +186,7 @@ Include (-
 ];
 
 ! InputRDataInterruptInput: Tell AwaitInput to interrupt char/line input, so that text can be printed. If there is no char/line input going on, this does nothing. (So it's safe to call it more than once.)
+! The options flag tells us to preserve interrupted line input by copying it to the window's preload-input-text property. (Assuming there is line input in progress.)
 ! This is just a temporary interruption. If AwaitInput continues, it will re-request input according to the setting-up-input rulebook.
 ! This may only be called from the accepting-input rulebook. 
 [ InputRDataInterruptInput winproxy options   win propstr;
@@ -209,6 +210,7 @@ Include (-
 				BlkValueCopy(propstr, EMPTY_TEXT_VALUE);
 			}
 			else {
+				! Copy from the buffer.
 				TEXT_CopyFromByteArray(propstr, input_rulebook_data-->IRDAT_BUFFER+WORDSIZE, gg_event-->2);
 			}
 		}
@@ -378,9 +380,10 @@ Section - Setting Up Input
 [This rulebook sets up the input requests for parser input (the command contexts, not the yes-or-no or final questions). It is called at the top of the ParserInput loop.]
 The setting up input rules are an input-context based rulebook.
 
+[This is called by every context that sets up requests for AwaitInput. (The start of the setting up input rulebook, and also YesOrNo and other such contexts.)
+We do not clear the preload-input-text variable! By default, we want interrupted input to carry over from turn to turn. Of course you could add a setting-up-input rule to clear it.]
 To clear all input requests for (W - glk-window) (this is all-input-request-clearing):
 	now the input-request of W is no-input;
-	now the preload-input-text of W is "";
 	now W is not hyperlink-input-request.
 
 First setting up input rule (this is the initial clear input requests rule):
@@ -570,6 +573,7 @@ Include (-
 	
 		if ( (+ story-window +).current_input_request ~= (+ line-input +) && wanttextinput == (+ line-input +)) {
 			!print "(DEBUG) req line input mode^";
+			! If the window's preload-input-text property is not empty, preload it into the buffer (and then clear the property).
 			len = 0;
 			val = GProperty(OBJECT_TY, (+ story-window +), (+ preload-input-text +) );
 			if (~~TEXT_TY_Empty(val)) {
