@@ -109,9 +109,6 @@ To say the/-- current input event line text: (- InputRDataEvLinePrint(); -).
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
 
-To save interrupted input of (W - glk-window) (this is interrupted-input-saving):
-	now the preload-input-text of W is the substituted form of "[current input event line text]".
-
 To handle the/-- current input event as (act - stored action): (- InputRDataParseAction({-by-reference:act}); -);
 
 Include (-
@@ -191,7 +188,7 @@ Include (-
 ! InputRDataInterruptInput: Tell AwaitInput to interrupt char/line input, so that text can be printed. If there is no char/line input going on, this does nothing. (So it's safe to call it more than once.)
 ! This is just a temporary interruption. If AwaitInput continues, it will re-request input according to the setting-up-input rulebook.
 ! This may only be called from the accepting-input rulebook. 
-[ InputRDataInterruptInput winproxy options   win;
+[ InputRDataInterruptInput winproxy options   win propstr;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
 		
@@ -206,13 +203,13 @@ Include (-
 		glk_cancel_line_event(win, gg_event);
 		if (input_rulebook_data-->IRDAT_BUFFER && options) {
 			! Preserve the interrupted input.
+			propstr = GProperty(OBJECT_TY, winproxy, (+ preload-input-text +) );
 			if (gg_event-->2 == 0) {
 				! Zero-length, so we assign the empty string.
-				BlkValueCopy(GProperty(OBJECT_TY, winproxy, (+ preload-input-text +) ), EMPTY_TEXT_VALUE);
+				BlkValueCopy(propstr, EMPTY_TEXT_VALUE);
 			}
 			else {
-				(input_rulebook_data-->IRDAT_BUFFER)-->0 = gg_event-->2;
-				((+ interrupted-input-saving +)-->1)(winproxy);
+				TEXT_CopyFromByteArray(propstr, input_rulebook_data-->IRDAT_BUFFER+WORDSIZE, gg_event-->2);
 			}
 		}
 		winproxy.current_input_request = (+ no-input +);
@@ -1799,6 +1796,25 @@ Include (-
 ];
 
 -) after "Reading the Command" in "Parser.i6t".
+
+Include (-
+
+[ TEXT_CopyFromByteArray txt buf len    ubuf ix;
+	TEXT_TY_Transmute(txt);
+
+	ubuf = VM_AllocateMemory((len+1) * WORDSIZE);
+	
+	for (ix=0 : ix<len : ix++) {
+		ubuf-->ix = buf->ix;
+	}
+	ubuf-->len = 0;
+	
+	BlkValueMassCopyFromArray(txt, ubuf, 4, len+1);
+	
+	VM_FreeMemory(ubuf);
+];
+
+-).
 
 Include (-
 ! KeyboardPrimitive no longer exists.
