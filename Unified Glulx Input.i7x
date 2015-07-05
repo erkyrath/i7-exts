@@ -479,8 +479,11 @@ Include (-
 			RunTimeProblemShow();
 			ClearRTP();
 		}
+
+		! This displayed any pending quotation. (The function name is misleading.) It only writes to the quote window, so it's safe to call even if input is pending.
+		ClearBoxedText();
 	
-		! If we're not already awaiting input, print the prompt. We also take care of other beginning-of-turn business, like showing quote-boxes and cleaning up leftover italics and what not.
+		! If we're not already awaiting input, print the prompt.
 		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
 		!### what about input events when there's no text input at all? E.g. a hyperlink-only game. We should only re-print the prompt if the event printed output, but this may be hard to check. Might need a phrase to signal "I printed stuff".
 		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
@@ -492,7 +495,6 @@ Include (-
 			
 			FollowRulebook((+ prompt displaying rules +), incontext, true);
 			
-			ClearBoxedText();  ! this *displays* a pending quotation
 			ClearParagraphing(14);
 		}
 	
