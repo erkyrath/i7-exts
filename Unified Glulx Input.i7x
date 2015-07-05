@@ -110,6 +110,8 @@ To say the/-- current input event line text: (- InputRDataEvLinePrint(); -).
 
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
+To replace the/-- current input event with the/-- link/hyperlink number (N - number): (- InputRDataSetEvent(evtype_Hyperlink, {N}); -).
+To replace the/-- current input event with the/-- link/hyperlink object (O - object): (- InputRDataSetEvent(evtype_Hyperlink, {O}); -).
 
 To handle the/-- current input event as (act - stored action): (- InputRDataParseAction({-by-reference:act}); -);
 
@@ -184,6 +186,9 @@ Include (-
 			if (input_rulebook_data-->IRDAT_TABLE) {
 				VM_Tokenise(input_rulebook_data-->IRDAT_BUFFER, input_rulebook_data-->IRDAT_TABLE);
 			}
+		evtype_Hyperlink:
+			ev-->1 = gg_mainwin;
+			ev-->2 = arg;
 	}
 ];
 
@@ -1930,11 +1935,11 @@ By default no prompt is printed. You can print your own beforehand, or write a p
 	Prompt displaying rule for keystroke-wait context:
 		say ">>>";
 
-If you want to wait for a key and pay attention to the value:
+If you want to cause a wait and then get the key that was hit:
 
-	let C be the key waited for
-	
-The result will be a Unicode character. (Include the Unicode Character Names extension for a complete list, or my ASCII Character Names extension for the basic ones.) The result may also be a special value representing a control key:
+	the key waited for -- Unicode character
+
+Include the Unicode Character Names extension for a complete list of characters, or my ASCII Character Names extension for the basic ones. The result may also be a special value representing a control key:
 
 	special keycode left, special keycode right, special keycode up, special keycode down, special keycode return, special keycode delete, special keycode escape, special keycode tab, special keycode pageup, special keycode pagedown, special keycode home, special keycode end, special keycode func1, ... special keycode func12
 
@@ -1974,9 +1979,11 @@ The input-request property can be char-input, line-input, or no-input. (These ar
 
 (Note that mouse-input-request does not apply to the story-window -- buffer windows have no fixed coordinates -- so it cannot currently be used. There is a status-window object, but UGI does not yet support input requests for it.)
 
+### hyperlink markup
+
 Section: Prompt displaying rules
 
-This rulebook displays a prompt before input. It applies to all input requests.
+This rulebook displays a prompt before input. It applies to all input contexts.
 
 The default for keystroke input is no prompt. For yes-no input it is ">", unless you've specified prompts by invoking the "player consents asking..." phrase. For the final question, the prompt is "> [run paragraph on]" (as defined by the old print the final prompt rule).
 
@@ -1984,11 +1991,53 @@ For other cases, including all command contexts, the prompt is ">". You can cust
 
 	Prompt displaying rule for a command input-context: ...
 
+(See example: "Changing the Prompt".)
+
 Section: Accepting input rules
 
-####
-### least used
-### the event-peering phrases
+This rulebook decides whether to accept or reject an incoming event, or convert the event to a different event. It applies to all input contexts.
+
+This is the fussiest rulebook in UGI. It's also the one you will use least often. For many games, the default rules are all you need. So don't be overwhelmed by the description here.
+
+Every time an event arrives, this rulebook is invoked. You can get the event type with this phrase:
+
+	the current input event type -- g-event
+
+So you can write a rule like:
+
+	Handling input rule when the current input event type is hyperlink-event:
+
+Or, as a handy shortcut:
+
+	Handling input rule when handling hyperlink-event:
+
+Depending on the current event type, you can check its contents with one of these phrases:
+
+	the current input event character -- Unicode character
+	the current input event hyperlink number -- number
+	the current input event hyperlink object -- object
+	the current input event line word count -- number
+	say the current input event line text
+
+(There is currently no handy way to retrieve the input event line text as a text variable. I'm working on that.)
+
+The job of the accepting input rulebook is to accept the event (stop waiting, allow event to be processed) or reject it (keep waiting). These are available as phrases (really just aliases for "rule succeeds" and "rule fails"):
+
+	accept the input event
+	reject the input event
+
+The default rules accept character, line, and hyperlink events (assuming they were requested by the setting up input rules). Other event types are rejected by default, although a rearrange event will trigger a status-line refresh first.
+
+You can also convert the event to a different one:
+
+	replace the current input event with the line (T - text)
+	replace the current input event with the character (C - Unicode character)
+	replace the current input event with the hyperlink number (N - number)
+	replace the current input event with the hyperlink object (O - object)
+
+This is handy for simple cases -- perhaps you want to convert hyperlink clicks into a line of text and run that through the parser in the usual way. (See example: "Keystroke Input".)
+
+### no snippets
 
 Section: Handling input rules
 
