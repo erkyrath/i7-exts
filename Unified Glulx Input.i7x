@@ -27,6 +27,7 @@ A text-input-mode is a kind of value. The text-input-modes are no-input, char-in
 A glk-window has a text-input-mode called the input-request.
 A glk-window has a text called the preload-input-text.
 A glk-window can be hyperlink-input-request.
+A glk-window can be mouse-input-request.
 
 [Timer input is global -- not attached to any window.]
 
@@ -37,6 +38,7 @@ The timer-request is a number that varies. The timer-request is 0.
 Include (-
 	with current_input_request (+ no-input +), ! of type text-input-mode
 	with current_hyperlink_request false,      ! true or false
+	with current_mouse_request false,          ! true or false
 -) when defining a glk-window.
 
 Include (-
@@ -1871,12 +1873,14 @@ We distinguish these situations with a value called an "input-context". The rule
 	final question context
 	keystroke-wait context
 
+The first two (primary and disambiguation) are used by the main game loop -- the core cycle of fetching and performing commands. The others are special-purpose, ad-hoc inputs.
+
 These are more finely divided than you usually need to bother with. For example, the game might be waiting for a normal command (primary context) or for a disambiguation reply (disambiguation context). In most games these will appear the same. So you can handle them together. For example:
 
 	Prompt displaying rule for a command input-context:
 		instead say ">>>";
 
-This rule changes the command prompt for both primary and disambiguation inputs.
+This rule changes the command prompt for all main-game-loop inputs (both primary and disambiguation).
 
 Section: G-events: what kind of input are we awaiting?
 
@@ -1949,9 +1953,26 @@ We've talked about the four rulebooks, and now it's time to introduce them:
 	accepting input rules - accept, reject, or alter individual input events
 	handling input rules - convert an input event into an action
 
+These rulebooks are based on an input-context value. So you might write
+
+	Prompt displaying rule for yes-or-no context: ...
+	Accepting input rule for a command input-context: ...
+
 Section: Setting up input rules
 
-####
+This rulebook decides what sort of input the game desires for player commands. By default it requests only line input.
+
+This rulebook applies only to the command contexts (primary and disambiguation). Other questions (yes-or-no, keystroke-wait, etc) do their own setup.
+
+To customize this, set the input-request, hyperlink-input-request, and mouse-input-request properties of the story-window object. For example:
+
+	Setting up input rule:
+		now the input-request of the story-window is char-input;
+		now the story-window is hyperlink-input-request;
+
+The input-request property can be char-input, line-input, or no-input. (These are mutually exclusive.) You can set hyperlink-input-request and mouse-input-request independently.
+
+(Note that mouse-input-request does not apply to the story-window -- buffer windows have no fixed coordinates -- so it cannot currently be used at all. There is a status-window object, but UGI does not yet support input requests for it.)
 
 Section: Prompt displaying rules
 
@@ -1968,9 +1989,13 @@ Section: Handling input rules
 ####
 ### accept as action
 
-Chapter: ### low-level invocations
+Section: ### what rulebook when?
+
+Chapter: ### The flow of the machinery
 
 Chapter: ### what about the reading a command activity?
+
+Chapter: ### low-level invocations
 
 Chapter: ### under the hood -- parser changes
 
