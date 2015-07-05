@@ -478,10 +478,11 @@ Include (-
 		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
 			RunTimeProblemShow();
 			ClearRTP();
-		}
 
-		! This displayed any pending quotation. (The function name is misleading.) It only writes to the quote window, so it's safe to call even if input is pending.
-		ClearBoxedText();
+			! This displayed any pending quotation. (The function name is misleading.)
+			! Normally this only writes to the quote window, so we could call it even if input were pending. But in cheapglk the quote goes to the main window. So we'll be paranoid.
+			ClearBoxedText();
+		}
 	
 		! If we're not already awaiting input, print the prompt.
 		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
@@ -619,12 +620,12 @@ Include (-
 	}
 	
 	! We can close any quote box that was displayed during the input loop.
-	quotewin_close_if_open();
+	QuoteWinCloseIfOpen();
 
 	! When this function exits, the window is (once again) not awaiting any input (except perhaps timer input).
 ];
 
-[ quotewin_close_if_open;
+[ QuoteWinCloseIfOpen;
 	if (gg_quotewin) {
 		glk_window_close(gg_quotewin, 0);
 		gg_quotewin = 0;
