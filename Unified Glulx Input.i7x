@@ -104,6 +104,7 @@ To decide what Unicode character is the/-- current input event char/character: (
 To decide what number is the/-- current input event link/hyperlink number: (- InputRDataEvHyperlink() -).
 To decide what object is the/-- current input event link/hyperlink object: (- ObjectValueIsSafe(InputRDataEvHyperlink()) -).
 To decide what number is the/-- current input event line word count: (- InputRDataEvLineWordCount() -).
+To say the/-- current input event line text: (- InputRDataEvLinePrint(); -).
 
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
@@ -152,6 +153,19 @@ Include (-
 	return (input_rulebook_data-->IRDAT_TABLE)-->0;
 ];
 
+[ InputRDataEvLinePrint  buf;
+	! Assumes that the buffer length has been stored in buffer-->0.
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return;
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
+		return;
+	buf = input_rulebook_data-->IRDAT_BUFFER;
+	if (~~buf)
+		return;
+	if (buf-->0)
+		glk_put_buffer(buf+WORDSIZE, buf-->0);
+];
+
 [ InputRDataSetEvent typ arg    ev len;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
@@ -176,7 +190,7 @@ Include (-
 ! InputRDataInterruptInput: Tell AwaitInput to interrupt char/line input, so that text can be printed. If there is no char/line input going on, this does nothing. (So it's safe to call it more than once.)
 ! This is just a temporary interruption. If AwaitInput continues, it will re-request input according to the setting-up-input rulebook.
 ! This may only be called from the accepting-input rulebook. 
-[ InputRDataInterruptInput winproxy   win;
+[ InputRDataInterruptInput winproxy options   win;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
 		
@@ -189,6 +203,17 @@ Include (-
 	
 	if (winproxy.current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(win, gg_event);
+		if (input_rulebook_data-->IRDAT_BUFFER && options) {
+			! Preserve the interrupted input in the so-named global variable.
+			if (gg_event-->2 == 0) {
+				! Zero-length, so we assign the empty string.
+				BlkValueCopy( (+ interrupted input +), EMPTY_TEXT_VALUE);
+			}
+			else {
+				(input_rulebook_data-->IRDAT_BUFFER)-->0 = gg_event-->2;
+				((+ interrupted-input-saving +)-->1)();
+			}
+		}
 		winproxy.current_input_request = (+ no-input +);
 	}
 	else if (winproxy.current_input_request == (+ char-input +) ) {
@@ -366,6 +391,17 @@ First setting up input rule (this is the initial clear input requests rule):
 Setting up input rule (this is the standard parser input line request rule):
 	now the input-request of the story-window is line-input.
 
+The interrupted input is initially "".
+
+To save interrupted input (this is interrupted-input-saving):
+	now interrupted input is the substituted form of "[current input event line text]".
+
+Last setting up input rule (this is the standard parser preload input rule):
+	if the input-request of the story-window is line-input:
+		if the interrupted input is not empty:
+			now the preload-input-text of the story-window is the interrupted input;
+			now the interrupted input is "".
+
 
 Section - Prompt Displaying
 
@@ -406,7 +442,7 @@ To reject the/-- input event: (- RulebookFails(); rtrue; -).
 [Same definition as in Basic Screen Effects.]
 To update/redraw the/-- status line: (- DrawStatusLine(); -).
 
-To interrupt text input for (W - glk-window): (- InputRDataInterruptInput({W}); -).
+To interrupt text input for (W - glk-window), preserving input: (- InputRDataInterruptInput({W}, {phrase options}); -).
 
 [Standard rules:]
 
