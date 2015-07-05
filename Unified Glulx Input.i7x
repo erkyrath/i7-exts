@@ -157,8 +157,6 @@ Include (-
 	! Assumes that the buffer length has been stored in buffer-->0.
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
-	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
-		return;
 	buf = input_rulebook_data-->IRDAT_BUFFER;
 	if (~~buf)
 		return;
