@@ -2009,7 +2009,7 @@ Section: Accepting input rules
 
 This rulebook decides whether to accept or reject an incoming event, or convert the event to a different event. It applies to all input contexts.
 
-This is the fussiest rulebook in UGI. It's also the one you will use least often. For many games, the default rules are all you need. So don't be overwhelmed by the description here.
+This is the fussiest rulebook in UGI. It's also the one you will use least often! For many games, the default rules are all you need. So don't be overwhelmed by the description here.
 
 Every time an event arrives, this rulebook is invoked. You can get the event type with this phrase:
 
@@ -2076,6 +2076,8 @@ This stops line or character input. If you then reject the event, input will be 
 This variation stores the player's in-progress input as the preload-input-text property of the story-window. The next time line input starts, the string will be pre-loaded into the input buffer. (See example: "### timer warnings".)
 
 It is safe to call the interrupt text input phrases multiple times, or when no input is pending. The UGI extension keeps track of what's going on.
+
+And to repeat: this is the least commonly used of the four rulebooks! Forget the mess above and read on.
 
 Section: Handling input rules
 
