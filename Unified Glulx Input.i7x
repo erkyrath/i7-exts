@@ -2197,23 +2197,23 @@ In this example, the underworld uses a different input mechanism: single keystro
 	Accepting input rule when the location is not in Aboveground and handling char-event:
 		let C be the current input event character;
 		if C is special keycode left or C is Unicode Latin small letter w or C is Unicode Latin capital letter W:
-			say "GO WEST[line break]";
+			say "GO WEST";
 			replace the current input event with the line "go west";
 			rule succeeds;
 		if C is special keycode right or C is Unicode Latin small letter e or C is Unicode Latin capital letter E:
-			say "GO EAST[line break]";
+			say "GO EAST";
 			replace the current input event with the line "go east";
 			rule succeeds;
 		if C is special keycode up or C is Unicode Latin small letter n or C is Unicode Latin capital letter N:
-			say "GO NORTH[line break]";
+			say "GO NORTH";
 			replace the current input event with the line "go north";
 			rule succeeds;
 		if C is special keycode down or C is Unicode Latin small letter s or C is Unicode Latin capital letter S:
-			say "GO SOUTH[line break]";
+			say "GO SOUTH";
 			replace the current input event with the line "go south";
 			rule succeeds;
 		if C is special keycode escape or C is Unicode Latin small letter u or C is Unicode Latin capital letter U:
-			say "GO UP[line break]";
+			say "GO UP";
 			replace the current input event with the line "go up";
 			rule succeeds;
 		interrupt text input for the story-window;
