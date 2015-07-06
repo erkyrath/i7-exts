@@ -645,8 +645,6 @@ Include (-
 		! End of loop.
 	}
 	
-	InputRDataFinal();
-
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
@@ -666,6 +664,8 @@ Include (-
 		!print "(DEBUG) cancel hyperlink input mode^";
 	}
 	
+	InputRDataFinal();
+
 	! We can close any quote box that was displayed during the input loop.
 	QuoteWinCloseIfOpen();
 
