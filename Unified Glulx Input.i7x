@@ -2,6 +2,16 @@ Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### This extension is a work in progress. You can do some stuff with it now, though!]
 
+[### To do: (rough order of importance)
+- timer events
+- write more examples (see todo notes)
+- convert line input buffer to a variable
+- rationalize UNDO and OOPS handling
+- noecho flag and whatever it enables
+- REPLAY support
+- add the discardundo model
+]
+
 Chapter - Constants and Variables
 
 Section - Basic Types
