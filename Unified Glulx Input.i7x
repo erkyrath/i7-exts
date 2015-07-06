@@ -2083,14 +2083,44 @@ This stops line or character input. If you then reject the event, input will be 
 
 This variation stores the player's in-progress input as the preload-input-text property of the story-window. The next time line input starts, the string will be pre-loaded into the input buffer. (See example: "### timer warnings".)
 
-The interrupt text input phrase has an additional use: it tells UGI that you're about to print text, so the prompt might have to be redisplayed. This is sometimes helpful if you're rejecting an input event non-silently.
+The interrupt text input phrase has an additional use: it tells UGI that you're about to print text, so the prompt might have to be redisplayed. This is sometimes helpful if you're rejecting an input event with an error message (rather than silently).
 
 Finally, I'll say again: this is the least commonly used of the four rulebooks! Forget the mess above and read on.
 
 Section: Handling input rules
 
-####
-### accept as action
+At this point an input event has been accepted. This rulebook decides how to convert it into an action.
+
+This rulebook applies only to the command contexts (primary and disambiguation). Other questions (yes-or-no, keystroke-wait, etc) do their own setup.
+
+The phrases mentioned above, for examining the input event, still apply:
+
+	the current input event type -- g-event
+	if handling (G - g-event): ...
+	the current input event character -- Unicode character
+	the current input event hyperlink number -- number
+	the current input event hyperlink object -- object
+	the current input event line word count -- number
+	accept the input event
+	reject the input event
+
+If your rule rejects the event, the command does nothing. The game prompts for another command.
+
+If your rule accepts the event, it is processed. Line input is parsed in the classic way. Any other input type causes an "I beg your pardon?" error.
+
+So what do we do with other input types? Usually you'll invoke this phrase:
+
+	handle the current input event as (act - stored action)
+
+This bypasses the parser entirely. The game will proceed as if the given action had been parsed; the player will carry it out (or try to). For example, if you had a hyperlink labelled "INVENTORY", you might write:
+
+	Handling input rule when handling hyperlink-event:
+		handle the current input event as the action of taking inventory;
+		accept the input event.
+
+(Note that a stored action is always phrased "the action of...".)
+
+See example: "A Study In Memoriam".
 
 Section: ### what rulebook when?
 
