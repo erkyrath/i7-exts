@@ -573,6 +573,7 @@ Include (-
 		if ( (+ story-window +).current_input_request == (+ line-input +) && wanttextinput ~= (+ line-input +) ) {
 			glk_cancel_line_event(gg_mainwin, gg_event);
 			(+ story-window +).current_input_request = (+ no-input +);
+			input_rulebook_data-->IRDAT_NEEDPROMPT = true;
 			!print "(DEBUG) cancel line input mode^";
 		}
 		if ( (+ story-window +).current_input_request == (+ char-input +) && wanttextinput ~= (+ char-input +) ) {
@@ -628,6 +629,7 @@ Include (-
 					if (a_table) {
 						VM_Tokenise(a_buffer, a_table);
 					}
+					input_rulebook_data-->IRDAT_NEEDPROMPT = true;
 				}
 			evtype_Hyperlink:
 				if (a_event-->1 == gg_mainwin) {
@@ -649,6 +651,7 @@ Include (-
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
 		(+ story-window +).current_input_request = (+ no-input +);
+		input_rulebook_data-->IRDAT_NEEDPROMPT = true;
 		!print "(DEBUG) cancel line input mode^";
 	}
 	if ( (+ story-window +).current_input_request == (+ char-input +) ) {
