@@ -492,7 +492,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (The latter two arguments are optional; if not supplied then line input cannot be accepted. If a_buffer is supplied but a_table is not, then line input will be accepted but not tokenized.)
 
-[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput wantlinkinput res val len;
+[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput wantlinkinput visprompt res val len;
 	! Clear our argument arrays (if present).
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
@@ -538,6 +538,8 @@ Include (-
 			}
 			runonprompt = false;
 			FollowRulebook((+ prompt displaying rules +), incontext, true);
+			! Crude check for whether any prompt was printed.
+			visprompt = (say__p || say__pc);
 			ClearParagraphing(14);
 		}
 	
@@ -645,8 +647,6 @@ Include (-
 		! End of loop.
 	}
 	
-	InputRDataFinal();
-
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
@@ -666,6 +666,14 @@ Include (-
 		!print "(DEBUG) cancel hyperlink input mode^";
 	}
 	
+	if (input_rulebook_data-->IRDAT_NEEDPROMPT)
+		visprompt = false;
+	if (visprompt) {
+		new_line;
+	}
+	
+	InputRDataFinal();
+
 	! We can close any quote box that was displayed during the input loop.
 	QuoteWinCloseIfOpen();
 
