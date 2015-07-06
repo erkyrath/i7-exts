@@ -78,11 +78,12 @@ Section - Input Rulebook Data
 
 Include (-
 ! Array contains: a_event, a_buffer, a_table
-Constant INPUT_RULEBOOK_SIZE 4;
+Constant INPUT_RULEBOOK_SIZE 5;
 Constant IRDAT_RB_CURRENT 0;
 Constant IRDAT_EVENT 1;
 Constant IRDAT_BUFFER 2;
 Constant IRDAT_TABLE 3;
+Constant IRDAT_NEEDPROMPT 4;
 Array input_rulebook_data --> INPUT_RULEBOOK_SIZE;
 -) after "Variables and Arrays" in "Glulx.i6t";
 
@@ -92,6 +93,7 @@ Include (-
 	input_rulebook_data-->IRDAT_EVENT = a_event;
 	input_rulebook_data-->IRDAT_BUFFER = a_buffer;
 	input_rulebook_data-->IRDAT_TABLE = a_table;
+	input_rulebook_data-->IRDAT_NEEDPROMPT = false;
 ];
 
 [ InputRDataFinal;
@@ -99,6 +101,7 @@ Include (-
 	input_rulebook_data-->IRDAT_EVENT = 0;
 	input_rulebook_data-->IRDAT_BUFFER = 0;
 	input_rulebook_data-->IRDAT_TABLE = 0;
+	input_rulebook_data-->IRDAT_NEEDPROMPT = false;
 ];
 -).
 
@@ -231,6 +234,8 @@ Include (-
 		glk_cancel_char_event(win);
 		winproxy.current_input_request = (+ no-input +);
 	}
+	
+	input_rulebook_data-->IRDAT_NEEDPROMPT = true;
 ];
 
 ! InputRDataParseAction: Parse out a stored action into parser_results form. We also set parsed_number, actor, and the parser_results_set flag. I don't think we have to set up anything else. (Note that this will be immediately followed by calls to TreatParserResults and GENERATE_ACTION_R.)
@@ -507,6 +512,9 @@ Include (-
 	}
 	InputRDataInit( (+ accepting input rules +), a_event, a_buffer, a_table);
 	
+	! Always start with a prompt.
+	input_rulebook_data-->IRDAT_NEEDPROMPT = true;
+	
 	while (true) {
 	
 		! Before input, we do the work that was in the old PrintPrompt call. The conditions have evolved a bit, though.
@@ -521,18 +529,15 @@ Include (-
 			ClearBoxedText();
 		}
 	
-		! If we're not already awaiting input, print the prompt.
-		! (Note that this stanza will always run on the first trip through the AwaitInput loop, because we entered awaiting no input. After that, we'll re-run the stanza (re-print the prompt) every time an input event cancels or completes text input.)
-		!### what about input events when there's no text input at all? E.g. a hyperlink-only game. We should only re-print the prompt if the event printed output, but this may be hard to check. Might need a phrase to signal "I printed stuff".
-		if ( (+ story-window +).current_input_request == (+ no-input +) ) {
+		! If we need to print the prompt, and we're not already awaiting input, print the prompt.
+		if (input_rulebook_data-->IRDAT_NEEDPROMPT && (+ story-window +).current_input_request == (+ no-input +) ) {
+			input_rulebook_data-->IRDAT_NEEDPROMPT = false;
 			style roman;
 			if (~~runonprompt) {
 				EnsureBreakBeforePrompt();
 			}
 			runonprompt = false;
-			
 			FollowRulebook((+ prompt displaying rules +), incontext, true);
-			
 			ClearParagraphing(14);
 		}
 	
