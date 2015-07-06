@@ -2049,7 +2049,33 @@ You can also convert the event to a different one:
 	replace the current input event with the hyperlink object (O - object)
 	replace the current input event with the hyperlink number (N - number)
 
-This is handy for simple cases -- perhaps you want to convert hyperlink clicks into a line of text and run that through the parser in the usual way. (See example: "Keystroke Input".)
+This is handy for simple cases -- perhaps you want to convert hyperlink clicks into a line of text and run that through the parser in the usual way. (See example: "Keystroke Input".) However, it's cleaner to handle hyperlinks in the handling input rulebook. See next section.
+
+Here's the messy part. If you've requested character or line input, and a *different* input event arrives, the character or line input is still in progress. *You may not print text as long as character or line input is in progress.*
+
+To be clear, this is not a problem when you *receive* a character or line event. That signals that the input is complete and printing is safe. But if you get another event type (say a timer or hyperlink event) while char/line input is in progress, you must either
+
+(a) take background action that does not print to the story window, or
+
+(b) accept the event, printing nothing, or
+
+(c) interrupt text input before printing.
+
+The standard redraw status line on arrange rule is an example of policy (a). It redraws the status line (and then rejects the event to continue waiting).
+
+Policy (b) is fine if you plan to handle the event in the handling input rulebook. See next section.
+
+For policy (c), you'll have to call this phrase:
+
+	interrupt text input for (W - glk-window)
+
+This stops line or character input. If you then reject the event, input will be re-requested automatically.
+
+	interrupt text input for (W - glk-window), preserving input
+
+This variation stores the player's in-progress input as the preload-input-text property of the story-window. The next time line input starts, the string will be pre-loaded into the input buffer. (See example: "### timer warnings".)
+
+It is safe to call the interrupt text input phrases multiple times, or when no input is pending. The UGI extension keeps track of what's going on.
 
 Section: Handling input rules
 
