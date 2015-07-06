@@ -51,6 +51,10 @@ A g-event is a kind of value. The g-events are timer-event, char-event, line-eve
 
 To decide which g-event is null-event: (- 0 -)
 
+To say hyperlink (O - object): (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink({O}); } -).
+To say hyperlink (N - number): (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink({N}); } -).
+To say /hyperlink: (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink(0); } -).
+
 
 Section - A Few Globals
 
@@ -1979,7 +1983,15 @@ The input-request property can be char-input, line-input, or no-input. (These ar
 
 (Note that mouse-input-request does not apply to the story-window -- buffer windows have no fixed coordinates -- so it cannot currently be used. There is a status-window object, but UGI does not yet support input requests for it.)
 
-### hyperlink markup
+We'd better mention how to display hyperlinks in your game text. A hyperlink can contain a number or an object reference. (Or, really, any value that can be cast to an I6 integer, which is any value at all. But stick with the easy cases.) (It's best not to mix numbers and objects in the same game. Pick one.)
+
+	say hyperlink (O - object)
+	say hyperlink (N - number)
+	say /hyperlink
+
+Use these phrases in text as markup:
+
+	say "You see a [hyperlink sword]ancient elvish sword[/hyperlink]."
 
 Section: Prompt displaying rules
 
@@ -2019,9 +2031,11 @@ Depending on the current event type, you can check its contents with one of thes
 	the current input event line word count -- number
 	say the current input event line text
 
-(There is currently no handy way to retrieve the input event line text as a text variable. I'm working on that.)
+An important note: in the accepting input rulebook, the "player's command" snippet has not yet been set up. You cannot refer to this or any other snippet variable; you will get errors. The word count phrase is as close as you get to inspecting the input line.
 
-The job of the accepting input rulebook is to accept the event (stop waiting, allow event to be processed) or reject it (keep waiting). These are available as phrases (really just aliases for "rule succeeds" and "rule fails"):
+(A future version of UGI may allow you to retrieve the input event line text as a text variable. I'm working on that.)
+
+The job of the accepting input rulebook is to reject the event (keep waiting) or accept it (stop waiting and allow event to be processed). These are available as phrases (really just aliases for "rule succeeds" and "rule fails"):
 
 	accept the input event
 	reject the input event
@@ -2032,12 +2046,10 @@ You can also convert the event to a different one:
 
 	replace the current input event with the line (T - text)
 	replace the current input event with the character (C - Unicode character)
-	replace the current input event with the hyperlink number (N - number)
 	replace the current input event with the hyperlink object (O - object)
+	replace the current input event with the hyperlink number (N - number)
 
 This is handy for simple cases -- perhaps you want to convert hyperlink clicks into a line of text and run that through the parser in the usual way. (See example: "Keystroke Input".)
-
-### no snippets
 
 Section: Handling input rules
 
@@ -2271,9 +2283,6 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 	The antique shop is a memory. The description is "You discovered a mad antique shop on a years-ago trip to North Carolina. The prize of its collection was [a microscope], though you doubt anyone else would think of it that way. You bought [hyperlink desk]an old desk[/hyperlink] instead; the very one in this room."
 
 	The lightning is a memory. The description is "One can never remember lightning properly."
-
-	To say hyperlink (O - object): (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink({O}); } -).
-	To say /hyperlink: (- if (glk_gestalt(gestalt_Hyperlinks, 0)) { glk_set_hyperlink(0); } -).
 
 	Rule for printing the name of something (called O):
 		say "[hyperlink O][printed name of O][/hyperlink]";
