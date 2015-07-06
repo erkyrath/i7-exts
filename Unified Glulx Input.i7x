@@ -2208,6 +2208,7 @@ In this example, the underworld uses a different input mechanism: single keystro
 			say "GO UP[line break]";
 			replace the current input event with the line "go up";
 			rule succeeds;
+		interrupt text input for the story-window;
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
 
