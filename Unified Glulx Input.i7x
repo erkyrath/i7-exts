@@ -2317,10 +2317,14 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 
 	The lightning is a memory. The description is "One can never remember lightning properly."
 
-	Rule for printing the name of something (called O):
+	Rule for printing the name of an object (called O):
 		say "[hyperlink O][printed name of O][/hyperlink]";
 
 	The standard parser input line request rule does nothing.
+
+	Prompt displaying rule for a command input-context:
+		say "[first time](Touch a link.)[only]";
+		rule succeeds.
 
 	Setting up input rule:
 		now the story-window is hyperlink-input-request.
@@ -2329,8 +2333,14 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 		let O be current input event hyperlink object;
 		if O is nothing:
 			reject the input event;
-		handle the current input event as the action of examining O;
-		rule succeeds.	
+		if O is a room:
+			handle the current input event as the action of looking;
+		else:
+			handle the current input event as the action of examining O;
+		rule succeeds.
+
+	Before examining something:
+		say "--- [The noun] ---[paragraph break]";
 
 
 Example: *** Requesting a Number - A phrase to query the player for a number.
