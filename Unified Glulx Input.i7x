@@ -2083,9 +2083,9 @@ This stops line or character input. If you then reject the event, input will be 
 
 This variation stores the player's in-progress input as the preload-input-text property of the story-window. The next time line input starts, the string will be pre-loaded into the input buffer. (See example: "### timer warnings".)
 
-It is safe to call the interrupt text input phrases multiple times, or when no input is pending. The UGI extension keeps track of what's going on.
+The interrupt text input phrase has an additional use: it tells UGI that you're about to print text, so the prompt might have to be redisplayed. This is sometimes helpful if you're rejecting an input event non-silently.
 
-And to repeat: this is the least commonly used of the four rulebooks! Forget the mess above and read on.
+Finally, I'll say again: this is the least commonly used of the four rulebooks! Forget the mess above and read on.
 
 Section: Handling input rules
 
