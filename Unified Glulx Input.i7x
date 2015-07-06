@@ -2133,7 +2133,7 @@ We also use an extended form of the "player consents" phrase, in which we supply
 
 Example: ** Keystroke Input - Controlling the game with single keystrokes.
 
-In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach; see the next example for a tidier model.)
+In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach. See the "Keystroke Input 2" example for a tidier model.)
 
 	*: "Keystroke Input"
 
