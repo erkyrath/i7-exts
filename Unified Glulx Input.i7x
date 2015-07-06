@@ -2122,6 +2122,8 @@ This bypasses the parser entirely. The game will proceed as if the given action 
 
 See example: "A Study In Memoriam".
 
+By the way, at the handling-input stage, all inputs have been completed or cancelled. You don't have to worry about manually interrupting text input.
+
 Section: ### what rulebook when?
 
 Chapter: ### The flow of the machinery
