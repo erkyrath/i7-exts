@@ -2124,11 +2124,68 @@ See example: "A Study In Memoriam".
 
 By the way, at the handling-input stage, all inputs have been completed or cancelled. You don't have to worry about manually interrupting text input.
 
-Section: ### what rulebook when?
+Section: Which rulebook again?
 
-Chapter: ### The flow of the machinery
+The accepting-input and handling-input rulebooks both operate on input events. They both can accept and reject events. When you're building a game, you may find yourself unsure which to use.
+
+The rules of thumb:
+
+- If you want to generate an action, use a handling input rule.
+
+- If you want to convert some event into a line input event, you can use either, but handling input will probably be simpler.
+
+- If you want to respond to an event without interrupting the player's input, use an accepting input rule.
+
+- If you want to reject an event without even printing a new prompt, use an accepting input rule.
+
+- If you want to respond to events in every input context (including yes-or-no, keystroke-wait, etc) use an accepting input rule.
 
 Chapter: ### what about the reading a command activity?
+
+Chapter: The flow of the machinery
+
+It may be helpful to diagram the whole input machine and describe exactly when each rulebook runs.
+
+	(top of parser loop:)
+	do before reading a command activity
+	repeat until a command is accepted:
+		...
+		(ParserInput function:)
+		repeat until an event is accepted:
+			follow setting up input rules
+			...
+			(AwaitInput function:)
+			repeat until an event is accepted:
+				follow prompt displaying rules
+				redraw the status line
+				make all necessary Glk input requests
+				wait for an input event to arrive
+				follow the accepting input rules
+			cancel any remaining Glk input requests
+			(end of AwaitInput function)
+			...
+			reject blank lines ("I beg your pardon")
+			handle UNDO commands
+			save an undo point
+		(end of ParserInput function)
+		...
+		follow handling input rules
+	(at this point, the "player's command" is set)
+	do after reading a command activity
+	if no action is recognized, say "I beg your pardon"
+	otherwise, carry out the action	
+
+Requests such as "player consents" and "wait for any key" only invoke the AwaitInput function. They bypass ParserInput, and thus ignore the setting up input rules and the handling input rules.
+
+The inner blank-line rejection is a bit of an anomaly. It happens before the handling input rules (and the after reading a command activity), which may cause problems; you cannot handle blank line input the same way you handle other line input.
+
+UGI offers a use option to resolve this:
+
+	Use pass blank input lines.
+
+If you set this, the reject blank lines step is omitted. A blank line will pass through all the same rulebooks as other line input. It will be rejected at the last step -- no action is recognized, say "I beg your pardon". So the player will see the same response, really.
+
+(One difference: we will have passed through the save-undo step. That is, when this option is set, blank lines count as undoable commands. That's not great, but it's not a big nuisance either. A future version of UGI may address this.)
 
 Chapter: ### low-level invocations
 
