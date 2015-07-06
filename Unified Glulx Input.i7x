@@ -492,7 +492,7 @@ Include (-
 ! This function also handles displaying the prompt and redrawing the status line. (Through customizable rulebooks and activities, of course.)
 ! AwaitInput takes four arguments: the input context, an event structure, a line input buffer, and a buffer for parsing words from line input. (The latter two arguments are optional; if not supplied then line input cannot be accepted. If a_buffer is supplied but a_table is not, then line input will be accepted but not tokenized.)
 
-[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput wantlinkinput visprompt res val len;
+[ AwaitInput incontext a_event a_buffer a_table     runonprompt wanttextinput wantlinkinput res val len;
 	! Clear our argument arrays (if present).
 	a_event-->0 = evtype_None;
 	if (a_buffer) {
@@ -538,8 +538,6 @@ Include (-
 			}
 			runonprompt = false;
 			FollowRulebook((+ prompt displaying rules +), incontext, true);
-			! Crude check for whether any prompt was printed.
-			visprompt = (say__p || say__pc);
 			ClearParagraphing(14);
 		}
 	
@@ -647,6 +645,8 @@ Include (-
 		! End of loop.
 	}
 	
+	InputRDataFinal();
+
 	! Cancel any remaining input requests.
 	if ( (+ story-window +).current_input_request == (+ line-input +) ) {
 		glk_cancel_line_event(gg_mainwin, gg_event);
@@ -666,14 +666,6 @@ Include (-
 		!print "(DEBUG) cancel hyperlink input mode^";
 	}
 	
-	if (input_rulebook_data-->IRDAT_NEEDPROMPT)
-		visprompt = false;
-	if (visprompt) {
-		new_line;
-	}
-	
-	InputRDataFinal();
-
 	! We can close any quote box that was displayed during the input loop.
 	QuoteWinCloseIfOpen();
 
@@ -2197,23 +2189,23 @@ In this example, the underworld uses a different input mechanism: single keystro
 	Accepting input rule when the location is not in Aboveground and handling char-event:
 		let C be the current input event character;
 		if C is special keycode left or C is Unicode Latin small letter w or C is Unicode Latin capital letter W:
-			say "GO WEST";
+			say "GO WEST[line break]";
 			replace the current input event with the line "go west";
 			rule succeeds;
 		if C is special keycode right or C is Unicode Latin small letter e or C is Unicode Latin capital letter E:
-			say "GO EAST";
+			say "GO EAST[line break]";
 			replace the current input event with the line "go east";
 			rule succeeds;
 		if C is special keycode up or C is Unicode Latin small letter n or C is Unicode Latin capital letter N:
-			say "GO NORTH";
+			say "GO NORTH[line break]";
 			replace the current input event with the line "go north";
 			rule succeeds;
 		if C is special keycode down or C is Unicode Latin small letter s or C is Unicode Latin capital letter S:
-			say "GO SOUTH";
+			say "GO SOUTH[line break]";
 			replace the current input event with the line "go south";
 			rule succeeds;
 		if C is special keycode escape or C is Unicode Latin small letter u or C is Unicode Latin capital letter U:
-			say "GO UP";
+			say "GO UP[line break]";
 			replace the current input event with the line "go up";
 			rule succeeds;
 		interrupt text input for the story-window;
