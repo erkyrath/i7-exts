@@ -406,14 +406,20 @@ Section - Setting Up Input
 [This rulebook sets up the input requests for parser input (the command contexts, not the yes-or-no or final questions). It is called at the top of the ParserInput loop.]
 The setting up input rules are an input-context based rulebook.
 
-[This is called by every context that sets up requests for AwaitInput. (The start of the setting up input rulebook, and also YesOrNo and other such contexts.)
-We do not clear the preload-input-text variable! By default, we want interrupted input to carry over from turn to turn. Of course you could add a setting-up-input rule to clear it.]
-To clear all input requests for (W - glk-window) (this is all-input-request-clearing):
+[This is called by every context that sets up requests for AwaitInput. (The start of the setting up input rulebook, and also YesOrNo and other such contexts.)]
+To clear all input requests (this is all-input-request-clearing):
+	clear input requests for the story-window;
+	clear input requests for the status-window.
+	[We do not clear timer-request. That will run in the background as turns (and other inputs) go by.]
+
+[Clear input requests for a given window.]
+To clear input requests for (W - glk-window):
 	now the input-request of W is no-input;
 	now W is not hyperlink-input-request.
+	[We do not clear the preload-input-text variable! By default, we want interrupted input to carry over from turn to turn. Of course you could add a setting-up-input rule to clear it.]
 
 First setting up input rule (this is the initial clear input requests rule):
-	clear all input requests for the story-window.
+	clear all input requests.
 
 Setting up input rule (this is the standard parser input line request rule):
 	now the input-request of the story-window is line-input.
@@ -830,7 +836,7 @@ Include (-
 
 [ YesOrNo i j;
 	for (::) {
-		((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+		((+ all-input-request-clearing +)-->1)();
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
 		
 		AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
@@ -849,7 +855,7 @@ Include (-
 [ YesOrNoPrompt i j incontext;
 	incontext = (+ extended yes-no question context +);
 	for (::) {
-		((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+		((+ all-input-request-clearing +)-->1)();
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
 		
 		AwaitInput(incontext, inputevent, buffer, parse);
@@ -894,7 +900,7 @@ Include (-
 ! Unlike in ParserInput, the input format cannot be customized. The "standard respond to final question rule" is looking for a typed response, so we must supply one.
 
 [ READ_FINAL_ANSWER_R;
-	((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+	((+ all-input-request-clearing +)-->1)();
 	WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
 		
 	AwaitInput( (+ final question context +), inputevent, buffer, parse);
@@ -922,7 +928,7 @@ To wait for the/-- SPACE key: (- InputKeysUntilSpace(); -).
 Include (-
 
 [ InputKeystroke;
-	((+ all-input-request-clearing +)-->1)( (+ story-window +) );
+	((+ all-input-request-clearing +)-->1)();
 	WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ char-input +) );
 	
 	AwaitInput( (+ keystroke-wait context +), inputevent, 0, 0);
@@ -2504,7 +2510,7 @@ A better implementation would rely on the secondary buffer. We couldn't use TryN
 
 	To decide what number is the number waited for:
 		while 1 is 1:
-			clear all input requests for the story-window;
+			clear all input requests;
 			now the input-request of the story-window is line-input;
 			await input in numeric context with primary buffer;
 			let N be the hacky low-level number check;
