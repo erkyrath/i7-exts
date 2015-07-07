@@ -2250,6 +2250,53 @@ We also use an extended form of the "player consents" phrase, in which we supply
 	Test me with "out / maybe / no / out / yes".
 
 
+Example: ** Background Timer - A timer in the status window.
+
+This timer updates a clock in the status window. It never interrupts input or writes to the story window, so we use an accepting input rule.
+
+The rule doesn't specify an input-context; timer input is accepted in all contexts. Thus, the clock keeps running during the yes-or-no question. It would keep running even during the game's final question if we didn't switch it off.
+
+	*: "Background Timer"
+
+	Include Unified Glulx Input by Andrew Plotkin.
+
+	The Observation Lounge is a room. "This room overlooks the test chamber. A single button is ready to launch the experiment."
+
+	A digital clock is fixed in place in the Lounge. "A digital clock blinks impassively overhead."
+	The description is "The clock reads [readout]."
+
+	A button is scenery in the Lounge.
+
+	Check pushing the button:
+		if the player consents asking "Are you very very sure?":
+			say "[line break]It is now [readout]. The experiment [one of]succeeds[or]fails[purely at random].";
+			set the timer off;
+			instead end the story finally;
+		else:
+			instead say "You demur for now.";
+
+	When play begins:
+		now the right hand status line is "[readout]";
+		set the timer to 1 second.
+
+	Rule for accepting input when handling timer-event:
+		increment the counter;
+		redraw the status line.
+
+	The counter is initially 60.
+
+	To say readout:
+		let M be the remainder after dividing the counter by 60;
+		let H be the counter divided by 60;
+		if H < 10:
+			say "0";
+		say H;
+		say ":";
+		if M < 10:
+			say "0";
+		say M;
+
+
 Example: ** Keystroke Input - Controlling the game with single keystrokes.
 
 In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach. See the "Keystroke Input 2" example for a tidier model.)
