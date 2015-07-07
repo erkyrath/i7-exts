@@ -3,7 +3,6 @@ Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 [### This extension is a work in progress. You can do some stuff with it now, though!]
 
 [### To do: (rough order of importance)
-- timer events
 - write more examples (see todo notes)
 - convert line input buffer to a variable
 - rationalize UNDO and OOPS handling
@@ -2116,7 +2115,7 @@ This stops line or character input. If you then reject the event, input will be 
 
 	interrupt text input for (W - glk-window), preserving input
 
-This variation stores the player's in-progress input as the preload-input-text property of the story-window. The next time line input starts, the string will be pre-loaded into the input buffer. (See example: "### timer warnings".)
+This variation stores the player's in-progress input as the preload-input-text property of the story-window. The next time line input starts, the string will be pre-loaded into the input buffer. (See example: "Master Blaster".)
 
 The interrupt text input phrase has an additional use: it tells UGI that you're about to print text, so the prompt might have to be redisplayed. This is sometimes helpful if you're rejecting an input event with an error message (rather than silently).
 
@@ -2303,7 +2302,7 @@ The rule doesn't specify an input-context; timer input operates in all contexts.
 		say M;
 
 
-Example: ** Master Blaster - A timer that triggers a game action.
+Example: *** Master Blaster - A timer that triggers a game action.
 
 In this game, the BLAST command causes an explosion exactly two seconds later.
 
@@ -2443,7 +2442,7 @@ In this example, the underworld uses a different input mechanism: single keystro
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
 
-Example: ** Keystroke Input 2 - Controlling the game with single keystrokes.
+Example: *** Keystroke Input 2 - Controlling the game with single keystrokes.
 
 This is nearly the same as the previous example. But now, instead of changing char input events to line input events, we handle char events directly as going actions.
 
@@ -2578,7 +2577,7 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 		say "--- [The noun] ---[paragraph break]";
 
 
-Example: *** Requesting a Number - A phrase to query the player for a number.
+Example: **** Requesting a Number - A phrase to query the player for a number.
 
 In this example we ask the player for a number. It's very much like "if the player consents..." except that we get back a number rather than a yes-or-no decision.
 
