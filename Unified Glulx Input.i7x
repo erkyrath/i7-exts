@@ -1757,7 +1757,7 @@ Include (-
 		rfalse;
 	if (~~gg_command_reading)
 		rfalse;
-	!###
+	!### this doesn't actually work yet.
 	rfalse;
 ];
 
@@ -2174,7 +2174,28 @@ The rules of thumb:
 
 - If you want to respond to events in every input context (including yes-or-no, keystroke-wait, etc) use an accepting input rule.
 
-Chapter: ### what about the reading a command activity?
+Section: What about the reading a command activity?
+
+The old "reading a command" activity still exists under UGI. It's called by the same code that runs the handling input rulebook. It's not the same thing, though; we must be careful of the differences.
+
+- Reading a command is an activity. You can write before rules and after rules for it. The accepting input and handling input rulebooks run "inside" reading a command -- between the before and after stages of the activity.
+
+- In an after reading a command rule, you can refer to (or replace) the "player's command" snippet. That's not allowed in a handling input rule; the player's command is not yet set up during that rulebook.
+
+- In a handling input rule, you can say "handle the current input event as the action of...". That's not available at after reading a command time.
+
+- For a disambiguation input, the player's command (in an after reading a command rule) is the *entire* disambiguated command! An example:
+
+	>GET 
+	(after reading: player's command="GET".)
+	What do you want to get?
+	>RED ROCK
+	(after reading: player's command="GET RED ROCK".)
+	Taken.
+
+The handling input rulebook will not see this. It's concerned only with the input events, which are "GET" followed by "RED ROCK".
+
+In short, the reading a command activity is the most sensible place to examine or replace text. The handling input rulebook is primarily meant for translating *non-textual* input events into actions.
 
 Chapter: The flow of the machinery
 
@@ -2217,7 +2238,7 @@ UGI offers a use option to resolve this:
 
 	Use pass blank input lines.
 
-If you set this, the reject blank lines step is omitted. A blank line will pass through all the same rulebooks as other line input. It will be rejected at the last step -- no action is recognized, say "I beg your pardon". So the player will see the same response, really.
+If you set this, the reject blank lines step is omitted. A blank line will pass through all the same rulebooks as other line input. It will be rejected at the *last* step -- no action is recognized, say "I beg your pardon". So the player will see the same response, really.
 
 (One difference: we will have passed through the save-undo step. That is, when this option is set, blank lines count as undoable commands. That's not great, but it's not a big nuisance either. A future version of UGI may address this.)
 
