@@ -2252,9 +2252,9 @@ We also use an extended form of the "player consents" phrase, in which we supply
 
 Example: ** Background Timer - A timer in the status window.
 
-This timer updates a clock in the status window. It never interrupts input or writes to the story window, so we use an accepting input rule.
+This timer updates a clock in the status window. It never interrupts input or writes to the story window, so we only need an accepting input rule. The rule does its work and then rejects the event. (Timer events are rejected by default, so that last line isn't necessary, but it keeps the flow clear.)
 
-The rule doesn't specify an input-context; timer input is accepted in all contexts. Thus, the clock keeps running during the yes-or-no question. It would keep running even during the game's final question if we didn't switch it off.
+The rule doesn't specify an input-context; timer input operates in all contexts. Thus, the clock keeps running during the yes-or-no question. It would keep running even during the game's final question if we didn't switch it off.
 
 	*: "Background Timer"
 
@@ -2281,7 +2281,8 @@ The rule doesn't specify an input-context; timer input is accepted in all contex
 
 	Rule for accepting input when handling timer-event:
 		increment the counter;
-		redraw the status line.
+		redraw the status line;
+		reject input event.
 
 	The counter is initially 60.
 
