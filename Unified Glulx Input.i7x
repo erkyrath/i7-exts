@@ -39,7 +39,7 @@ A glk-window has a text called the preload-input-text.
 A glk-window can be hyperlink-input-request.
 A glk-window can be mouse-input-request.
 
-[Timer input is global -- not attached to any window.]
+[Timer input is global -- not attached to any window. The timer-request variable is in milliseconds, or 0 for no timer events.]
 
 The timer-request is a number that varies. The timer-request is 0.
 
@@ -418,6 +418,14 @@ To clear input requests for (W - glk-window):
 	now W is not hyperlink-input-request.
 	[We do not clear the preload-input-text variable! By default, we want interrupted input to carry over from turn to turn. Of course you could add a setting-up-input rule to clear it.]
 
+To set the/-- timer to (N - number) ms/millisec/millisecond/milliseconds:
+	now timer-request is N.
+To set the/-- timer to (R - real number) sec/second/seconds:
+	let N be (R * 1000.0) to the nearest whole number;
+	now timer-request is N.
+To set/turn the/-- timer off:
+	now timer-request is 0.
+
 First setting up input rule (this is the initial clear input requests rule):
 	clear all input requests.
 
@@ -627,6 +635,12 @@ Include (-
 				glk_request_hyperlink_event(gg_mainwin);
 				(+ story-window +).current_hyperlink_request = true;
 			}
+		}
+		
+		val = (+ timer-request +);
+		if (current_timer_request ~= val) {
+			glk_request_timer_events(val);
+			current_timer_request = val;
 		}
 
 		glk_select(a_event);
