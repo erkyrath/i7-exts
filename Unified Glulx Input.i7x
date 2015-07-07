@@ -5,6 +5,7 @@ Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 [### To do: (rough order of importance)
 - write more examples (see todo notes)
 - convert line input buffer to a variable
+- should setting-up-input be generalized? moved into AwaitInput?
 - rationalize UNDO and OOPS handling
 - noecho flag and whatever it enables
 - REPLAY support
@@ -2242,7 +2243,44 @@ If you set this, the reject blank lines step is omitted. A blank line will pass 
 
 (One difference: we will have passed through the save-undo step. That is, when this option is set, blank lines count as undoable commands. That's not great, but it's not a big nuisance either. A future version of UGI may address this.)
 
-Chapter: ### low-level invocations
+Chapter: Low-level invocations
+
+UGI offers phrases to stop and wait for a particular input (a keystroke, a yes-or-no question). It's quite easy to write your own such phrase.
+
+Say we want to stop and wait for one hyperlink click. First we'll want to define a new input-context:
+
+	Link-wait context is an input-context.
+
+Then we need a rule to accept hyperlink input, storing the link value in a global:
+
+	The found object is an object that varies.
+	Rule for accepting input for link-wait context when handling hyperlink-event:
+		now the found object is the current input event hyperlink object;
+		accept the input event.
+
+Now we can write a phrase:
+
+	To decide what object is the hyperlink waited for:
+		now the found object is nothing;
+		clear all input requests;
+		now the story-window is hyperlink-input-request;
+		await input in link-wait context;
+		decide on the found object.
+
+The core phrase here is
+
+	await input in (C - input-context)
+
+Before calling this, we *must* set the desired request properties. (Remember, the setting up input rulebook will not be run) It is best to clear all requests and then set exactly the requests desired.
+
+If we want line input, we must use one of the alternate forms:
+
+	await input in (C - input-context) with primary buffer
+	await input in (C - input-context) with secondary buffer
+
+Generally you will want to use the secondary buffer. That will avoid stomping on the player's command (which is always stored in the primary buffer).
+
+For another case, see example: "Requesting a Number"
 
 Chapter: ### under the hood -- parser changes
 
