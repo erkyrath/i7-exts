@@ -638,7 +638,7 @@ Include (-
 		}
 		
 		val = (+ timer-request +);
-		if (current_timer_request ~= val) {
+		if (current_timer_request ~= val && glk_gestalt(gestalt_Timer, 0)) {
 			glk_request_timer_events(val);
 			current_timer_request = val;
 		}
