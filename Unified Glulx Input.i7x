@@ -2103,7 +2103,7 @@ To be clear, this is not a problem when you *receive* a character or line event.
 
 (c) interrupt text input before printing.
 
-The standard redraw status line on arrange rule is an example of policy (a). It redraws the status line (and then rejects the event to continue waiting).
+The standard redraw status line on arrange rule is an example of policy (a). It redraws the status line (and then rejects the event to continue waiting). See example: "Tick Tick Tick Button".
 
 Policy (b) is fine if you plan to handle the event in the handling input rulebook. See next section.
 
@@ -2306,7 +2306,7 @@ Example: *** Master Blaster - A timer that triggers a game action.
 
 In this game, the BLAST command causes an explosion exactly two seconds later.
 
-We want the timer to interrupt player input, so we accept the timer event. The interrupt text input line is not required; UGI always interrupts all input when an event is accepted. But by invoking it explicitly with the "preserving input" option, we ensure that the player's interrupted command will be preloaded into the next input line.
+We want the timer to interrupt player input, so we accept the timer event. The interrupt text input line is not required; UGI always interrupts all input when an event is accepted. But by invoking it explicitly with the "preserving input" option, we ensure that the player's interrupted command will be preloaded into the next input line. It also allows us to print a quick "Interrupting..." message before the rule finishes.
 
 Note that we only accept timer events when in a command input-context. In any other context (yes-or-no, etc) we would want to ignore the event -- it wouldn't make sense to trigger one game action in the middle of another. (In fact, the handling input rules don't even run in non-command contexts, so the event would be wasted anyhow.)
 
