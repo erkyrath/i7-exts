@@ -2250,13 +2250,13 @@ We also use an extended form of the "player consents" phrase, in which we supply
 	Test me with "out / maybe / no / out / yes".
 
 
-Example: ** Background Timer - A timer in the status window.
+Example: ** Tick Tick Tick Button - A timer in the status window.
 
 This timer updates a clock in the status window. It never interrupts input or writes to the story window, so we only need an accepting input rule. The rule does its work and then rejects the event. (Timer events are rejected by default, so that last line isn't necessary, but it keeps the flow clear.)
 
 The rule doesn't specify an input-context; timer input operates in all contexts. Thus, the clock keeps running during the yes-or-no question. It would keep running even during the game's final question if we didn't switch it off.
 
-	*: "Background Timer"
+	*: "Tick Tick Tick Button"
 
 	Include Unified Glulx Input by Andrew Plotkin.
 
