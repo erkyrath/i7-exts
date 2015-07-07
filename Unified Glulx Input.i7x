@@ -426,6 +426,11 @@ To set the/-- timer to (R - real number) sec/second/seconds:
 To set/turn the/-- timer off:
 	now timer-request is 0.
 
+To decide whether the timer is active:
+	if timer-request is not zero, decide yes.
+To decide whether the timer is inactive:
+	if timer-request is zero, decide yes.
+
 First setting up input rule (this is the initial clear input requests rule):
 	clear all input requests.
 
@@ -2296,6 +2301,65 @@ The rule doesn't specify an input-context; timer input operates in all contexts.
 		if M < 10:
 			say "0";
 		say M;
+
+
+Example: ** Master Blaster - A timer that triggers a game action.
+
+In this game, the BLAST command causes an explosion exactly two seconds later.
+
+We want the timer to interrupt player input, so we accept the timer event. The interrupt text input line is not required; UGI always interrupts all input when an event is accepted. But by invoking it explicitly with the "preserving input" option, we ensure that the player's interrupted command will be preloaded into the next input line.
+
+Note that we only accept timer events when in a command input-context. In any other context (yes-or-no, etc) we would want to ignore the event -- it wouldn't make sense to trigger one game action in the middle of another. (In fact, the handling input rules don't even run in non-command contexts, so the event would be wasted anyhow.)
+
+Once the timer event is accepted, it proceeds to the next rulebook, the handling input rules. The rule here generates an explosioning action. (This is a special action which has no understand lines. It cannot be invoked directly by the player; the handling input rule is the only way the explosioning can occur.)
+
+	*: "The Master Blaster"
+
+	Include Unified Glulx Input by Andrew Plotkin.
+
+	The Repository is a room. "You are in an immense room, even larger than the giant room. A sign reads, 'Say BLAST to wrap it all up!'"
+
+	The gap is a thing. "A ragged gap in the south wall shows the way to victory!" 
+
+	Check entering the gap:
+		say "You march through in triumph.";
+		turn the timer off;
+		instead end the story finally.
+
+	Check going south in the Repository:
+		if the gap is in the Repository:
+			instead try entering the gap.
+
+	Blasting is an action applying to nothing.
+
+	Understand "blast" as blasting.
+
+	Carry out blasting:
+		if the timer is active:
+			instead say "The explosion is already on its way.";
+		set the timer to 2 seconds;
+		say "You say the magic word. The air prickles. Wait for it..."
+
+	Check answering someone that "blast":
+		instead try blasting.
+
+	Explosioning is an action applying to nothing.
+
+	Carry out explosioning:
+		if the gap is not in the Repository:
+			now the gap is in the Repository;
+			now the gap is fixed in place;
+			instead say "A tremendous explosion rocks the Repository! When the dust clears, you see a gap to the south.";
+		say "Additional fireworks go off! No new gaps though."	
+
+	Rule for accepting input for a command input-context when handling timer-event:
+		interrupt text input for the story-window, preserving input;
+		say "(Interrupting...)";
+		accept input event.
+
+	Rule for handling input for a command input-context when handling timer-event:
+		turn the timer off;
+		handle the current input event as the action of explosioning.
 
 
 Example: ** Keystroke Input - Controlling the game with single keystrokes.
