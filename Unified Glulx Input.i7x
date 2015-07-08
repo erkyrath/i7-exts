@@ -2078,7 +2078,7 @@ You can also convert the event to a different one:
 	replace the current input event with the hyperlink object (O - object)
 	replace the current input event with the hyperlink number (N - number)
 
-This is handy for simple cases -- perhaps you want to convert hyperlink clicks into a line of text and run that through the parser in the usual way. (See example: "Keystroke Input".) However, it's cleaner to handle hyperlinks in the handling input rulebook. See next section.
+This is handy for simple cases -- perhaps you want to convert hyperlink clicks into a line of text and run that through the parser in the usual way. (See example: "Maze of Keys".) However, it's cleaner to handle hyperlinks in the handling input rulebook. See next section.
 
 Here's the messy part. If you've requested character or line input, and a *different* input event arrives, the character or line input is still in progress. *You may not print text as long as character or line input is in progress.*
 
@@ -2424,11 +2424,11 @@ Once the timer event is accepted, it proceeds to the next rulebook, the handling
 		handle the current input event as the action of explosioning.
 
 
-Example: ** Keystroke Input - Controlling the game with single keystrokes.
+Example: ** Maze of Keys - Controlling the game with single keystrokes.
 
-In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach. See the "Keystroke Input 2" example for a tidier model.)
+In this example, the underworld uses a different input mechanism: single keystrokes. Character events are translated into line input for the parser. (This is a crude approach. See the "Maze of Keys 2" example for a tidier model.)
 
-	*: "Keystroke Input"
+	*: "Maze of Keys"
 
 	Include Unified Glulx Input by Andrew Plotkin.
 	Include Unicode Character Names by Graham Nelson.
@@ -2505,13 +2505,13 @@ In this example, the underworld uses a different input mechanism: single keystro
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
 
-Example: *** Keystroke Input 2 - Controlling the game with single keystrokes.
+Example: *** Maze of Keys 2 - Controlling the game with single keystrokes.
 
 This is nearly the same as the previous example. But now, instead of changing char input events to line input events, we handle char events directly as going actions.
 
 The work is now done in the accepting input rulebook. We no longer pretend that we're entering line input, and the parser is entirely bypassed.
 
-	*: "Keystroke Input 2"
+	*: "Maze of Keys 2"
 
 	Include Unified Glulx Input by Andrew Plotkin.
 	Include Unicode Character Names by Graham Nelson.
