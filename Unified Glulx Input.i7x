@@ -2266,7 +2266,7 @@ If we want line input, we must use one of the alternate forms:
 
 Generally you will want to use the secondary buffer. That will avoid stomping on the player's command (which is always stored in the primary buffer).
 
-For another case, see example: "Requesting a Number"
+For another case, see example: "Secret Number Request"
 
 Chapter: Under the hood
 
@@ -2640,7 +2640,7 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 		say "--- [The noun] ---[paragraph break]";
 
 
-Example: **** Requesting a Number - A phrase to query the player for a number.
+Example: **** Secret Number Request - A phrase to query the player for a number.
 
 In this example we ask the player for a number. It's very much like "if the player consents..." except that we get back a number rather than a yes-or-no decision.
 
@@ -2660,7 +2660,7 @@ This winds up stomping on "the player's command"; that snippet will be invalid f
 
 A better implementation would rely on the secondary buffer. We couldn't use TryNumber, though, so it would be a longer and messier example.
 
-	*: "Requesting a Number"
+	*: "Secret Number Request"
 
 	Include Unified Glulx Input by Andrew Plotkin.
 
