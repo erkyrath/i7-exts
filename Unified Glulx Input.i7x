@@ -124,6 +124,7 @@ To decide what number is the/-- current input event link/hyperlink number: (- In
 To decide what object is the/-- current input event link/hyperlink object: (- ObjectValueIsSafe(InputRDataEvHyperlink()) -).
 To decide what number is the/-- current input event line word count: (- InputRDataEvLineWordCount() -).
 To say the/-- current input event line text: (- InputRDataEvLinePrint(); -).
+To decide what text is the/-- current input event line text: (- InputRDataEvLineStore({-new:text}) -).
 
 To replace the/-- current input event with the/-- line (T - text): (- InputRDataSetEvent(evtype_LineInput, {T}); -).
 To replace the/-- current input event with the/-- char/character (C - Unicode character): (- InputRDataSetEvent(evtype_CharInput, {C}); -).
@@ -183,6 +184,17 @@ Include (-
 		return;
 	if (buf-->0)
 		glk_put_buffer(buf+WORDSIZE, buf-->0);
+];
+
+[ InputRDataEvLineStore txt   buf;
+	! Assumes that the buffer length has been stored in buffer-->0.
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return txt;
+	buf = input_rulebook_data-->IRDAT_BUFFER;
+	if (~~buf || buf-->0 == 0)
+		return txt;
+	TEXT_CopyFromByteArray(txt, buf+WORDSIZE, buf-->0);
+	return txt;
 ];
 
 [ InputRDataSetEvent typ arg    ev len;
