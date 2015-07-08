@@ -1894,6 +1894,8 @@ Unified Glulx Input is an attempt to tidy up all the messy I6 APIs that you need
 
 The Glulx Entry Points extension does this already, but that exposes all the mess -- you have to understand how Glk works to use to correctly. Unified Glulx Input tries to offer you a simple model which handles common cases easily.
 
+(This extension was written and tested with Inform 7 release 6L38 only.)
+
 Chapter: Basic concepts
 
 Section: Input-contexts: why are we awaiting input?
