@@ -4,7 +4,6 @@ Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### To do: (rough order of importance)
 - write more examples (see todo notes)
-- convert line input buffer to a variable
 - should setting-up-input be generalized? moved into AwaitInput?
 - rationalize UNDO and OOPS handling
 - noecho flag and whatever it enables
@@ -2071,12 +2070,10 @@ Depending on the current event type, you can check its contents with one of thes
 	the current input event character -- Unicode character
 	the current input event hyperlink number -- number
 	the current input event hyperlink object -- object
+	the current input event line text -- text
 	the current input event line word count -- number
-	say the current input event line text
 
-An important note: in the accepting input rulebook, the "player's command" snippet has not yet been set up. You cannot refer to this or any other snippet variable; you will get errors. The word count phrase is as close as you get to inspecting the input line.
-
-(A future version of UGI may allow you to retrieve the input event line text as a text variable. I'm working on that.)
+An important note: in the accepting input rulebook, the "player's command" snippet has not yet been set up. You cannot refer to this or any other snippet variable; you will get errors. Use the "current input event line text" phrase.
 
 The job of the accepting input rulebook is to reject the event (keep waiting) or accept it (stop waiting and allow event to be processed). These are available as phrases (really just aliases for "rule succeeds" and "rule fails"):
 
@@ -2135,6 +2132,7 @@ The phrases mentioned above, for examining the input event, still apply:
 	the current input event character -- Unicode character
 	the current input event hyperlink number -- number
 	the current input event hyperlink object -- object
+	the current input event line text -- text
 	the current input event line word count -- number
 	accept the input event
 	reject the input event
