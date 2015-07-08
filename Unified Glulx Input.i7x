@@ -1890,20 +1890,6 @@ Unified Glulx Input ends here.
 
 ---- DOCUMENTATION ----
 
-Here's the summary:
-
-All input will occur in an AwaitInput routine. This will be able to return any kind of event (not just a text buffer). It will display the prompt, draw/redraw the status line, accept input, filter it for the caller, and return it.
-
-Displaying the prompt and filtering input events will become rulebooks, so that games can customize them. (The HandleGlkEvent hook will change to a rulebook.)
-
-AwaitInput will be responsible for requesting and cancelling Glk input. (Again, customizable via rulebook, so games can add custom input types.)
-
-The parser will invoke a rulebook/activity to convert new event types directly into actions.
-
-The first draft will be concerned only with the story window. I will extend it to status window input later. Eventually it will have to be compatible with the Multiple Windows extension, but I don't know whether that means adapting this extension to that one or vice versa. (Probably both.)
-
-----
-
 Unified Glulx Input is an attempt to tidy up all the messy I6 APIs that you need to customize your game's input system. 
 
 The Glulx Entry Points extension does this already, but that exposes all the mess -- you have to understand how Glk works to use to correctly. Unified Glulx Input tries to offer you a simple model which handles common cases easily.
@@ -2282,7 +2268,7 @@ Generally you will want to use the secondary buffer. That will avoid stomping on
 
 For another case, see example: "Requesting a Number"
 
-Chapter: Under the hood -- parser changes
+Chapter: Under the hood
 
 This chapter describes what UGI has changed in the deep reaches of the Parser.i6t template. It is not very interesting.
 
@@ -2292,11 +2278,15 @@ Responsibility for redrawing the status line and printing the prompt has been mo
 
 The old Keyboard routine has been renamed ParserInput. It too now takes input-context, event, buffer, and table arguments. ParserInput is a wrapper around AwaitInput which adds OOPS and UNDO support.
 
-Blank line rejection is still handled in ParserInput (nee Keyboard), but only for the sake of backwards compatibility. By using the "pass blank input lines" option, the game can omit this check from ParserInput. Blank lines are then handled the same way as all other line input (and rejected by the parser).
+Blank line rejection is still handled in ParserInput (nee Keyboard), but only for the sake of backwards compatibility. By using the "pass blank input lines" option, the game can omit this check from ParserInput. Blank lines are then handled the same way as all other line input (and rejected by the parser at a later stage).
 
 TestKeyboardPrimitive (in Tests.i6t) is now named CheckTestInput. It now takes event and buffer arguments. (Not table, as tokenization is now handled by the caller.) 
 
 Responsibility for getting TEST ME input (the CheckTestInput call) has been moved into AwaitInput, right next to the code that gets REPLAY stream input. CheckTestInput returns a flag indicating whether it generated a test event. (This is different from TestKeyboardPrimitive, which was called from the KeyboardPrimitive wrapper, and called through to VM_ReadKeyboard when no test event was available. KeyboardPrimitive is not needed in the new model.)
+
+The parser itself used to call Keyboard in three places (Parser Letter A and NounDomain). It now calls ParserInput, and understands that it could receive any kind of input event (not just line input). 
+
+The parser invokes the handling input rulebook after each ParserInput call. If that rulebook generates an action, Parser__parse returns immediately (or NounDomain returns REPARSE_CODE, which leads to the same outcome.) Then the parser rejects blank lines and non-text inputs with an "I beg your pardon" error. After that, we know we have non-blank text input, so parsing proceeds in the original path.
 
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
