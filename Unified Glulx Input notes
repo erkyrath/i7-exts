@@ -116,15 +116,15 @@ Questions:
 - The reading-a-command activity? This is outside handling-input. For disambiguation, handling-input applies to each player input; reading-a-command applies to the completed line. (Also, reading-a-command has access to snippets.)
 
 Test cases:
-- Change the prompt for YesOrNo, or for the main game
-- Keystroke-only game -- char input rather than line input
-- Keystroke-only game that calls YesOrNo for a single line input
-- A game with a timer interrupt (prints output but preserves player's partial input)
-- A game with a timer that increases the score (so we see status window updates without interrupting editing)
++ Change the prompt for YesOrNo, or for the main game
++ Keystroke-only game -- char input rather than line input
+- Keystroke-only game that calls YesOrNo for a single line input [tested]
++ A game with a timer interrupt (prints output but preserves player's partial input)
++ A game with a timer that increases the score (so we see status window updates without interrupting editing)
 - A timer-only game
-- Hyperlinks only
-- Hyperlinks or text input (links used to construct actions) (links do not preserve player's partial input)
++ Hyperlinks only
+- Hyperlinks or text input (links used to construct actions) (links do not preserve player's partial input) (requires noecho)
 - Hyperlinks that create synthetic text input
 - A game that changes input modes inside AwaitInput
-- A modal routine which asks for a number (digits or English).
++ A modal routine which asks for a number (digits or English) [hacky implementation]
 - A hyperlink-based final question replacement
