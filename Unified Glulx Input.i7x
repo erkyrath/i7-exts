@@ -2183,16 +2183,16 @@ The old "reading a command" activity still exists under UGI. It's called by the 
 
 - In a handling input rule, you can say "handle the current input event as the action of...". That's not available at after reading a command time.
 
-- For a disambiguation input, the player's command (in an after reading a command rule) is the *entire* disambiguated command! An example:
+- For a disambiguation input, the handling input rule sees what the player typed. In contrast, the player's command (in an after reading a command rule) is the *entire* disambiguated command! An example:
 
-	>GET 
+	>GET
+	(handling input: text="GET".)
 	(after reading: player's command="GET".)
 	What do you want to get?
 	>RED ROCK
+	(handling input: text="RED ROCK".)
 	(after reading: player's command="GET RED ROCK".)
 	Taken.
-
-The handling input rulebook will not see this. It's concerned only with the input events, which are "GET" followed by "RED ROCK".
 
 In short, the reading a command activity is the most sensible place to examine or replace text. The handling input rulebook is primarily meant for translating *non-textual* input events into actions.
 
