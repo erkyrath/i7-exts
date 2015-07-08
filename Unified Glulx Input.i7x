@@ -2282,7 +2282,21 @@ Generally you will want to use the secondary buffer. That will avoid stomping on
 
 For another case, see example: "Requesting a Number"
 
-Chapter: ### under the hood -- parser changes
+Chapter: Under the hood -- parser changes
+
+This chapter describes what UGI has changed in the deep reaches of the Parser.i6t template. It is not very interesting.
+
+The low-level functions VM_ReadKeyboard and VM_KeyDelay are gone. Instead, AwaitInput handles the bottom-level glk_select loop. Where VM_ReadKeyboard took two arguments (buffer and table), AwaitInput takes four (input-context, event, buffer, table).
+
+Responsibility for redrawing the status line and printing the prompt has been moved into AwaitInput. (In the old model, these had to be done before calling an input function, meaning they were required in a lot of places. Bugs resulted.)
+
+The old Keyboard routine has been renamed ParserInput. It too now takes input-context, event, buffer, and table arguments. ParserInput is a wrapper around AwaitInput which adds OOPS and UNDO support.
+
+Blank line rejection is still handled in ParserInput (nee Keyboard), but only for the sake of backwards compatibility. By using the "pass blank input lines" option, the game can omit this check from ParserInput. Blank lines are then handled the same way as all other line input (and rejected by the parser).
+
+TestKeyboardPrimitive (in Tests.i6t) is now named CheckTestInput. It now takes event and buffer arguments. (Not table, as tokenization is now handled by the caller.) 
+
+Responsibility for getting TEST ME input (the CheckTestInput call) has been moved into AwaitInput, right next to the code that gets REPLAY stream input. CheckTestInput returns a flag indicating whether it generated a test event. (This is different from TestKeyboardPrimitive, which was called from the KeyboardPrimitive wrapper, and called through to VM_ReadKeyboard when no test event was available. KeyboardPrimitive is not needed in the new model.)
 
 
 Example: * Changing the Prompt - Changing the command prompt in various contexts.
