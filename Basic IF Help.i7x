@@ -1,4 +1,4 @@
-Version 2 of Basic IF Help by Andrew Plotkin begins here.
+Version 2/140417 of Basic IF Help by Andrew Plotkin begins here.
 
 "Provides a HELP (TOPIC) command which gives tutorial information about IF."
 [Modernized for 6K92.]

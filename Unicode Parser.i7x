@@ -1,4 +1,4 @@
-Version 8 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+Version 8/150625 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
 
 [Modernized for 6L38.]
 
