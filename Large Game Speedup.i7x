@@ -1,4 +1,4 @@
-Version 4 of Large Game Speedup by Andrew Plotkin begins here.
+Version 4/140731 of Large Game Speedup by Andrew Plotkin begins here.
 
 "Performance improvements for games with several hundred objects."
 
