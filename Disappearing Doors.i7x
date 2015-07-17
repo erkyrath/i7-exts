@@ -1,4 +1,4 @@
-Version 1 of Disappearing Doors by Andrew Plotkin begins here.
+Version 1/150415 of Disappearing Doors by Andrew Plotkin begins here.
 
 "The ability to remove doors from the world and put them back."
 

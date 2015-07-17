@@ -1,4 +1,4 @@
-Version 1 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
+Version 1/150708 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### To do: (rough order of importance)
 - should setting-up-input be generalized? moved into AwaitInput?

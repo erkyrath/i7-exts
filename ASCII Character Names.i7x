@@ -1,4 +1,4 @@
-Version 1 of ASCII Character Names by Andrew Plotkin begins here.
+Version 1/150703 of ASCII Character Names by Andrew Plotkin begins here.
 
 Use authorial modesty.
 
