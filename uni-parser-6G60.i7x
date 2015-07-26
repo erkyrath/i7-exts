@@ -1,4 +1,4 @@
-Version 6 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
+Version 6/140417 of Unicode Parser (for Glulx only) by Andrew Plotkin begins here.
 
 [Tell the I6 compiler to generate a dictionary containing Unicode values rather than 8-bit characters. This requires I6 version 6.32 or later.]
 Use DICT_CHAR_SIZE of 4.
