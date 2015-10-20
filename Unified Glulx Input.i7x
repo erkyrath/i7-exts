@@ -1,4 +1,4 @@
-Version 1/150708 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
+Version 2/151019 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### To do: (rough order of importance)
 - should setting-up-input be generalized? moved into AwaitInput?
@@ -869,11 +869,11 @@ Include (-
 		((+ all-input-request-clearing +)-->1)();
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
 		
-		AwaitInput( (+ yes-no question context +), inputevent, buffer, parse);
+		AwaitInput( (+ yes-no question context +), inputevent, buffer2, parse2);
 				
-		j = parse-->0;
+		j = parse2-->0;
 		if (j) { ! at least one word entered
-			i = parse-->1;
+			i = parse2-->1;
 			if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
 			if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
 		}
@@ -888,11 +888,11 @@ Include (-
 		((+ all-input-request-clearing +)-->1)();
 		WriteGProperty(OBJECT_TY, (+ story-window +), (+ input-request +),  (+ line-input +) );
 		
-		AwaitInput(incontext, inputevent, buffer, parse);
+		AwaitInput(incontext, inputevent, buffer2, parse2);
 				
-		j = parse-->0;
+		j = parse2-->0;
 		if (j) { ! at least one word entered
-			i = parse-->1;
+			i = parse2-->1;
 			if (i == YES1__WD or YES2__WD or YES3__WD) rtrue;
 			if (i == NO1__WD or NO2__WD or NO3__WD) rfalse;
 		}

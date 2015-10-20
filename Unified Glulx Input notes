@@ -128,3 +128,5 @@ Test cases:
 - A game that changes input modes inside AwaitInput
 + A modal routine which asks for a number (digits or English) [hacky implementation]
 - A hyperlink-based final question replacement
+
+(done) I7 has switched YesOrNo to use buffer2/parse2; we should too
