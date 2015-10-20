@@ -2519,7 +2519,7 @@ In this example, the underworld uses a different input mechanism: single keystro
 		say "Maze".
 
 	Check going down from the Kitchen:
-		say "(Down here, single-keystroke commands rule. Use the arrow keys or NSEW to move around; U or escape to quit.)";
+		say "(Down here, single-keystroke commands rule. Use the arrow keys or NSEW to move around; Z to undo; U or escape to return upstairs.)";
 		continue the action.
 
 	Check going up when the location is not in Aboveground:
@@ -2532,6 +2532,7 @@ In this example, the underworld uses a different input mechanism: single keystro
 
 	Setting up input rule when the location is not in Aboveground:
 		now the input-request of the story-window is char-input;
+		set input undoable;
 		rule succeeds.
 
 	Accepting input rule when the location is not in Aboveground and handling char-event:
@@ -2555,6 +2556,10 @@ In this example, the underworld uses a different input mechanism: single keystro
 		if C is special keycode escape or C is Unicode Latin small letter u or C is Unicode Latin capital letter U:
 			say "GO UP[line break]";
 			replace the current input event with the line "go up";
+			rule succeeds;
+		if C is Unicode Latin small letter z or C is Unicode Latin capital letter Z:
+			say "UNDO[line break]";
+			replace the current input event with the line "undo";
 			rule succeeds;
 		interrupt text input for the story-window;
 		say "('[extended C]' is not a valid key.)";
