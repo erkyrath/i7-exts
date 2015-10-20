@@ -196,6 +196,20 @@ Include (-
 	return txt;
 ];
 
+[ InputRDataEvLineIsUndo;
+	if (~~input_rulebook_data-->IRDAT_EVENT)
+		return 0;
+	if ((input_rulebook_data-->IRDAT_EVENT)-->0 ~= evtype_LineInput)
+		return 0;
+	if (~~input_rulebook_data-->IRDAT_TABLE)
+		return 0;
+	if ((input_rulebook_data-->IRDAT_TABLE)-->0 ~= 1)
+		return 0;
+	if ((input_rulebook_data-->IRDAT_TABLE)-->1 == UNDO1__WD or UNDO2__WD or UNDO3__WD)
+		return 1;
+	return 0;
+];
+
 [ InputRDataSetEvent typ arg    ev len;
 	if (~~input_rulebook_data-->IRDAT_EVENT)
 		return;
@@ -442,10 +456,22 @@ To decide whether the timer is active:
 To decide whether the timer is inactive:
 	if timer-request is zero, decide yes.
 
+[A flag for whether "set input undoable" has been used during the current ParserInput call. It has no meaning outside ParserInput.]
+The setting-up-input-undoability-flag is a truth state that varies.
+
+To set the/-- input undoable:
+	now setting-up-input-undoability-flag is true.
+To set the/-- input not undoable:
+	now setting-up-input-undoability-flag is false.
+To set the/-- input nonundoable/non-undoable:
+	now setting-up-input-undoability-flag is false.
+
 First setting up input rule (this is the initial clear input requests rule):
+	set input non-undoable;
 	clear all input requests.
 
 Setting up input rule (this is the standard parser input line request rule):
+	set input undoable;
 	now the input-request of the story-window is line-input.
 
 
@@ -473,6 +499,17 @@ Last prompt displaying rule for the final question context (this is the final qu
 Last prompt displaying rule for an input-context (this is the default prompt rule):
 	[really truly last]
 	instead say the command prompt.
+
+
+Section - Checking Undo Input
+
+The checking undo input rules are an input-context based rulebook.
+
+To decide whether standard-undo-input-line: (- InputRDataEvLineIsUndo() -).
+
+Checking undo input rule (this is the standard line input undo checking rule):
+	if standard-undo-input-line:
+		rule succeeds.
 
 
 Section - Accepting Input
@@ -744,7 +781,7 @@ Include (-
 ! (Context-specific questions, such as YesOrNo and the end-game question, do not use this wrapper. They call AwaitInput directly.)
 ! In this function, unlike in AwaitInput, a_buffer and a_table are both mandatory. They may be either buffer/table (primary context) or buffer2/table2 (disambiguation context).
 
-[ ParserInput  incontext a_event a_buffer a_table    evtyp nw i w w2 x1 x2;
+[ ParserInput  incontext a_event a_buffer a_table    evtyp nw i w w2 x1 x2 undoable;
 	! Repeat loop until an acceptable input arrives.
 	while (true) {
 		! Save the start of the buffer, in case "oops" needs to restore it
@@ -752,6 +789,8 @@ Include (-
 		
 		! Set up the input requests. (Normally just line input, but the game can customize this.)
 		FollowRulebook((+ setting up input rules +), incontext, true);
+		
+		undoable = (+ setting-up-input-undoability-flag +);
 		
 		! The input deed itself.
 		AwaitInput(incontext, a_event, a_buffer, a_table);
@@ -825,26 +864,30 @@ Include (-
 			return;
 		}
 
-		! Undo handling
-		! ### only if the player *could* have entered an UNDO command!
-	
-		if ((w == UNDO1__WD or UNDO2__WD or UNDO3__WD) && (nw==1)) {
-			Perform_Undo();
-			continue;
-		}
-		i = VM_Save_Undo();
-		#ifdef PREVENT_UNDO; undo_flag = 0; #endif;
-		#ifndef PREVENT_UNDO; undo_flag = 2; #endif;
-		if (i == -1) undo_flag = 0;
-		if (i == 0) undo_flag = 1;
-		if (i == 2) {
-			VM_RestoreWindowColours();
-			VM_Style(SUBHEADER_VMSTY);
-			SL_Location(); print "^";
-			! print (name) location, "^";
-			VM_Style(NORMAL_VMSTY);
-			IMMEDIATELY_UNDO_RM('E'); new_line;
-			continue;
+		! Undo handling -- check whether we got an undo command, and then save a new undo point. But we only do these if the setting-up-input rules said this is an undoable input.
+		if (undoable) {
+			InputRDataInit( (+ checking undo input rules +), a_event, a_buffer, a_table);
+			FollowRulebook((+ checking undo input rules +), incontext, true);
+			InputRDataFinal();
+			if (RulebookSucceeded()) {
+				Perform_Undo();
+				continue;
+			}
+		
+			i = VM_Save_Undo();
+			#ifdef PREVENT_UNDO; undo_flag = 0; #endif;
+			#ifndef PREVENT_UNDO; undo_flag = 2; #endif;
+			if (i == -1) undo_flag = 0;
+			if (i == 0) undo_flag = 1;
+			if (i == 2) {
+				VM_RestoreWindowColours();
+				VM_Style(SUBHEADER_VMSTY);
+				SL_Location(); print "^";
+				! print (name) location, "^";
+				VM_Style(NORMAL_VMSTY);
+				IMMEDIATELY_UNDO_RM('E'); new_line;
+				continue;
+			}
 		}
 		
 		! Neither OOPS nor UNDO; we're done.
