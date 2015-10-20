@@ -2607,7 +2607,7 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 		say "Maze".
 
 	Check going down from the Kitchen:
-		say "(Down here, single-keystroke commands rule. Use the arrow keys or NSEW to move around; U or escape to quit.)";
+		say "(Down here, single-keystroke commands rule. Use the arrow keys or NSEW to move around; Z to undo; U or escape to return upstairs.)";
 		continue the action.
 
 	Check going up when the location is not in Aboveground:
@@ -2620,7 +2620,14 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 
 	Setting up input rule when the location is not in Aboveground:
 		now the input-request of the story-window is char-input;
+		set input undoable;
 		rule succeeds.
+
+	Checking undo input rule when the location is not in Aboveground:
+		let C be the current input event character;
+		if C is Unicode Latin small letter z or C is Unicode Latin capital letter Z:
+			say "(Undoing one turn...)";
+			rule succeeds.
 
 	Handling input rule when the location is not in Aboveground and handling char-event:
 		let C be the current input event character;
