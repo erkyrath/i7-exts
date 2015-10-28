@@ -2078,6 +2078,8 @@ When you set input undoable, you're telling the parser that the player *can* per
 
 To make this more clear: when the player does an UNDO, they don't want to jump back to the previous *input*; they want to jump back to the previous *turn*. Yes-or-no commands are inputs but never turns. When the setting-up-input rulebook is called, it's *usually* a turn, but you might want to decide otherwise.
 
+(Note: you can suppress UNDO for your game this way, but it's better to use the "undo prevention" option. That way, UNDO commands will say "The use of 'undo' is forbidden", rather than just throwing a "not a verb I recognize" error.)
+
 We'd better mention how to display hyperlinks in your game text. A hyperlink can contain a number or an object reference. (Or, really, any value that can be cast to an I6 integer, which is any value at all. But stick with the easy cases.) (It's best not to mix numbers and objects in the same game. Pick one.)
 
 	say hyperlink (O - object)
