@@ -2074,7 +2074,7 @@ To indicate whether this command is an undo step, use one of these phrases:
 	set input undoable
 	set input non-undoable
 
-This is *not* a way to suppress the UNDO command! When you set input undoable, you're telling the parser that the player *can* perform an UNDO command (whether by typing "UNDO" or some other way) and therefore this is a turn that should be added to the undo chain. If you set input non-undoable, you're telling the parser that future UNDO commands should skip over this command.
+When you set input undoable, you're telling the parser that the player *can* perform an UNDO command (whether by typing "UNDO" or some other way) and therefore this is a turn that should be added to the undo chain. If you set input non-undoable, you're telling the parser that UNDO is not supported for this command, and future UNDO commands should skip back over it.
 
 To make this more clear: when the player does an UNDO, they don't want to jump back to the previous *input*; they want to jump back to the previous *turn*. Yes-or-no commands are inputs but never turns. When the setting-up-input rulebook is called, it's *usually* a turn, but you might want to decide otherwise.
 
@@ -2174,11 +2174,21 @@ Finally, I'll say again: this is the least commonly used of the five rulebooks! 
 
 Section: Checking undo input rules
 
+At this point an input event has been accepted. This rulebook decides whether it's an UNDO command.
 
+(UNDO commands are special; they never reach the handling-input stage, and they never become an "undoing" action. There is no such action, in fact. This is awkward but it's just the way the parser is. So we need this special rulebook to detect them.)
+
+The default rule in this rulebook checks for line input containing just the word "UNDO". That's the expected behavior for games that accept line input.
+
+If your game works by keystroke or hyperlink input, you might still want to support UNDO. You could write an accepting input rule that replaces the current input event with the line "undo". (See example: "Maze of Keys".) However, it's cleaner to write a checking undo rule which checks for whatever UNDO input your game wants. (See example: "Maze of Keys 2".)
+
+This is important: if you set input undoable at setting-up-input time, you *must* accept at least one input as UNDO at checking-undo-input time! If you don't, you'll break multiple undo for the player. (They won't be able to UNDO back through this command.) 
+
+Contrariwise, if you forget to set input undoable at setting-up-input time, then UNDO will not work for this command. The checking-undo-input rulebook will be skipped.
 
 Section: Handling input rules
 
-At this point an input event has been accepted. This rulebook decides how to convert it into an action.
+At this point an input event has been accepted (and it wasn't UNDO). This rulebook decides how to convert it into an action.
 
 This rulebook applies only to the command contexts (primary and disambiguation). Other questions (yes-or-no, keystroke-wait, etc) do their own setup.
 
