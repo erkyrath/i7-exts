@@ -1958,7 +1958,7 @@ A game can stop and await input for many reasons. It can be waiting for a comman
 
 In Unified Glulx Input, all of these inputs invoke the same mechanism. The mechanism can be customized to behave in different ways -- printing different prompts, waiting for different sorts of input. But it's always the same mechanism underneath.
 
-You customize it by writing rules. The extension has four rulebooks which cover various aspects of the problem. The default rules cover the normal input situations of an IF game -- the ones mentioned above. Of course, you can modify these or add more.
+You customize it by writing rules. The extension has five rulebooks which cover various aspects of the problem. The default rules cover the normal input situations of an IF game -- the ones mentioned above. Of course, you can modify these or add more.
 
 We distinguish these situations with a value called an "input-context". The rulebooks we mentioned are input-context based rulebooks. The UGI extension comes with seven:
 
@@ -2038,13 +2038,14 @@ These are not part of the Unicode spec, but I7 represents them as Unicode charac
 
 This will print special characters as "left", "right", and so on. Normal Unicode characters will be printed directly.
 
-Chapter: The four rulebooks
+Chapter: The five rulebooks
 
-We've talked about the four rulebooks, and now it's time to introduce them:
+We've talked about the five rulebooks, and now it's time to introduce them:
 
 	setting up input rules - decide what kinds of input are desired
 	prompt displaying rules - display a prompt, traditionally ">"
 	accepting input rules - accept, reject, or alter individual input events
+	checking undo input rules - check whether an input event is an UNDO command
 	handling input rules - convert an input event into an action
 
 These rulebooks are based on an input-context value. So you might write
@@ -2262,8 +2263,11 @@ It may be helpful to diagram the whole input machine and describe exactly when e
 			(end of AwaitInput function)
 			...
 			reject blank lines ("I beg your pardon")
-			handle UNDO commands
-			save an undo point
+			if the setting-up rules said that this is an undoable turn:
+				follow checking undo input rules
+				if the input was an UNDO command:
+					perform UNDO
+				save an undo point
 		(end of ParserInput function)
 		...
 		follow handling input rules
