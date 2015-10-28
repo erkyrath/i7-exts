@@ -501,17 +501,6 @@ Last prompt displaying rule for an input-context (this is the default prompt rul
 	instead say the command prompt.
 
 
-Section - Checking Undo Input
-
-The checking undo input rules are an input-context based rulebook.
-
-To decide whether standard-undo-input-line: (- InputRDataEvLineIsUndo() -).
-
-Checking undo input rule (this is the standard line input undo checking rule):
-	if standard-undo-input-line:
-		rule succeeds.
-
-
 Section - Accepting Input
 
 The accepting input rules are an input-context based rulebook.
@@ -547,6 +536,17 @@ Last accepting input rule (this is the standard accept all requested input rule)
 				accept input event;
 	[This doesn't cover non-human-generated events like timer events.]
 	reject input event.
+
+
+Section - Checking Undo Input
+
+The checking undo input rules are an input-context based rulebook.
+
+To decide whether standard-undo-input-line: (- InputRDataEvLineIsUndo() -).
+
+Checking undo input rule (this is the standard line input undo checking rule):
+	if standard-undo-input-line:
+		rule succeeds.
 
 
 Section - Handling Input
