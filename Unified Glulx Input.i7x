@@ -2055,9 +2055,9 @@ These rulebooks are based on an input-context value. So you might write
 
 Section: Setting up input rules
 
-This rulebook decides what sort of input the game desires for player commands. By default it requests only line input.
+This rulebook decides what sort of input the game desires for player commands. It also decides whether the command will be an undo step. By default it requests only line input, and says that all line inputs are undo steps.
 
-This rulebook applies only to the command contexts (primary and disambiguation). Other questions (yes-or-no, keystroke-wait, etc) do their own setup.
+This rulebook applies only to the command contexts (primary and disambiguation). Other questions (yes-or-no, keystroke-wait, etc) do their own setup (and are not undo steps).
 
 To customize this, set the input-request, hyperlink-input-request, and mouse-input-request properties of the story-window object. For example:
 
@@ -2068,6 +2068,15 @@ To customize this, set the input-request, hyperlink-input-request, and mouse-inp
 The input-request property can be char-input, line-input, or no-input. (These are mutually exclusive.) You can set hyperlink-input-request and mouse-input-request independently.
 
 (Note that mouse-input-request does not apply to the story-window -- buffer windows have no fixed coordinates -- so it cannot currently be used. There is a status-window object, but UGI does not yet support input requests for it.)
+
+To indicate whether this command is an undo step, use one of these phrases:
+
+	set input undoable
+	set input non-undoable
+
+This is *not* a way to suppress the UNDO command! When you set input undoable, you're telling the parser that the player *can* perform an UNDO command (whether by typing "UNDO" or some other way) and therefore this is a turn that should be added to the undo chain. If you set input non-undoable, you're telling the parser that future UNDO commands should skip over this command.
+
+To make this more clear: when the player does an UNDO, they don't want to jump back to the previous *input*; they want to jump back to the previous *turn*. Yes-or-no commands are inputs but never turns. When the setting-up-input rulebook is called, it's *usually* a turn, but you might want to decide otherwise.
 
 We'd better mention how to display hyperlinks in your game text. A hyperlink can contain a number or an object reference. (Or, really, any value that can be cast to an I6 integer, which is any value at all. But stick with the easy cases.) (It's best not to mix numbers and objects in the same game. Pick one.)
 
@@ -2161,7 +2170,11 @@ This variation stores the player's in-progress input as the preload-input-text p
 
 The interrupt text input phrase has an additional use: it tells UGI that you're about to print text, so the prompt might have to be redisplayed. This is sometimes helpful if you're rejecting an input event with an error message (rather than silently).
 
-Finally, I'll say again: this is the least commonly used of the four rulebooks! Forget the mess above and read on.
+Finally, I'll say again: this is the least commonly used of the five rulebooks! Forget the mess above and read on.
+
+Section: Checking undo input rules
+
+
 
 Section: Handling input rules
 
