@@ -2586,6 +2586,10 @@ In this example, the underworld uses a different input mechanism: single keystro
 			say "GO UP[line break]";
 			replace the current input event with the line "go up";
 			rule succeeds;
+		if C is Unicode Latin small letter l or C is Unicode Latin capital letter L:
+			say "LOOK[line break]";
+			replace the current input event with the line "look";
+			rule succeeds;
 		if C is Unicode Latin small letter z or C is Unicode Latin capital letter Z:
 			say "UNDO[line break]";
 			replace the current input event with the line "undo";
@@ -2679,6 +2683,10 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 		if C is special keycode escape or C is Unicode Latin small letter u or C is Unicode Latin capital letter U:
 			say "(You try going up...)";
 			handle the current input event as the action of going up;
+			rule succeeds;
+		if C is Unicode Latin small letter l or C is Unicode Latin capital letter L:
+			say "(You look around...)";
+			handle the current input event as the action of looking;
 			rule succeeds;
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
