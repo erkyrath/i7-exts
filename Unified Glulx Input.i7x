@@ -1,13 +1,11 @@
-Version 2/151019 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
+Version 2/151028 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### To do: (rough order of importance)
-- should setting-up-input be generalized? moved into AwaitInput?
 - should event/buffer info linger after the rulebooks run? would simplify code that calls AwaitInput, and also you could see more stuff at after-reading time
-- rationalize UNDO and OOPS handling
 - noecho flag and whatever it enables
+- input termination keys
 - write more examples (see todo notes)
 - status-window support
-- REPLAY support
 - add the discardundo model
 ]
 
