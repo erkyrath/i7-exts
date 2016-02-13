@@ -1,11 +1,15 @@
 Version 2/151028 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### To do: (rough order of importance)
+- a way for user-level code to fake in an event
+- status-window support
+- TEST support for other event types
+
+- multiple-window support
 - should event/buffer info linger after the rulebooks run? would simplify code that calls AwaitInput, and also you could see more stuff at after-reading time
 - noecho flag and whatever it enables
 - input termination keys
 - write more examples (see todo notes)
-- status-window support
 - add the discardundo model
 ]
 
