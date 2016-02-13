@@ -2633,6 +2633,8 @@ Once the timer event is accepted, it proceeds to the next rulebook, the handling
 		turn the timer off;
 		handle the current input event as the action of explosioning.
 
+	Test me with "blast / $timer / blast / blast / $timer / south".
+
 
 Example: ** Maze of Keys - Controlling the game with single keystrokes.
 
