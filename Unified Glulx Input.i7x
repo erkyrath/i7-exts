@@ -1,4 +1,4 @@
-Version 2/151028 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
+Version 3/151028 of Unified Glulx Input (for Glulx only) by Andrew Plotkin begins here.
 
 [### To do: (rough order of importance)
 - a way for user-level code to fake in an event
@@ -1950,7 +1950,7 @@ Unified Glulx Input is an attempt to tidy up all the messy I6 APIs that you need
 
 The Glulx Entry Points extension does this already, but that exposes all the mess -- you have to understand how Glk works to use to correctly. Unified Glulx Input tries to offer you a simple model which handles common cases easily.
 
-(This extension was written and tested with Inform 7 release 6L38 only.)
+(This extension was written and tested with Inform 7 releases 6L38 and 6M62.)
 
 Chapter: Basic concepts
 
