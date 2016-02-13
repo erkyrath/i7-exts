@@ -2762,7 +2762,7 @@ Unfortunately, TryNumber is set up to use the parser's input buffer. That's why 
 
 	await input in numeric context with primary buffer;
 
-This winds up stomping on "the player's command"; that snippet will be invalid for the rest of the turn. Too bad! (Really, "if the player consents" has the same bug.)
+This winds up stomping on "the player's command"; that snippet will be invalid for the rest of the turn. Too bad!
 
 A better implementation would rely on the secondary buffer. We couldn't use TryNumber, though, so it would be a longer and messier example.
 
