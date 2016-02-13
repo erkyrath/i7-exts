@@ -2724,6 +2724,9 @@ In this example, the underworld uses a different input mechanism: single keystro
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
 
+	Test me with "down / $char s / $char w / $char right / $char up / $char escape / look".
+
+
 Example: *** Maze of Keys 2 - Controlling the game with single keystrokes.
 
 This is nearly the same as the previous example. But now, instead of changing char input events to line input events, we handle char events directly as going actions.
@@ -2816,6 +2819,8 @@ The work is now done in the accepting input rulebook. We no longer pretend that 
 			rule succeeds;
 		say "('[extended C]' is not a valid key.)";
 		reject the input event.
+
+	Test me with "down / $char s / $char w / $char right / $char up / $char escape / look".
 
 
 Example: ** A Study In Memoriam - A pure-hyperlink game.
