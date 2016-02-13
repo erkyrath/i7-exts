@@ -1800,10 +1800,26 @@ Global test_sp = 0;
 			}
 			else {
 				! check for a special keyword
-				arg = 65; !###
+				wd = CheckTestDictWord(p+i, l-i);
+				arg = 0;
+				for (ch=0; TestSpecialKeys-->ch; ch=ch+2) {
+					if (wd == TestSpecialKeys-->(ch+1)) {
+						arg = TestSpecialKeys-->ch;
+						break;
+					}
+				}
+				if (~~arg) {
+					print "$char ";
+					while ((i < l) && (p->i ~= '/')) {
+						print (char) p->i;
+						i++;
+					}
+					print " (char name not recognized)";
+					jump checkev_parsed;
+				}
 			}
 			print "$char ";
-			if (arg < 32)
+			if (arg >= 0 && arg < 32)
 				print "ctrl-", (char) (arg+64);
 			else if (arg == 32)
 				print "space";
@@ -1895,6 +1911,9 @@ Global test_sp = 0;
 	@binarysearch gg_tokenbuf DICT_WORD_SIZE val entrylen dictlen 1 1 res;
 	return res;
 ];
+
+Array TestSpecialKeys --> 32 'space' keycode_Left 'left' keycode_Right 'right' keycode_Up 'up' keycode_Down 'down' keycode_Return 'return' keycode_Delete 'delete' keycode_Escape 'escape' keycode_Tab 'tab' keycode_PageUp 'pageup' keycode_PageDown 'pagedown' keycode_Home 'home' keycode_End 'end' keycode_Func1 'func1' keycode_Func2 'func2' keycode_Func3 'func3' keycode_Func4 'func4' keycode_Func5 'func5' keycode_Func6 'func6' keycode_Func7 'func7' keycode_Func8 'func8' keycode_Func9 'func9' keycode_Func10 'func10' keycode_Func11 'func11' keycode_Func12 'func12' 0 0;
+
 
 #IFNOT;
 
