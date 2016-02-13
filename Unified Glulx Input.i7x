@@ -1738,8 +1738,8 @@ Global test_sp = 0;
 ];
 
 ! CheckTestInput: If a test input is pending, this fills out the event and buffer structure and returns true. Otherwise it returns false.
-! This function is allowed to return any event type (even arrange or timer events). However, Inform's current TEST-ME system can only generate line input events. So this code only returns events of that type.
-! Note that a_buffer may be 0. If so, we cannot return a line input event, so we do nothing. (We could return other event types if we had them.)
+! This function is allowed to return any event type (even arrange or timer events). A test line beginning with '$' indicates a special event (not line input): $char X, $link Y, $timer. Unrecognized specials are skipped. See the documentation for details.
+! Note that a_buffer may be 0. If so, we skip past line input events, since there's no buffer to put them in.
 ! (This replaces TestKeyboardPrimitive, but is invoked differently. We no longer call through to VM_ReadKeyboard when no tests are available. We just return false. Also, arguments are event/buffer instead of buffer/table.)
 
 ! $char X
@@ -1755,6 +1755,7 @@ Array test_keywords string "$char/$link/$timer/";
 	.checkev_restart;
 	
 	if (test_sp == 0) {
+		! Out of tests entirely.
 		test_stack-->2 = 1;
 		return false;
 	}
@@ -1775,7 +1776,7 @@ Array test_keywords string "$char/$link/$timer/";
 	! we can use sloppy lookahead.
 	
 	if (i < l && p->i == '$') {
-		res = CheckTestKeyword(p+i, test_keywords+1); ! $char
+		res = CheckTestKeyword(p+i, test_keywords+1, 5); ! $char
 		if (res == 5) {
 			! char input -- several possible formats
 			i = i+res;
@@ -1811,7 +1812,7 @@ Array test_keywords string "$char/$link/$timer/";
 			a_event-->2 = arg;
 			jump checkev_parsed;
 		}
-		res = CheckTestKeyword(p+i, test_keywords+13); ! $timer
+		res = CheckTestKeyword(p+i, test_keywords+13, 6); ! $timer
 		if (res == 6) {
 			! timer input
 			print "$timer";
@@ -1873,8 +1874,10 @@ Array test_keywords string "$char/$link/$timer/";
 	return true;
 ];
 
-[ CheckTestKeyword buf keyword   ix ch;
-	for (ix=0 : true : ix++) {
+! Compare a string in the test buffer with another buffer. Both are
+! byte arrays, terminated by slash.
+[ CheckTestKeyword buf keyword maxlen   ix ch;
+	for (ix=0 : ix<maxlen : ix++) {
 		if (keyword->ix == '/')
 			break;
 		if (buf->ix == '/')
