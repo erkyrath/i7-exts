@@ -2532,6 +2532,8 @@ Hyperlink events are defined with "$link"; they can be a numeric value or an obj
 
 Timer events are defined with "$timer". There is no other information to supply.	
 
+If you generate a test event that the game isn't expecting, it will be ignored and the game will move on to the next test.
+
 Chapter: Under the hood
 
 This chapter describes what UGI has changed in the deep reaches of the Parser.i6t template. It is not very interesting.
