@@ -1771,15 +1771,35 @@ Array test_keywords string "$char/$link/$timer/";
 	test_stack-->2 = test_stack-->2 + 1;
 	style bold;
 	
+	! Note that each test-string array ends with four bytes of padding, so
+	! we can use sloppy lookahead.
+	
 	if (i < l && p->i == '$') {
 		res = CheckTestKeyword(p+i, test_keywords+1); ! $char
 		if (res == 5) {
-			! char input
+			! char input -- several possible formats
 			i = i+res;
+			! skip whitespace
 			while ((i < l) && (p->i == ' '))
 				i++;
-			arg = 65;
-			print "$CHAR ";
+			if ((i >= l) || (p->i == '/')) {
+				arg = ' ';
+			}
+			else if ((i+1 >= l) || (p->(i+1) == '/')) {
+				arg = p->i;
+				i++;
+			}
+			else if (p->i >= '0' && p->i <= '9') {
+				arg = 0;
+				while (p->i >= '0' && p->i <= '9') {
+					arg = arg * 10 + (p->i - '0');
+					i++;
+				}
+			}
+			else {
+				arg = 65; !###
+			}
+			print "$char ";
 			if (arg < 32)
 				print "ctrl-", (char) (arg+64);
 			else if (arg == 32)
@@ -1789,6 +1809,13 @@ Array test_keywords string "$char/$link/$timer/";
 			a_event-->0 = evtype_CharInput;
 			a_event-->1 = gg_mainwin;
 			a_event-->2 = arg;
+			jump checkev_parsed;
+		}
+		res = CheckTestKeyword(p+i, test_keywords+13); ! $timer
+		if (res == 6) {
+			! timer input
+			print "$timer";
+			a_event-->0 = evtype_Timer;
 			jump checkev_parsed;
 		}
 		print "(unknown event)";
@@ -1836,6 +1863,9 @@ Array test_keywords string "$char/$link/$timer/";
 		test_sp = test_sp - 4;
 	} else test_stack-->(test_sp-3) = i;
 	
+	! If no test event was successfully parsed, we restart and look at the
+	! next one. (Returning false would be wrong; that would halt the whole
+	! test sequence.)
 	if (a_event-->0 == evtype_None) {
 		jump checkev_restart;
 	}
