@@ -1742,14 +1742,6 @@ Global test_sp = 0;
 ! Note that a_buffer may be 0. If so, we skip past line input events, since there's no buffer to put them in.
 ! (This replaces TestKeyboardPrimitive, but is invoked differently. We no longer call through to VM_ReadKeyboard when no tests are available. We just return false. Also, arguments are event/buffer instead of buffer/table.)
 
-! $char X
-! $char 64
-! $char pageup
-! $link 123
-! $link sword
-! $timer
-! beware lowercasing!
-
 [ CheckTestInput a_event a_buffer    p i arg l res obj ch wd;
 	.checkev_restart;
 	
@@ -2521,6 +2513,24 @@ If we want line input, we must use one of the alternate forms:
 Generally you will want to use the secondary buffer. That will avoid stomping on the player's command (which is always stored in the primary buffer).
 
 For another case, see example: "Secret Number Request"
+
+Chapter: TEST ME
+
+Inform's standard TEST ME facility has been upgraded to support more kinds of events. You can now say
+
+	Test me with "$char x / $char 65 / $char escape / $char".
+	Test me with "$link 123 / $link sword".
+	Test me with "$timer".
+
+Any test line beginning with a dollar sign defines a special event. You can escape dollar signs and slashes in line input by writing "[$]" or "[/]".
+
+Character (keystroke) events are defined with "$char"; they can be single characters, ASCII codes, or special names such as "escape", "left", "right", "space", etc. "$char" by itself is taken as a space keystroke.
+
+(Note that Inform automatically lower-cases test lines. So to define an upper-case keystroke, you must use a numeric ASCII code.)
+
+Hyperlink events are defined with "$link"; they can be a numeric value or an object name. Note that the object name parsing is extremely simplistic. Only one word is recognized after "$link", and it must be unconditionally defined for the object (not a property adjective, e.g.). There is no disambiguation; if several objects match the word, the test just picks the first one.
+
+Timer events are defined with "$timer". There is no other information to supply.	
 
 Chapter: Under the hood
 
