@@ -1748,10 +1748,11 @@ Global test_sp = 0;
 ! $link 123
 ! $link sword
 ! $timer
+! beware lowercasing!
 
 Array test_keywords string "$char/$link/$timer/";
 
-[ CheckTestInput a_event a_buffer    p i arg l res ch;
+[ CheckTestInput a_event a_buffer    p i arg l res ch wd;
 	.checkev_restart;
 	
 	if (test_sp == 0) {
@@ -1776,21 +1777,23 @@ Array test_keywords string "$char/$link/$timer/";
 	! we can use sloppy lookahead.
 	
 	if (i < l && p->i == '$') {
-		res = CheckTestKeyword(p+i, test_keywords+1, 5); ! $char
-		if (res == 5) {
-			! char input -- several possible formats
-			i = i+res;
+		wd = CheckTestDictWord(p+i, l-i);
+		if (wd == '$char') {
+			i = i+5;   ! skip '$char'
 			! skip whitespace
 			while ((i < l) && (p->i == ' '))
 				i++;
 			if ((i >= l) || (p->i == '/')) {
+				! no argument; use space
 				arg = ' ';
 			}
 			else if ((i+1 >= l) || (p->(i+1) == '/')) {
+				! single-char argument; take literally
 				arg = p->i;
 				i++;
 			}
 			else if (p->i >= '0' && p->i <= '9') {
+				! numeric argument; take as ASCII/Unicode code
 				arg = 0;
 				while (p->i >= '0' && p->i <= '9') {
 					arg = arg * 10 + (p->i - '0');
@@ -1798,6 +1801,7 @@ Array test_keywords string "$char/$link/$timer/";
 				}
 			}
 			else {
+				! check for a special keyword
 				arg = 65; !###
 			}
 			print "$char ";
@@ -1812,9 +1816,8 @@ Array test_keywords string "$char/$link/$timer/";
 			a_event-->2 = arg;
 			jump checkev_parsed;
 		}
-		res = CheckTestKeyword(p+i, test_keywords+13, 6); ! $timer
-		if (res == 6) {
-			! timer input
+		if (wd == '$timer') {
+			i = i+6;   ! skip '$timer'
 			print "$timer";
 			a_event-->0 = evtype_Timer;
 			jump checkev_parsed;
@@ -1874,18 +1877,19 @@ Array test_keywords string "$char/$link/$timer/";
 	return true;
 ];
 
-! Compare a string in the test buffer with another buffer. Both are
-! byte arrays, terminated by slash.
-[ CheckTestKeyword buf keyword maxlen   ix ch;
-	for (ix=0 : ix<maxlen : ix++) {
-		if (keyword->ix == '/')
-			break;
-		if (buf->ix == '/')
-			break;
-		if (keyword->ix ~= buf->ix)
-			break;
-	}
-	return ix;
+[ CheckTestDictWord buf buflen   ix dictlen entrylen val res;
+	dictlen = #dictionary_table-->0;
+	entrylen = DICT_WORD_SIZE + 7;
+
+	! Copy the word into the gg_tokenbuf array, clipping to DICT_WORD_SIZE
+	! characters and lower case.
+	for (ix=0 : ix<buflen && ix < DICT_WORD_SIZE && (buf->ix ~= '/' or ' ') : ix++)
+		gg_tokenbuf->ix = VM_UpperToLowerCase(buf->ix);
+	for (: ix<DICT_WORD_SIZE : ix++) gg_tokenbuf->ix = 0;
+
+	val = #dictionary_table + WORDSIZE;
+	@binarysearch gg_tokenbuf DICT_WORD_SIZE val entrylen dictlen 1 1 res;
+	return res;
 ];
 
 #IFNOT;
