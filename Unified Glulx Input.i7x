@@ -1750,7 +1750,7 @@ Global test_sp = 0;
 ! $timer
 ! beware lowercasing!
 
-[ CheckTestInput a_event a_buffer    p i arg l res ch wd;
+[ CheckTestInput a_event a_buffer    p i arg l res obj ch wd;
 	.checkev_restart;
 	
 	if (test_sp == 0) {
@@ -1826,6 +1826,50 @@ Global test_sp = 0;
 			else
 				PrintUnicodeSpecialName(arg);
 			a_event-->0 = evtype_CharInput;
+			a_event-->1 = gg_mainwin;
+			a_event-->2 = arg;
+			jump checkev_parsed;
+		}
+		if (wd == '$link') {
+			i = i+5;   ! skip '$link'
+			! skip whitespace
+			while ((i < l) && (p->i == ' '))
+				i++;
+			if (p->i >= '0' && p->i <= '9') {
+				! numeric argument
+				arg = 0;
+				while (p->i >= '0' && p->i <= '9') {
+					arg = arg * 10 + (p->i - '0');
+					i++;
+				}
+				print "$link ", arg;
+			}
+			else {
+				! text argument; try to find a matching object
+				arg = 0;
+				wd = CheckTestDictWord(p+i, l-i);
+				if (wd) {
+					objectloop (obj ofclass Object && obj.&name) {
+						for (ch=0; ch*WORDSIZE<obj.#name; ch++) {
+							if (obj.&name-->ch == wd) {
+								arg = obj;
+								break;
+							}
+						}
+					}
+				}
+				if (~~arg) {
+					print "$link ";
+					while ((i < l) && (p->i ~= '/')) {
+						print (char) p->i;
+						i++;
+					}
+					print " (link object not recognized)";
+					jump checkev_parsed;
+				}
+				print "$link ", (name) arg;
+			}
+			a_event-->0 = evtype_Hyperlink;
 			a_event-->1 = gg_mainwin;
 			a_event-->2 = arg;
 			jump checkev_parsed;
@@ -2875,6 +2919,20 @@ Here we drop text input entirely. (Dropping the standard parser input line reque
 
 	Before examining something:
 		say "--- [The noun] ---[paragraph break]";
+
+	Section - not for release
+
+	The test-me is a memory.
+
+	When play begins:
+		say "(Hit [test-me] to run the tests.)";
+
+	Instead of examining test-me:
+		run test-me.
+
+	To run test-me: (- special_word = 'me//'; TestScriptSub(); -).
+
+	Test me with "$link fossil / $link ammonite / $link study".
 
 
 Example: **** Secret Number Request - A phrase to query the player for a number.
