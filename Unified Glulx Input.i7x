@@ -1750,8 +1750,6 @@ Global test_sp = 0;
 ! $timer
 ! beware lowercasing!
 
-Array test_keywords string "$char/$link/$timer/";
-
 [ CheckTestInput a_event a_buffer    p i arg l res ch wd;
 	.checkev_restart;
 	
@@ -1822,7 +1820,11 @@ Array test_keywords string "$char/$link/$timer/";
 			a_event-->0 = evtype_Timer;
 			jump checkev_parsed;
 		}
-		print "(unknown event)";
+		while ((i < l) && (p->i ~= '/')) {
+			print (char) p->i;
+			i++;
+		}
+		print " (event not recognized)";
 		jump checkev_parsed;
 	}
 	else {
@@ -1877,6 +1879,8 @@ Array test_keywords string "$char/$link/$timer/";
 	return true;
 ];
 
+! Look at a single word in a test string and return the matching dict word
+! (or 0). Words are terminated by space or slash.
 [ CheckTestDictWord buf buflen   ix dictlen entrylen val res;
 	dictlen = #dictionary_table-->0;
 	entrylen = DICT_WORD_SIZE + 7;
