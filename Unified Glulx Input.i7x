@@ -1742,16 +1742,24 @@ Global test_sp = 0;
 ! Note that a_buffer may be 0. If so, we cannot return a line input event, so we do nothing. (We could return other event types if we had them.)
 ! (This replaces TestKeyboardPrimitive, but is invoked differently. We no longer call through to VM_ReadKeyboard when no tests are available. We just return false. Also, arguments are event/buffer instead of buffer/table.)
 
-[ CheckTestInput a_event a_buffer    p i j l spaced ch;
+! $char X
+! $char 64
+! $char pageup
+! $link 123
+! $link sword
+! $timer
+
+Array test_keywords string "$char/$link/$timer/";
+
+[ CheckTestInput a_event a_buffer    p i arg l res ch;
+	.checkev_restart;
+	
 	if (test_sp == 0) {
 		test_stack-->2 = 1;
 		return false;
 	}
-	
-	if (~~a_buffer) {
-		return false;
-	}
 
+	arg = 0;
 	a_event-->0 = evtype_None;
 	
 	p = test_stack-->(test_sp-4);
@@ -1762,33 +1770,89 @@ Global test_sp = 0;
 	print "] ";
 	test_stack-->2 = test_stack-->2 + 1;
 	style bold;
-	while ((i < l) && (p->i ~= '/')) {
-		ch = p->i;
-		if (spaced || (ch ~= ' ')) {
-			if ((p->i == '[') && (p->(i+1) == '/') && (p->(i+2) == ']')) {
-				ch = '/'; i = i+2;
-			}
-			a_buffer->(j+WORDSIZE) = ch;
-			print (char) ch;
-			i++; j++;
-			spaced = true;
-		} else i++;
+	
+	if (i < l && p->i == '$') {
+		res = CheckTestKeyword(p+i, test_keywords+1); ! $char
+		if (res == 5) {
+			! char input
+			i = i+res;
+			while ((i < l) && (p->i == ' '))
+				i++;
+			arg = 65;
+			print "$CHAR ";
+			if (arg < 32)
+				print "ctrl-", (char) (arg+64);
+			else if (arg == 32)
+				print "space";
+			else
+				PrintUnicodeSpecialName(arg);
+			a_event-->0 = evtype_CharInput;
+			a_event-->1 = gg_mainwin;
+			a_event-->2 = arg;
+			jump checkev_parsed;
+		}
+		print "(unknown event)";
+		jump checkev_parsed;
 	}
+	else {
+		! line input
+		if (~~a_buffer) {
+			! Can't generate a line event without a buffer to write it in.
+			print "(no buffer for line input)";
+			jump checkev_parsed;
+		}
+
+		arg = 0;
+		while ((i < l) && (p->i ~= '/')) {
+			ch = p->i;
+			if ((p->i == '[') && (p->(i+1) == '/' or '$') && (p->(i+2) == ']')) {
+				ch = p->(i+1); i = i+2;
+			}
+			a_buffer->(arg+WORDSIZE) = ch;
+			print (char) ch;
+			i++; arg++;
+		}
+		a_event-->0 = evtype_LineInput;
+		a_event-->1 = gg_mainwin;
+		a_event-->2 = arg;
+		! (We don't have to tokenize; AwaitInput will handle that.)
+	}
+	
+	.checkev_parsed;
 	style roman;
 	print "^";
 	
-	! Fill out the event structure.
-	a_event-->0 = evtype_LineInput;
-	a_event-->1 = gg_mainwin;
-	a_event-->2 = j;
-	! (We don't have to tokenize; AwaitInput will handle that.)
+	! Eat up any characters up to the next slash, if we haven't already.
+	while ((i < l) && (p->i ~= '/')) {
+		if ((p->i == '[') && (p->(i+1) == '/' or '$') && (p->(i+2) == ']')) {
+			i = i+2;
+		}
+		i++;
+	}
 	
+	! Consume the next slash and advance to the next test.
 	if (p->i == '/') i++;
 	if (i >= l) {
 		test_sp = test_sp - 4;
 	} else test_stack-->(test_sp-3) = i;
 	
+	if (a_event-->0 == evtype_None) {
+		jump checkev_restart;
+	}
+	
 	return true;
+];
+
+[ CheckTestKeyword buf keyword   ix ch;
+	for (ix=0 : true : ix++) {
+		if (keyword->ix == '/')
+			break;
+		if (buf->ix == '/')
+			break;
+		if (keyword->ix ~= buf->ix)
+			break;
+	}
+	return ix;
 ];
 
 #IFNOT;
