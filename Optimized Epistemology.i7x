@@ -115,6 +115,8 @@ Example: * Contemplation - Thinking about things that are known
 
 	Part  2 - Scenario
 
+	The player wears a watch.
+
 	The Study is a Room. "You deliberately keep this room as bare as possible, to prevent material objects distracting you from your thoughts. The two essential objects that remain are a comfortable armchair and the door out into the hall to the west."
 
 	The comfortable armchair is an enterable scenery supporter in the Study. The description is "It's nothing special, but it looks comfortable enough." The thought is "You think it's a good place to sit and think."
