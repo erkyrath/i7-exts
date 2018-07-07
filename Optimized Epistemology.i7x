@@ -144,10 +144,13 @@ Example: * Contemplation - Thinking about things that are known
 
 	The Great Golden Golf Ball of Destiny is a thing. The thought is "You wonder what kind of object it can be to offer so much."
 
-	There is an open container called the red box on the large oak table.
+	The red box is an open container on the large oak table.
 	The red ball is in the red box.
 
-	There is a closed openable container called the green box on the large oak table.
+	The green box is a closed openable container on the large oak table.
 	The green ball is in the green box.
+
+	The glass box is a closed openable transparent container on the large oak table.
+	The crystal ball is in the glass box.
 
 	Test me with "think about love/think about door/think about golden ball/think about note/think about table/think about life/epistat red ball/epistat green ball/w/think about table/think about note/read note/think about note/think about love/think about golden ball/think about life/epistat golden ball/epistat red ball/epistat green ball/open green box/epistat green ball".
