@@ -8,8 +8,10 @@ A thing can be either seen or unseen. A thing is usually unseen.
 
 [It might seem more straightforward simply to write "Now everything visible in
 the location is seen." but this turns out to be unacceptably slow in practice.
-The following code does approximately the same thing but much faster.]
 
+The original Epistemology extension uses "repeat with item running through things that are enclosed by the location: if the item is not enclosed by an opaque closed container: ..." This is better, but it still iterates over every thing in the game world, which is bad for very large games.
+
+Instead, we use an I6 scope search. This only runs through items in the room, which is typically a much more manageable list.]
 
 Carry out looking (this is the mark items as seen when looking rule):
 	observe-all-in-scope.
@@ -26,6 +28,7 @@ Chapter 1 - Basic Familiarity
 
 A thing can be familiar or unfamiliar. A thing is usually unfamiliar.
 
+[Mark an item as both familiar and seen.]
 To familiarize (T - thing) (this is familiarization):
 	now T is familiar;
 	now T is seen.
@@ -51,7 +54,8 @@ To observe-all-in-scope: (- ObserveScopeWithin(player); -).
 
 Include (-
 
-! Perform a scope search for the given room or object, applying seen/familiar to every item reached.
+! Perform a scope search for the given actor, applying seen/familiar to every item reached.
+! In this routine, ((+ familiarization +)-->1) is the I6 idiom for calling the I7 "familiarization" phrase.
 [ ObserveScopeWithin obj;
 	LoopOverScope(((+ familiarization +)-->1), obj);
 ];
@@ -72,6 +76,24 @@ Report requesting epistemic status of (this is the report epistemic status rule)
 Optimized Epistemology ends here.
 
 ---- DOCUMENTATION ----
+
+Foreword: This is an optimized version of Epistemology by Eric Eve (version 9). I created it for use in very large games (hundreds of objects), where the original code might detectably bog down. This version is meant as a drop-in replacement.
+
+Like the original Epistemology, this version only marks objects "seen" when you look around, open a container, or examine something. (Or move to a different room, which invokes LOOK.) This means that objects which are moved into a room might not be "seen" until the player does LOOK or EXAMINE.
+
+This version differs from the original in a couple of minor ways:
+
+- When you open a container, all objects in the room (not just the container) are marked "seen". (This should be fine, since objects in the room should already have been seen when you walked in.)
+
+- When you LOOK or OPEN, objects added to scope (with the "deciding the scope of" activity) are marked "seen". The original Epistemology did not do this.
+
+- The phrase "familiarize (thing)" is provided to mark a thing as both "seen" and "familiar". You can also do "observe-all-in-scope" to re-scan the entire room.
+
+If you want to be certain about marking every object that appears, you can add this rule, at the expense of some game speed:
+
+Every turn: observe-all-in-scope.
+
+--- ORIGINAL DOCUMENTATION ---
 
 The purpose of this extension is to keep track of what objects the player character knows about, either because s/he has seen them, or because they are already familiar for some other reason. It is not intended as a way to track NPC knowledge, which might be better implemented using a system of relations.
 
