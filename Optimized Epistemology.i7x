@@ -11,10 +11,10 @@ the location is seen." but this turns out to be unacceptably slow in practice.
 The following code does approximately the same thing but much faster.]
 
 
-Carry out looking (this is the mark items as seen when looking rule): 
+Carry out looking (this is the mark items as seen when looking rule):
 	unless in darkness:
 		now every backdrop in the location is seen;
-		repeat with item running through things that are enclosed by the location:  
+		repeat with item running through things that are enclosed by the location:
 			if the item is not enclosed by an opaque closed container:	
 				now the item is familiar;
 				now the item is seen.
@@ -41,7 +41,7 @@ Carry out examining something visible (this is the mark items as seen on examini
 
 Definition: a thing is known rather than unknown if it is familiar or it is seen.
 
-Chapter 2 - Subject (for use without Threaded Conversation by Emily Short) 
+Chapter 2 - Subject (for use without Threaded Conversation by Emily Short)
 
 A subject is a kind of thing. The specification of a subject is "Something
 that conversations can refer to, but which has no real-world presence or
@@ -82,7 +82,7 @@ Finally, the testing command EPISTAT X (not for release) is provided to aid test
 
 (With thanks to Aaron Reed for suggesting some optimization, which also led me to spot a bug.)
 
-Example: * Contemplation - Thinking about things that are known 
+Example: * Contemplation - Thinking about things that are known
 
 	*: "Contemplation"
 
@@ -110,14 +110,14 @@ Example: * Contemplation - Thinking about things that are known
 	Report pondering:
 	  say "[no thoughts]"
 
-	To say no thoughts:  
-	   say "You have no thoughts on that subject right now." 
+	To say no thoughts:
+	   say "You have no thoughts on that subject right now."
 
 	Part  2 - Scenario
 
 	The Study is a Room. "You deliberately keep this room as bare as possible, to prevent material objects distracting you from your thoughts. The two essential objects that remain are a comfortable armchair and the door out into the hall to the west."
 
-	The comfortable armchair is an enterable scenery supporter in the Study. The description is "It's nothing special, but it looks comfortable enough." The thought is "You think it's a good place to sit and think." 
+	The comfortable armchair is an enterable scenery supporter in the Study. The description is "It's nothing special, but it looks comfortable enough." The thought is "You think it's a good place to sit and think."
 	Understand "arm" or "chair" as the comfortable armchair.
 
 	Report entering the armchair:
