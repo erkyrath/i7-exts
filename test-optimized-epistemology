@@ -40,10 +40,16 @@ green ball - unseen / unfamiliar / unknown.
 > epistat crystal ball
 crystal ball - unseen / unfamiliar / unknown.
 
+> think about dream
+You have no thoughts on that subject right now.
+
 > sit in chair
 You sit down and dream about golf.
 
 > look
+
+> think about dream
+You have long had a distant dream of playing golf in some paradisaical country club.
 
 > epistat dream
 Golf Dream - seen / familiar / known.
@@ -68,6 +74,9 @@ green ball - unseen / unfamiliar / unknown.
 
 > epistat crystal ball
 crystal ball - seen / familiar / known.
+
+> epistat button
+button - seen / familiar / known.
 
 > open green box
 You open the green box, revealing a green ball.

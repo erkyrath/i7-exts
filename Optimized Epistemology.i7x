@@ -122,7 +122,15 @@ Example: * Contemplation - Thinking about things that are known
 	The comfortable armchair is an enterable scenery supporter in the Study. The description is "It's nothing special, but it looks comfortable enough." The thought is "You think it's a good place to sit and think." 
 	Understand "arm" or "chair" as the comfortable armchair.
 
+	Report entering the armchair:
+		instead say "You sit down and dream about golf."
+
 	The hall door is an open openable scenery door. The hall door is west of the Study and east of the Main Hall. The thought is "Useful things, doors, you muse: without them it would be so much harder to get from room to room."
+
+	The Golf Dream is scenery. The description is "You have long had a distant dream of playing golf in some paradisaical country club." The thought is "[description of the Golf Dream]".
+
+	After deciding the scope of the player when the player is on the armchair:
+		place the Golf Dream in scope.
 
 	The Main Hall is a Room. "This place is almost as sparsely furnished as the Study which lies to the east."
 
@@ -152,5 +160,8 @@ Example: * Contemplation - Thinking about things that are known
 
 	The glass box is a closed openable transparent container on the large oak table.
 	The crystal ball is in the glass box.
+
+	The widget is in the Main Hall.
+	The button is part of the widget.
 
 	Test me with "think about love/think about door/think about golden ball/think about note/think about table/think about life/epistat red ball/epistat green ball/w/think about table/think about note/read note/think about note/think about love/think about golden ball/think about life/epistat golden ball/epistat red ball/epistat green ball/open green box/epistat green ball".
