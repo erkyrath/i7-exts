@@ -192,5 +192,7 @@ Example: * Contemplation - Thinking about things that are known
 
 	The widget is in the Main Hall.
 	The button is part of the widget.
+	
+	The wallpaper is a backdrop. The wallpaper is in the Main Hall.
 
 	Test me with "think about love/think about door/think about golden ball/think about note/think about table/think about life/epistat red ball/epistat green ball/w/think about table/think about note/read note/think about note/think about love/think about golden ball/think about life/epistat golden ball/epistat red ball/epistat green ball/open green box/epistat green ball".
