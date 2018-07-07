@@ -39,9 +39,7 @@ Carry out examining something visible (this is the mark items as seen on examini
 	now the noun is familiar;
 	now the noun is seen.
 
-Definition: a thing is known if it is familiar or it is seen.
-
-Definition: a thing is unknown if it is not known.
+Definition: a thing is known rather than unknown if it is familiar or it is seen.
 
 Chapter 2 - Subject (for use without Threaded Conversation by Emily Short) 
 
