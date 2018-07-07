@@ -1,4 +1,4 @@
-Version 1 of Optimized Epistemology by Andrew Plotkin begins here.
+Version 1/180707 of Optimized Epistemology by Andrew Plotkin begins here.
 
 "Keeping track of what the player character knows and sees."
 
