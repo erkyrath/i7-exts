@@ -12,19 +12,10 @@ The following code does approximately the same thing but much faster.]
 
 
 Carry out looking (this is the mark items as seen when looking rule):
-	unless in darkness:
-		now every backdrop in the location is seen;
-		repeat with item running through things that are enclosed by the location:
-			if the item is not enclosed by an opaque closed container:	
-				now the item is familiar;
-				now the item is seen.
-
+	observe-all-in-scope.
 
 Carry out opening a container (this is the mark items as seen on opening a container rule):
-	repeat with item running through things that are enclosed by the noun:
-		if the item is unseen and the item is visible:			
-			now the item is familiar;
-			now the item is seen.
+	observe-all-in-scope.
 
 The mark items as seen on opening a container rule is listed after the
 standard opening rule in the carry out opening rules.
@@ -35,9 +26,12 @@ Chapter 1 - Basic Familiarity
 
 A thing can be familiar or unfamiliar. A thing is usually unfamiliar.
 
+To familiarize (T - thing) (this is familiarization):
+	now T is familiar;
+	now T is seen.
+
 Carry out examining something visible (this is the mark items as seen on examining rule):
-	now the noun is familiar;
-	now the noun is seen.
+	familiarize the noun.
 
 Definition: a thing is known rather than unknown if it is familiar or it is seen.
 
@@ -51,7 +45,20 @@ Chapter 3 - Familiarity of Subjects
 
 A subject is usually familiar.
 
-Book 3 - Testing commands - not for release
+Book 3 - The Nasty Bits
+
+To observe-all-in-scope: (- ObserveScopeWithin(player); -).
+
+Include (-
+
+! Perform a scope search for the given room or object, applying seen/familiar to every item reached.
+[ ObserveScopeWithin obj;
+	LoopOverScope(((+ familiarization +)-->1), obj);
+];
+
+-);
+
+Book 4 - Testing commands - not for release
 
 Requesting epistemic status of is an action out of world applying to one visible thing.
 
